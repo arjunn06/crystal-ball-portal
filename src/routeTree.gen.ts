@@ -17,6 +17,7 @@ import { Route as AuthenticatedChooseRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticated/blue-pill'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authenticated/account/route'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
 import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account/profile'
 import { Route as AuthenticatedAccountDiscordRouteImport } from './routes/_authenticated/account/discord'
@@ -66,6 +67,11 @@ const AuthenticatedAccountRouteRoute =
     path: '/account',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedAccountIndexRoute =
   AuthenticatedAccountIndexRouteImport.update({
     id: '/',
@@ -119,7 +125,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRouteRouteWithChildren
-  '/admin': typeof AuthenticatedAdminRouteRoute
+  '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
@@ -129,13 +135,13 @@ export interface FileRoutesByFullPath {
   '/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/admin': typeof AuthenticatedAdminRouteRoute
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
@@ -145,6 +151,7 @@ export interface FileRoutesByTo {
   '/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account': typeof AuthenticatedAccountIndexRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
@@ -154,7 +161,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/account': typeof AuthenticatedAccountRouteRouteWithChildren
-  '/_authenticated/admin': typeof AuthenticatedAdminRouteRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/blue-pill': typeof AuthenticatedBluePillRoute
   '/_authenticated/choose': typeof AuthenticatedChooseRoute
   '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
@@ -164,6 +171,7 @@ export interface FileRoutesById {
   '/_authenticated/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
@@ -183,13 +191,13 @@ export interface FileRouteTypes {
     | '/account/discord'
     | '/account/profile'
     | '/account/'
+    | '/admin/'
     | '/account/courses/$slug'
     | '/api/public/webhooks/razorpay'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/admin'
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
@@ -199,6 +207,7 @@ export interface FileRouteTypes {
     | '/account/discord'
     | '/account/profile'
     | '/account'
+    | '/admin'
     | '/account/courses/$slug'
     | '/api/public/webhooks/razorpay'
   id:
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account/discord'
     | '/_authenticated/account/profile'
     | '/_authenticated/account/'
+    | '/_authenticated/admin/'
     | '/_authenticated/account/courses/$slug'
     | '/api/public/webhooks/razorpay'
   fileRoutesById: FileRoutesById
@@ -285,6 +295,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/account'
       preLoaderRoute: typeof AuthenticatedAccountRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/account/': {
       id: '/_authenticated/account/'
@@ -384,9 +401,23 @@ const AuthenticatedAccountRouteRouteWithChildren =
     AuthenticatedAccountRouteRouteChildren,
   )
 
+interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
+  {
+    AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  }
+
+const AuthenticatedAdminRouteRouteWithChildren =
+  AuthenticatedAdminRouteRoute._addFileChildren(
+    AuthenticatedAdminRouteRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRouteRoute: typeof AuthenticatedAccountRouteRouteWithChildren
-  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRoute
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedBluePillRoute: typeof AuthenticatedBluePillRoute
   AuthenticatedChooseRoute: typeof AuthenticatedChooseRoute
   AuthenticatedRedPillRoute: typeof AuthenticatedRedPillRoute
@@ -394,7 +425,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRouteRoute: AuthenticatedAccountRouteRouteWithChildren,
-  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRoute,
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedBluePillRoute: AuthenticatedBluePillRoute,
   AuthenticatedChooseRoute: AuthenticatedChooseRoute,
   AuthenticatedRedPillRoute: AuthenticatedRedPillRoute,

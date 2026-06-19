@@ -101,11 +101,6 @@ function Landing() {
         <div className="hairline mx-auto mt-16 w-40" />
       </section>
 
-      {/* GRADIENT BAND — soft aurora breath */}
-      <section className="relative h-[40vh] bg-aurora-soft overflow-hidden" aria-hidden="true">
-        <div className="absolute inset-0 bg-grid opacity-15" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
-      </section>
 
       {/* PATHS — the two pills, presented as luxury offerings */}
       <section id="paths" className="relative mx-auto max-w-7xl px-6 py-32">

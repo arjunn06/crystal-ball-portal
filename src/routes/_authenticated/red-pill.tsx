@@ -1,6 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { createRedPillOrder, verifyPayment } from "@/lib/razorpay.functions";
+import { openRazorpay } from "@/lib/razorpay-checkout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,6 +27,41 @@ function RedPill() {
   const [loading, setLoading] = useState(true);
   const [when, setWhen] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [paying, setPaying] = useState(false);
+  const createOrder = useServerFn(createRedPillOrder);
+  const verify = useServerFn(verifyPayment);
+
+  async function payRedPill() {
+    setPaying(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { orderId, amount, currency, keyId } = await createOrder();
+      await openRazorpay({
+        key: keyId,
+        order_id: orderId,
+        amount,
+        currency,
+        name: "Blueprint by Arjun IFVG",
+        description: "Red Pill — One-time mentorship",
+        prefill: { email: user?.email ?? undefined },
+        theme: { color: "#0a0f1f" },
+        handler: async (resp) => {
+          try {
+            await verify({ data: resp });
+            setApp((a) => (a ? { ...a, status: "paid" } : a));
+            toast.success("Payment received. Welcome to the Red Pill.");
+          } catch (e: any) {
+            toast.error(e?.message ?? "Verification failed");
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) },
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not start checkout");
+    } finally {
+      setPaying(false);
+    }
+  }
 
   useEffect(() => {
     supabase.from("red_pill_applications")
@@ -126,8 +164,8 @@ function RedPill() {
             <div>
               <h2 className="text-xl font-semibold">You're in. Complete payment.</h2>
               <p className="mt-2 text-sm text-muted-foreground">One-time payment of ₹4,999. After payment you'll unlock the Red Pill Discord role.</p>
-              <Button disabled className="mt-6 bg-red-pill text-red-pill-foreground hover:bg-red-pill/90 glow-red">
-                Pay ₹4,999 (Razorpay wires up next)
+              <Button onClick={payRedPill} disabled={paying} className="mt-6 bg-red-pill text-red-pill-foreground hover:bg-red-pill/90 glow-red">
+                {paying ? "Opening checkout…" : "Pay ₹4,999"}
               </Button>
             </div>
           ) : app.status === "paid" ? (

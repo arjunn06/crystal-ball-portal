@@ -58,8 +58,8 @@
   --color-blue-pill: var(--blue-pill);
   --color-blue-pill-foreground: var(--blue-pill-foreground);
   --color-blue-pill-glow: var(--blue-pill-glow);
-  --color-gold: var(--gold);
-  --color-gold-soft: var(--gold-soft);
+  --color-platinum: var(--platinum);
+  --color-platinum-soft: var(--platinum-soft);
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
@@ -102,9 +102,9 @@
   --blue-pill-foreground: oklch(0.98 0.005 250);
   --blue-pill-glow: oklch(0.55 0.14 245 / 0.50);
 
-  /* Luxury accent — antique gold for hairline detail */
-  --gold: oklch(0.78 0.11 85);                  /* #c9a84c */
-  --gold-soft: oklch(0.85 0.08 85 / 0.4);
+  /* Luxury accent — cool platinum hairline (no gold) */
+  --platinum: oklch(0.82 0.012 260);
+  --platinum-soft: oklch(0.82 0.012 260 / 0.35);
 
   /* Charts */
   --chart-1: oklch(0.52 0.22 16);
@@ -174,14 +174,7 @@
   }
   .hairline {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--gold-soft), transparent);
-  }
-  .vignette::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: radial-gradient(ellipse at center, transparent 40%, oklch(0.05 0.02 280 / 0.85) 100%);
+    background: linear-gradient(90deg, transparent, var(--platinum-soft), transparent);
   }
   .grain {
     position: relative;
@@ -195,18 +188,34 @@
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/></svg>");
   }
-  .text-gradient-gold {
-    background: linear-gradient(180deg, oklch(0.92 0.10 88) 0%, oklch(0.62 0.13 70) 100%);
+  .text-gradient-platinum {
+    background: linear-gradient(180deg, oklch(0.97 0.005 260) 0%, oklch(0.60 0.02 260) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
-  .parallax-bg {
-    background-attachment: fixed;
-    background-size: cover;
-    background-position: center;
+  /* Subtle gradient backdrops — replace photography */
+  .bg-aurora {
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 15%, oklch(0.32 0.18 16 / 0.38), transparent 60%),
+      radial-gradient(ellipse 55% 55% at 85% 85%, oklch(0.34 0.12 245 / 0.32), transparent 65%),
+      radial-gradient(ellipse 80% 50% at 50% 110%, oklch(0.16 0.04 278 / 0.7), transparent 70%),
+      linear-gradient(180deg, oklch(0.08 0.018 280), oklch(0.10 0.022 278));
   }
-  @media (max-width: 768px) {
-    .parallax-bg { background-attachment: scroll; }
+  .bg-aurora-soft {
+    background:
+      radial-gradient(ellipse 50% 40% at 80% 25%, oklch(0.28 0.14 16 / 0.18), transparent 60%),
+      radial-gradient(ellipse 55% 45% at 20% 75%, oklch(0.30 0.10 245 / 0.18), transparent 65%),
+      linear-gradient(180deg, oklch(0.09 0.020 280), oklch(0.08 0.018 280));
+  }
+  .bg-aurora-crimson {
+    background:
+      radial-gradient(ellipse 75% 60% at 50% 50%, oklch(0.32 0.18 16 / 0.42), transparent 65%),
+      linear-gradient(180deg, oklch(0.08 0.018 280), oklch(0.10 0.022 278));
+  }
+  .bg-aurora-steel {
+    background:
+      radial-gradient(ellipse 75% 60% at 50% 50%, oklch(0.34 0.10 245 / 0.36), transparent 65%),
+      linear-gradient(180deg, oklch(0.10 0.022 278), oklch(0.08 0.018 280));
   }
 }

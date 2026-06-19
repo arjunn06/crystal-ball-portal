@@ -1,7 +1,4 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import heroImg from "@/assets/hero-pills.jpg";
-import chartImg from "@/assets/parallax-chart.jpg";
-import mentorshipImg from "@/assets/parallax-mentorship.jpg";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -11,7 +8,6 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "A private community for IFVG traders. Choose your path: The Red Pill for 1-on-1 mentorship, The Blue Pill for premium recorded education." },
       { property: "og:title", content: "Blueprint — Premium Trading Community" },
       { property: "og:description", content: "Choose your path. Trade with intention." },
-      { property: "og:image", content: heroImg },
     ],
   }),
   component: Landing,
@@ -27,7 +23,7 @@ function Landing() {
             <span className="font-display text-xl font-semibold tracking-tight">
               blueprint<span className="text-primary">.</span>
             </span>
-            <span className="label-mono text-muted-foreground hidden sm:inline">by ifvg</span>
+            <span className="label-mono text-muted-foreground hidden sm:inline">by Arjun · IFVG</span>
           </Link>
           <nav className="flex items-center gap-6">
             <a href="#paths" className="hidden md:inline label-mono text-muted-foreground hover:text-foreground transition-colors">The Paths</a>
@@ -42,22 +38,20 @@ function Landing() {
         </div>
       </header>
 
-      {/* HERO — parallax pills photograph */}
-      <section
-        className="relative min-h-screen flex items-end overflow-hidden parallax-bg vignette grain"
-        style={{ backgroundImage: `url(${heroImg})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-transparent to-background" />
+      {/* HERO — gradient aurora, no imagery */}
+      <section className="relative min-h-screen flex items-end overflow-hidden bg-aurora grain">
+        <div className="absolute inset-0 bg-grid opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         <div className="relative mx-auto w-full max-w-7xl px-6 pb-24 pt-40 z-10">
           <div className="max-w-3xl">
-            <p className="label-mono text-gold mb-6 flex items-center gap-3">
-              <span className="inline-block h-px w-10 bg-gold/60" />
+            <p className="label-mono text-platinum mb-6 flex items-center gap-3">
+              <span className="inline-block h-px w-10 bg-platinum/60" />
               A private community, by invitation
             </p>
             <h1 className="text-balance text-5xl md:text-7xl lg:text-[5.5rem] font-display font-semibold leading-[1.02] tracking-tight">
               Two pills.
               <br />
-              One <span className="text-gradient-gold italic font-light">blueprint</span>.
+              One <span className="text-gradient-platinum italic font-light">blueprint</span>.
             </h1>
             <p className="mt-8 max-w-xl text-lg md:text-xl text-muted-foreground leading-relaxed">
               A members-only sanctuary for traders who refuse mediocrity.
@@ -87,7 +81,7 @@ function Landing() {
               ["Private", "Discord sanctuary"],
             ].map(([k, v]) => (
               <div key={k} className="flex items-baseline gap-3">
-                <span className="font-display text-2xl text-gold">{k}</span>
+                <span className="font-display text-2xl text-platinum">{k}</span>
                 <span className="label-mono text-muted-foreground">{v}</span>
               </div>
             ))}
@@ -97,29 +91,26 @@ function Landing() {
 
       {/* MANIFESTO — quiet editorial breath */}
       <section className="relative mx-auto max-w-5xl px-6 py-32 md:py-44 text-center">
-        <p className="label-mono text-gold mb-8">Manifesto · 001</p>
+        <p className="label-mono text-platinum mb-8">Manifesto · 001</p>
         <p className="text-balance text-3xl md:text-5xl font-display font-light leading-[1.2] tracking-tight">
           The market does not reward effort.
           <br className="hidden md:block" />
-          It rewards <span className="text-gradient-gold italic">precision</span>,
+          It rewards <span className="text-gradient-platinum italic">precision</span>,
           patience, and the company you keep.
         </p>
         <div className="hairline mx-auto mt-16 w-40" />
       </section>
 
-      {/* PARALLAX BAND — chart imagery */}
-      <section
-        className="relative h-[60vh] parallax-bg vignette"
-        style={{ backgroundImage: `url(${chartImg})` }}
-        aria-hidden="true"
-      >
+      {/* GRADIENT BAND — soft aurora breath */}
+      <section className="relative h-[40vh] bg-aurora-soft overflow-hidden" aria-hidden="true">
+        <div className="absolute inset-0 bg-grid opacity-15" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
       </section>
 
       {/* PATHS — the two pills, presented as luxury offerings */}
       <section id="paths" className="relative mx-auto max-w-7xl px-6 py-32">
         <div className="text-center mb-20">
-          <p className="label-mono text-gold mb-4">The two paths</p>
+          <p className="label-mono text-platinum mb-4">The two paths</p>
           <h2 className="text-balance text-4xl md:text-6xl font-display font-semibold tracking-tight">
             Choose the depth of your involvement.
           </h2>
@@ -154,15 +145,13 @@ function Landing() {
         </div>
       </section>
 
-      {/* PARALLAX BAND — mentorship imagery */}
-      <section
-        className="relative h-[70vh] parallax-bg vignette grain"
-        style={{ backgroundImage: `url(${mentorshipImg})` }}
-      >
+      {/* GRADIENT BAND — crimson glow editorial */}
+      <section className="relative min-h-[60vh] bg-aurora-crimson overflow-hidden">
+        <div className="absolute inset-0 bg-grid opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent" />
         <div className="relative mx-auto max-w-7xl px-6 h-full flex items-center">
-          <div className="max-w-lg">
-            <p className="label-mono text-gold mb-5">Inside the room</p>
+          <div className="max-w-lg py-24">
+            <p className="label-mono text-platinum mb-5">Inside the room</p>
             <h3 className="text-balance text-3xl md:text-5xl font-display font-semibold leading-tight">
               A room of serious traders.
               <br />
@@ -180,7 +169,7 @@ function Landing() {
       <section id="inside" className="relative mx-auto max-w-7xl px-6 py-32">
         <div className="grid md:grid-cols-12 gap-12 items-end mb-16">
           <div className="md:col-span-7">
-            <p className="label-mono text-gold mb-4">What lives inside</p>
+            <p className="label-mono text-platinum mb-4">What lives inside</p>
             <h2 className="text-balance text-4xl md:text-5xl font-display font-semibold tracking-tight">
               An architecture for serious capital.
             </h2>
@@ -200,7 +189,7 @@ function Landing() {
             { n: "06", t: "Private Calls", d: "Direct access for surgical feedback on your charts, journal, and execution." },
           ].map(({ n, t, d }) => (
             <div key={n} className="bg-background p-8 md:p-10 hover:bg-card transition-colors">
-              <span className="label-mono text-gold">{n}</span>
+              <span className="label-mono text-platinum">{n}</span>
               <h3 className="mt-6 font-display text-xl font-semibold">{t}</h3>
               <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{d}</p>
             </div>
@@ -209,16 +198,13 @@ function Landing() {
       </section>
 
       {/* CTA — final invitation */}
-      <section className="relative overflow-hidden">
-        <div
-          className="absolute inset-0 parallax-bg opacity-50"
-          style={{ backgroundImage: `url(${heroImg})` }}
-        />
+      <section className="relative overflow-hidden bg-aurora-steel">
+        <div className="absolute inset-0 bg-grid opacity-15" />
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background" />
         <div className="relative mx-auto max-w-3xl px-6 py-40 text-center">
-          <p className="label-mono text-gold mb-6">The invitation</p>
+          <p className="label-mono text-platinum mb-6">The invitation</p>
           <h2 className="text-balance text-4xl md:text-6xl font-display font-semibold leading-[1.05] tracking-tight">
-            Step inside the <span className="text-gradient-gold italic font-light">Blueprint</span>.
+            Step inside the <span className="text-gradient-platinum italic font-light">Blueprint</span>.
           </h2>
           <p className="mt-8 text-muted-foreground text-lg">
             Choose your pill. The door closes behind you.
@@ -238,7 +224,7 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-6 py-10 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-baseline gap-3">
             <span className="font-display text-lg font-semibold">blueprint<span className="text-primary">.</span></span>
-            <span className="label-mono text-muted-foreground">ifvg · est. 2026</span>
+            <span className="label-mono text-muted-foreground">by Arjun · IFVG · est. 2026</span>
           </div>
           <p className="label-mono text-muted-foreground">Members only. By invitation.</p>
         </div>

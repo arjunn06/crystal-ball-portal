@@ -20,6 +20,7 @@ import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
+import { Route as AuthenticatedAdminApplicationsRouteImport } from './routes/_authenticated/admin/applications'
 import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account/profile'
 import { Route as AuthenticatedAccountDiscordRouteImport } from './routes/_authenticated/account/discord'
 import { Route as AuthenticatedAccountCoursesRouteImport } from './routes/_authenticated/account/courses'
@@ -84,6 +85,12 @@ const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminApplicationsRoute =
+  AuthenticatedAdminApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAccountProfileRoute =
   AuthenticatedAccountProfileRouteImport.update({
     id: '/profile',
@@ -140,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
   '/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
+  '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
   '/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
   '/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
+  '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -178,6 +187,7 @@ export interface FileRoutesById {
   '/_authenticated/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
   '/_authenticated/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
+  '/_authenticated/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/account/courses'
     | '/account/discord'
     | '/account/profile'
+    | '/admin/applications'
     | '/admin/users'
     | '/account/'
     | '/admin/'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/account/courses'
     | '/account/discord'
     | '/account/profile'
+    | '/admin/applications'
     | '/admin/users'
     | '/account'
     | '/admin'
@@ -236,6 +248,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account/courses'
     | '/_authenticated/account/discord'
     | '/_authenticated/account/profile'
+    | '/_authenticated/admin/applications'
     | '/_authenticated/admin/users'
     | '/_authenticated/account/'
     | '/_authenticated/admin/'
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/applications': {
+      id: '/_authenticated/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AuthenticatedAdminApplicationsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/account/profile': {
@@ -421,12 +441,14 @@ const AuthenticatedAccountRouteRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminApplicationsRoute: typeof AuthenticatedAdminApplicationsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminApplicationsRoute: AuthenticatedAdminApplicationsRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
     AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   }

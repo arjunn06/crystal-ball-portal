@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ export const Route = createFileRoute("/_authenticated/blue-pill")({
 });
 
 function BluePill() {
-  const navigate = useNavigate();
   const [active, setActive] = useState(false);
   const [loading, setLoading] = useState(true);
 

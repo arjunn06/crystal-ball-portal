@@ -25,7 +25,7 @@ function AccountIndex() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Pill" value={data.pill?.pill ? data.pill.pill.toUpperCase() : "—"} sub={data.pill?.pill ? "Locked in" : <span><Link to="/choose" className="underline">Choose now</Link></span> as any} />
+        <StatCard label="Pill" value={data.pill?.pill ? data.pill.pill.toUpperCase() : "—"} sub={data.pill?.pill ? "Locked in" : <Link to="/choose" className="underline">Choose now</Link>} />
         <StatCard label="Subscription" value={data.subscription?.status?.toUpperCase() ?? "—"} sub={data.subscription?.current_period_end ? `Renews ${new Date(data.subscription.current_period_end).toLocaleDateString()}` : undefined} />
         <StatCard label="Lifetime spend" value={formatINR(totalPaidPaise)} />
       </div>

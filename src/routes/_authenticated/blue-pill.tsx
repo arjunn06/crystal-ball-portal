@@ -1,8 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CalendarPlus, PlayCircle, Radio, Sparkles } from "lucide-react";
+import { toast } from "sonner";
+import { createBluePillSubscription, verifyPayment } from "@/lib/razorpay.functions";
+import { openRazorpay } from "@/lib/razorpay-checkout";
 
 export const Route = createFileRoute("/_authenticated/blue-pill")({
   head: () => ({ meta: [{ title: "The Blue Pill — Blueprint" }] }),
@@ -12,6 +16,9 @@ export const Route = createFileRoute("/_authenticated/blue-pill")({
 function BluePill() {
   const [active, setActive] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
+  const createSub = useServerFn(createBluePillSubscription);
+  const verify = useServerFn(verifyPayment);
 
   useEffect(() => {
     supabase.from("subscriptions").select("status").maybeSingle().then(({ data }) => {
@@ -19,6 +26,36 @@ function BluePill() {
       setLoading(false);
     });
   }, []);
+
+  async function subscribe() {
+    setPaying(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { subscriptionId, keyId } = await createSub();
+      await openRazorpay({
+        key: keyId,
+        subscription_id: subscriptionId,
+        name: "Blueprint by Arjun IFVG",
+        description: "Blue Pill — ₹499 / month",
+        prefill: { email: user?.email ?? undefined },
+        theme: { color: "#0a0f1f" },
+        handler: async (resp) => {
+          try {
+            await verify({ data: resp });
+            setActive(true);
+            toast.success("Subscription active. Welcome.");
+          } catch (e: any) {
+            toast.error(e?.message ?? "Verification failed");
+          }
+        },
+        modal: { ondismiss: () => setPaying(false) },
+      });
+    } catch (e: any) {
+      toast.error(e?.message ?? "Could not start checkout");
+    } finally {
+      setPaying(false);
+    }
+  }
 
   if (loading) return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
 
@@ -43,8 +80,8 @@ function BluePill() {
               ₹499 / month. Cancel anytime. Unlocks the full Red Pill recorded library,
               one monthly private call, weekly market reviews, and the Premium Discord.
             </p>
-            <Button disabled className="mt-6 bg-blue-pill text-blue-pill-foreground hover:bg-blue-pill/90 glow-blue">
-              Subscribe — ₹499 / month (Razorpay wires up next)
+            <Button onClick={subscribe} disabled={paying} className="mt-6 bg-blue-pill text-blue-pill-foreground hover:bg-blue-pill/90 glow-blue">
+              {paying ? "Opening checkout…" : "Subscribe — ₹499 / month"}
             </Button>
           </div>
         ) : (

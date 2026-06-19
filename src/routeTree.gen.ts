@@ -31,6 +31,7 @@ import { Route as AuthenticatedAccountCoursesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAccountBillingRouteImport } from './routes/_authenticated/account/billing'
 import { Route as AuthenticatedAccountApplicationRouteImport } from './routes/_authenticated/account/application'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
+import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
 import { Route as AuthenticatedAccountCoursesSlugRouteImport } from './routes/_authenticated/account/courses.$slug'
 
 const AuthRoute = AuthRouteImport.update({
@@ -155,6 +156,12 @@ const ApiPublicWebhooksRazorpayRoute =
     path: '/api/public/webhooks/razorpay',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminCoursesIdRoute =
+  AuthenticatedAdminCoursesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminCoursesRoute,
+  } as any)
 const AuthenticatedAccountCoursesSlugRoute =
   AuthenticatedAccountCoursesSlugRouteImport.update({
     id: '/$slug',
@@ -177,13 +184,14 @@ export interface FileRoutesByFullPath {
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/admin/bookings': typeof AuthenticatedAdminBookingsRoute
-  '/admin/courses': typeof AuthenticatedAdminCoursesRoute
+  '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
+  '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRoutesByTo {
@@ -199,13 +207,14 @@ export interface FileRoutesByTo {
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/admin/bookings': typeof AuthenticatedAdminBookingsRoute
-  '/admin/courses': typeof AuthenticatedAdminCoursesRoute
+  '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
+  '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRoutesById {
@@ -225,13 +234,14 @@ export interface FileRoutesById {
   '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
   '/_authenticated/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/_authenticated/admin/bookings': typeof AuthenticatedAdminBookingsRoute
-  '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRoute
+  '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/_authenticated/admin/payments': typeof AuthenticatedAdminPaymentsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
+  '/_authenticated/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRouteTypes {
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/account/'
     | '/admin/'
     | '/account/courses/$slug'
+    | '/admin/courses/$id'
     | '/api/public/webhooks/razorpay'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -280,6 +291,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/admin'
     | '/account/courses/$slug'
+    | '/admin/courses/$id'
     | '/api/public/webhooks/razorpay'
   id:
     | '__root__'
@@ -305,6 +317,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account/'
     | '/_authenticated/admin/'
     | '/_authenticated/account/courses/$slug'
+    | '/_authenticated/admin/courses/$id'
     | '/api/public/webhooks/razorpay'
   fileRoutesById: FileRoutesById
 }
@@ -471,6 +484,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksRazorpayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/courses/$id': {
+      id: '/_authenticated/admin/courses/$id'
+      path: '/$id'
+      fullPath: '/admin/courses/$id'
+      preLoaderRoute: typeof AuthenticatedAdminCoursesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminCoursesRoute
+    }
     '/_authenticated/account/courses/$slug': {
       id: '/_authenticated/account/courses/$slug'
       path: '/$slug'
@@ -520,10 +540,24 @@ const AuthenticatedAccountRouteRouteWithChildren =
     AuthenticatedAccountRouteRouteChildren,
   )
 
+interface AuthenticatedAdminCoursesRouteChildren {
+  AuthenticatedAdminCoursesIdRoute: typeof AuthenticatedAdminCoursesIdRoute
+}
+
+const AuthenticatedAdminCoursesRouteChildren: AuthenticatedAdminCoursesRouteChildren =
+  {
+    AuthenticatedAdminCoursesIdRoute: AuthenticatedAdminCoursesIdRoute,
+  }
+
+const AuthenticatedAdminCoursesRouteWithChildren =
+  AuthenticatedAdminCoursesRoute._addFileChildren(
+    AuthenticatedAdminCoursesRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminApplicationsRoute: typeof AuthenticatedAdminApplicationsRoute
   AuthenticatedAdminBookingsRoute: typeof AuthenticatedAdminBookingsRoute
-  AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRoute
+  AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRouteWithChildren
   AuthenticatedAdminDiscordRoute: typeof AuthenticatedAdminDiscordRoute
   AuthenticatedAdminPaymentsRoute: typeof AuthenticatedAdminPaymentsRoute
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
@@ -534,7 +568,7 @@ const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren
   {
     AuthenticatedAdminApplicationsRoute: AuthenticatedAdminApplicationsRoute,
     AuthenticatedAdminBookingsRoute: AuthenticatedAdminBookingsRoute,
-    AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRoute,
+    AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRouteWithChildren,
     AuthenticatedAdminDiscordRoute: AuthenticatedAdminDiscordRoute,
     AuthenticatedAdminPaymentsRoute: AuthenticatedAdminPaymentsRoute,
     AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,

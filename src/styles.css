@@ -58,6 +58,8 @@
   --color-blue-pill: var(--blue-pill);
   --color-blue-pill-foreground: var(--blue-pill-foreground);
   --color-blue-pill-glow: var(--blue-pill-glow);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;

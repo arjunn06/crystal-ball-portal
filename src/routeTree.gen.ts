@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRedPillRouteImport } from './routes/_authenticated/red-pill'
 import { Route as AuthenticatedChooseRouteImport } from './routes/_authenticated/choose'
 import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticated/blue-pill'
+import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authenticated/account/route'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
 import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account/profile'
@@ -52,6 +53,11 @@ const AuthenticatedChooseRoute = AuthenticatedChooseRouteImport.update({
 const AuthenticatedBluePillRoute = AuthenticatedBluePillRouteImport.update({
   id: '/blue-pill',
   path: '/blue-pill',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAccountRouteRoute =
@@ -113,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AuthenticatedAccountRouteRouteWithChildren
+  '/admin': typeof AuthenticatedAdminRouteRoute
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
@@ -128,6 +135,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/admin': typeof AuthenticatedAdminRouteRoute
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
@@ -146,6 +154,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/account': typeof AuthenticatedAccountRouteRouteWithChildren
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteRoute
   '/_authenticated/blue-pill': typeof AuthenticatedBluePillRoute
   '/_authenticated/choose': typeof AuthenticatedChooseRoute
   '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/account'
+    | '/admin'
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/admin'
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/account'
+    | '/_authenticated/admin'
     | '/_authenticated/blue-pill'
     | '/_authenticated/choose'
     | '/_authenticated/red-pill'
@@ -258,6 +270,13 @@ declare module '@tanstack/react-router' {
       path: '/blue-pill'
       fullPath: '/blue-pill'
       preLoaderRoute: typeof AuthenticatedBluePillRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/account': {
@@ -367,6 +386,7 @@ const AuthenticatedAccountRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAccountRouteRoute: typeof AuthenticatedAccountRouteRouteWithChildren
+  AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRoute
   AuthenticatedBluePillRoute: typeof AuthenticatedBluePillRoute
   AuthenticatedChooseRoute: typeof AuthenticatedChooseRoute
   AuthenticatedRedPillRoute: typeof AuthenticatedRedPillRoute
@@ -374,6 +394,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAccountRouteRoute: AuthenticatedAccountRouteRouteWithChildren,
+  AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRoute,
   AuthenticatedBluePillRoute: AuthenticatedBluePillRoute,
   AuthenticatedChooseRoute: AuthenticatedChooseRoute,
   AuthenticatedRedPillRoute: AuthenticatedRedPillRoute,

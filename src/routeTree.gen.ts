@@ -18,6 +18,7 @@ import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authenticated/account/route'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
 import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account/profile'
+import { Route as AuthenticatedAccountCoursesRouteImport } from './routes/_authenticated/account/courses'
 import { Route as AuthenticatedAccountBillingRouteImport } from './routes/_authenticated/account/billing'
 import { Route as AuthenticatedAccountApplicationRouteImport } from './routes/_authenticated/account/application'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
@@ -69,6 +70,12 @@ const AuthenticatedAccountProfileRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedAccountRouteRoute,
   } as any)
+const AuthenticatedAccountCoursesRoute =
+  AuthenticatedAccountCoursesRouteImport.update({
+    id: '/courses',
+    path: '/courses',
+    getParentRoute: () => AuthenticatedAccountRouteRoute,
+  } as any)
 const AuthenticatedAccountBillingRoute =
   AuthenticatedAccountBillingRouteImport.update({
     id: '/billing',
@@ -97,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/red-pill': typeof AuthenticatedRedPillRoute
   '/account/application': typeof AuthenticatedAccountApplicationRoute
   '/account/billing': typeof AuthenticatedAccountBillingRoute
+  '/account/courses': typeof AuthenticatedAccountCoursesRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
@@ -109,6 +117,7 @@ export interface FileRoutesByTo {
   '/red-pill': typeof AuthenticatedRedPillRoute
   '/account/application': typeof AuthenticatedAccountApplicationRoute
   '/account/billing': typeof AuthenticatedAccountBillingRoute
+  '/account/courses': typeof AuthenticatedAccountCoursesRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
@@ -124,6 +133,7 @@ export interface FileRoutesById {
   '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
   '/_authenticated/account/application': typeof AuthenticatedAccountApplicationRoute
   '/_authenticated/account/billing': typeof AuthenticatedAccountBillingRoute
+  '/_authenticated/account/courses': typeof AuthenticatedAccountCoursesRoute
   '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/red-pill'
     | '/account/application'
     | '/account/billing'
+    | '/account/courses'
     | '/account/profile'
     | '/account/'
     | '/api/public/webhooks/razorpay'
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/red-pill'
     | '/account/application'
     | '/account/billing'
+    | '/account/courses'
     | '/account/profile'
     | '/account'
     | '/api/public/webhooks/razorpay'
@@ -165,6 +177,7 @@ export interface FileRouteTypes {
     | '/_authenticated/red-pill'
     | '/_authenticated/account/application'
     | '/_authenticated/account/billing'
+    | '/_authenticated/account/courses'
     | '/_authenticated/account/profile'
     | '/_authenticated/account/'
     | '/api/public/webhooks/razorpay'
@@ -242,6 +255,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountProfileRouteImport
       parentRoute: typeof AuthenticatedAccountRouteRoute
     }
+    '/_authenticated/account/courses': {
+      id: '/_authenticated/account/courses'
+      path: '/courses'
+      fullPath: '/account/courses'
+      preLoaderRoute: typeof AuthenticatedAccountCoursesRouteImport
+      parentRoute: typeof AuthenticatedAccountRouteRoute
+    }
     '/_authenticated/account/billing': {
       id: '/_authenticated/account/billing'
       path: '/billing'
@@ -269,6 +289,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAccountRouteRouteChildren {
   AuthenticatedAccountApplicationRoute: typeof AuthenticatedAccountApplicationRoute
   AuthenticatedAccountBillingRoute: typeof AuthenticatedAccountBillingRoute
+  AuthenticatedAccountCoursesRoute: typeof AuthenticatedAccountCoursesRoute
   AuthenticatedAccountProfileRoute: typeof AuthenticatedAccountProfileRoute
   AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute
 }
@@ -277,6 +298,7 @@ const AuthenticatedAccountRouteRouteChildren: AuthenticatedAccountRouteRouteChil
   {
     AuthenticatedAccountApplicationRoute: AuthenticatedAccountApplicationRoute,
     AuthenticatedAccountBillingRoute: AuthenticatedAccountBillingRoute,
+    AuthenticatedAccountCoursesRoute: AuthenticatedAccountCoursesRoute,
     AuthenticatedAccountProfileRoute: AuthenticatedAccountProfileRoute,
     AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
   }

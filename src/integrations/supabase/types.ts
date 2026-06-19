@@ -14,16 +14,243 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          created_at: string
+          google_event_id: string | null
+          id: string
+          kind: string
+          notes: string | null
+          scheduled_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          google_event_id?: string | null
+          id?: string
+          kind: string
+          notes?: string | null
+          scheduled_at: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          google_event_id?: string | null
+          id?: string
+          kind?: string
+          notes?: string | null
+          scheduled_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_paise: number
+          created_at: string
+          currency: string
+          id: string
+          pill: Database["public"]["Enums"]["pill_type"]
+          razorpay_order_id: string | null
+          razorpay_payment_id: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_paise: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pill: Database["public"]["Enums"]["pill_type"]
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_paise?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          pill?: Database["public"]["Enums"]["pill_type"]
+          razorpay_order_id?: string | null
+          razorpay_payment_id?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pill_choices: {
+        Row: {
+          chosen_at: string
+          pill: Database["public"]["Enums"]["pill_type"]
+          user_id: string
+        }
+        Insert: {
+          chosen_at?: string
+          pill: Database["public"]["Enums"]["pill_type"]
+          user_id: string
+        }
+        Update: {
+          chosen_at?: string
+          pill?: Database["public"]["Enums"]["pill_type"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          discord_user_id: string | null
+          discord_username: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          discord_user_id?: string | null
+          discord_username?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          discord_user_id?: string | null
+          discord_username?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      red_pill_applications: {
+        Row: {
+          admin_notes: string | null
+          call_scheduled_at: string | null
+          created_at: string
+          google_event_id: string | null
+          id: string
+          status: Database["public"]["Enums"]["application_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          call_scheduled_at?: string | null
+          created_at?: string
+          google_event_id?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          call_scheduled_at?: string | null
+          created_at?: string
+          google_event_id?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          razorpay_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          razorpay_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          razorpay_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          granted_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          granted_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          granted_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "red_pill" | "blue_pill"
+      application_status:
+        | "pending_call"
+        | "call_scheduled"
+        | "call_completed"
+        | "approved"
+        | "rejected"
+        | "paid"
+      payment_status: "created" | "pending" | "success" | "failed" | "refunded"
+      pill_type: "red" | "blue"
+      subscription_status:
+        | "created"
+        | "active"
+        | "paused"
+        | "cancelled"
+        | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +377,25 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "red_pill", "blue_pill"],
+      application_status: [
+        "pending_call",
+        "call_scheduled",
+        "call_completed",
+        "approved",
+        "rejected",
+        "paid",
+      ],
+      payment_status: ["created", "pending", "success", "failed", "refunded"],
+      pill_type: ["red", "blue"],
+      subscription_status: [
+        "created",
+        "active",
+        "paused",
+        "cancelled",
+        "expired",
+      ],
+    },
   },
 } as const

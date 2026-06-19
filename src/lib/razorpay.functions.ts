@@ -148,7 +148,7 @@ export const verifyPayment = createServerFn({ method: "POST" })
     if (data.razorpay_order_id) {
       await supabaseAdmin
         .from("payments")
-        .update({ razorpay_payment_id: data.razorpay_payment_id, status: "captured" })
+        .update({ razorpay_payment_id: data.razorpay_payment_id, status: "success" })
         .eq("razorpay_order_id", data.razorpay_order_id)
         .eq("user_id", context.userId);
       await supabaseAdmin

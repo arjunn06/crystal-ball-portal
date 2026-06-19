@@ -5,10 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Blueprint — premium trading community design system.
- * Cinematic black canvas. The Red Pill = crimson (mentorship, intensity).
- * The Blue Pill = electric cyan-blue (members, knowledge).
- * Single dark theme — no light mode.
+ * Blueprint — Arjun IFVG brand system (ifvg.in/brand).
+ * Surfaces: obsidian (#0A0A0F → #1B1B21).
+ * Primary Red #E53935 · Secondary Purple #AB47BC · Accent Gold #FFC107 (reserved).
+ * Red Pill = brand red (mentorship). Blue Pill = brand purple (members).
+ * Display: Clash Display · Body: Archivo. Single dark theme.
  */
 
 @theme inline {
@@ -58,69 +59,68 @@
   --color-blue-pill: var(--blue-pill);
   --color-blue-pill-foreground: var(--blue-pill-foreground);
   --color-blue-pill-glow: var(--blue-pill-glow);
-  --color-platinum: var(--platinum);
-  --color-platinum-soft: var(--platinum-soft);
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-gold-soft: var(--brand-gold-soft);
+  --font-display: "Clash Display", "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 }
 
 :root {
   --radius: 0.75rem;
 
-  /* Surfaces */
-  /* Midnight + Crimson — luxury obsidian canvas */
-  --background: oklch(0.08 0.018 280);          /* #0a0a12 */
-  --foreground: oklch(0.96 0.006 260);
-  --card: oklch(0.13 0.022 278);                /* #16162a */
-  --card-foreground: oklch(0.96 0.006 260);
-  --popover: oklch(0.11 0.020 278);
-  --popover-foreground: oklch(0.96 0.006 260);
+  /* Surfaces — IFVG.in brand */
+  --background: hsl(240 10% 4%);                /* #0A0A0F */
+  --foreground: hsl(0 0% 98%);                  /* #FAFAFA */
+  --card: hsl(240 10% 7%);                      /* #101014 */
+  --card-foreground: hsl(0 0% 98%);
+  --popover: hsl(240 10% 7%);
+  --popover-foreground: hsl(0 0% 98%);
 
-  /* Brand — restrained crimson is the primary CTA accent */
-  --primary: oklch(0.52 0.20 16);               /* #b91c3c */
-  --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.18 0.020 278);
-  --secondary-foreground: oklch(0.97 0.005 250);
+  /* Brand — Primary Red is the CTA accent */
+  --primary: hsl(0 85% 55%);                    /* #E53935 */
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(240 10% 12%);                /* neutral surface for shadcn */
+  --secondary-foreground: hsl(0 0% 98%);
 
-  --muted: oklch(0.16 0.018 278);
-  --muted-foreground: oklch(0.66 0.020 260);
-  --accent: oklch(0.20 0.024 278);
-  --accent-foreground: oklch(0.97 0.005 250);
-  --destructive: oklch(0.52 0.22 16);
-  --destructive-foreground: oklch(0.98 0.005 250);
+  --muted: hsl(240 10% 12%);                    /* #1B1B21 */
+  --muted-foreground: hsl(240 5% 55%);          /* #8B8B96 */
+  --accent: hsl(270 95% 65%);                   /* #AB47BC brand purple */
+  --accent-foreground: hsl(0 0% 100%);
+  --destructive: hsl(0 85% 55%);
+  --destructive-foreground: hsl(0 0% 100%);
 
-  --border: oklch(0.22 0.020 278 / 0.7);
-  --input: oklch(0.18 0.020 278);
-  --ring: oklch(0.52 0.20 16);
+  --border: hsl(240 10% 16% / 0.85);
+  --input: hsl(240 10% 12%);
+  --ring: hsl(0 85% 55%);
 
-  /* Pill brand tokens — Midnight + Crimson */
-  --red-pill: oklch(0.52 0.22 16);              /* #b91c3c crimson */
-  --red-pill-foreground: oklch(0.98 0.01 22);
-  --red-pill-glow: oklch(0.55 0.25 16 / 0.55);
-  --blue-pill: oklch(0.56 0.10 245);            /* #3b6fa0 steel blue */
-  --blue-pill-foreground: oklch(0.98 0.005 250);
-  --blue-pill-glow: oklch(0.55 0.14 245 / 0.50);
+  /* Pill tokens — Red Pill = brand red, Blue Pill = brand purple */
+  --red-pill: hsl(0 85% 55%);                   /* #E53935 */
+  --red-pill-foreground: hsl(0 0% 100%);
+  --red-pill-glow: hsl(0 85% 55% / 0.55);
+  --blue-pill: hsl(270 95% 65%);                /* #AB47BC */
+  --blue-pill-foreground: hsl(0 0% 100%);
+  --blue-pill-glow: hsl(270 95% 65% / 0.50);
 
-  /* Luxury accent — cool platinum hairline (no gold) */
-  --platinum: oklch(0.82 0.012 260);
-  --platinum-soft: oklch(0.82 0.012 260 / 0.35);
+  /* Accent Gold — reserved brand token, used sparingly */
+  --brand-gold: hsl(45 100% 55%);               /* #FFC107 */
+  --brand-gold-soft: hsl(45 100% 55% / 0.30);
 
   /* Charts */
-  --chart-1: oklch(0.52 0.22 16);
-  --chart-2: oklch(0.56 0.14 245);
-  --chart-3: oklch(0.75 0.12 180);
-  --chart-4: oklch(0.78 0.18 80);
-  --chart-5: oklch(0.65 0.20 300);
+  --chart-1: hsl(0 85% 55%);
+  --chart-2: hsl(270 95% 65%);
+  --chart-3: hsl(45 100% 55%);
+  --chart-4: hsl(240 5% 55%);
+  --chart-5: hsl(0 0% 98%);
 
-  --sidebar: oklch(0.10 0.020 278);
-  --sidebar-foreground: oklch(0.97 0.005 250);
-  --sidebar-primary: oklch(0.52 0.22 16);
-  --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.18 0.020 278);
-  --sidebar-accent-foreground: oklch(0.97 0.005 250);
-  --sidebar-border: oklch(0.22 0.020 278);
-  --sidebar-ring: oklch(0.52 0.20 16);
+  --sidebar: hsl(240 10% 5%);
+  --sidebar-foreground: hsl(0 0% 98%);
+  --sidebar-primary: hsl(0 85% 55%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 10% 12%);
+  --sidebar-accent-foreground: hsl(0 0% 98%);
+  --sidebar-border: hsl(240 10% 16%);
+  --sidebar-ring: hsl(0 85% 55%);
 }
 
 @layer base {
@@ -146,26 +146,26 @@
   .text-balance { text-wrap: balance; }
   .bg-grid {
     background-image:
-      linear-gradient(to right, oklch(1 0 0 / 0.04) 1px, transparent 1px),
-      linear-gradient(to bottom, oklch(1 0 0 / 0.04) 1px, transparent 1px);
+      linear-gradient(to right, hsl(0 0% 100% / 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(0 0% 100% / 0.04) 1px, transparent 1px);
     background-size: 56px 56px;
   }
   .text-gradient-red {
-    background: linear-gradient(180deg, oklch(0.85 0.15 22) 0%, oklch(0.55 0.27 22) 100%);
+    background: linear-gradient(180deg, hsl(0 95% 75%) 0%, hsl(0 85% 50%) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .text-gradient-blue {
-    background: linear-gradient(180deg, oklch(0.88 0.12 240) 0%, oklch(0.60 0.22 240) 100%);
+    background: linear-gradient(180deg, hsl(280 95% 80%) 0%, hsl(270 80% 55%) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .glow-red { box-shadow: 0 0 80px -10px var(--red-pill-glow); }
   .glow-blue { box-shadow: 0 0 80px -10px var(--blue-pill-glow); }
-  .ring-red { box-shadow: 0 0 0 1px oklch(0.62 0.245 22 / 0.4), 0 30px 80px -20px var(--red-pill-glow); }
-  .ring-blue { box-shadow: 0 0 0 1px oklch(0.70 0.18 240 / 0.4), 0 30px 80px -20px var(--blue-pill-glow); }
+  .ring-red { box-shadow: 0 0 0 1px hsl(0 85% 55% / 0.4), 0 30px 80px -20px var(--red-pill-glow); }
+  .ring-blue { box-shadow: 0 0 0 1px hsl(270 95% 65% / 0.4), 0 30px 80px -20px var(--blue-pill-glow); }
   .label-mono {
     font-family: var(--font-mono);
     text-transform: uppercase;
@@ -174,7 +174,7 @@
   }
   .hairline {
     height: 1px;
-    background: linear-gradient(90deg, transparent, var(--platinum-soft), transparent);
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.18), transparent);
   }
   .grain {
     position: relative;
@@ -189,7 +189,7 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/></svg>");
   }
   .text-gradient-platinum {
-    background: linear-gradient(180deg, oklch(0.97 0.005 260) 0%, oklch(0.60 0.02 260) 100%);
+    background: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(240 5% 55%) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -197,25 +197,25 @@
   /* Subtle gradient backdrops — replace photography */
   .bg-aurora {
     background:
-      radial-gradient(ellipse 60% 50% at 15% 15%, oklch(0.32 0.18 16 / 0.38), transparent 60%),
-      radial-gradient(ellipse 55% 55% at 85% 85%, oklch(0.34 0.12 245 / 0.32), transparent 65%),
-      radial-gradient(ellipse 80% 50% at 50% 110%, oklch(0.16 0.04 278 / 0.7), transparent 70%),
-      linear-gradient(180deg, oklch(0.08 0.018 280), oklch(0.10 0.022 278));
+      radial-gradient(ellipse 60% 50% at 15% 15%, hsl(0 85% 55% / 0.22), transparent 60%),
+      radial-gradient(ellipse 55% 55% at 85% 85%, hsl(270 95% 65% / 0.20), transparent 65%),
+      radial-gradient(ellipse 80% 50% at 50% 110%, hsl(240 10% 7% / 0.7), transparent 70%),
+      linear-gradient(180deg, hsl(240 10% 4%), hsl(240 10% 6%));
   }
   .bg-aurora-soft {
     background:
-      radial-gradient(ellipse 50% 40% at 80% 25%, oklch(0.28 0.14 16 / 0.18), transparent 60%),
-      radial-gradient(ellipse 55% 45% at 20% 75%, oklch(0.30 0.10 245 / 0.18), transparent 65%),
-      linear-gradient(180deg, oklch(0.09 0.020 280), oklch(0.08 0.018 280));
+      radial-gradient(ellipse 50% 40% at 80% 25%, hsl(0 85% 55% / 0.12), transparent 60%),
+      radial-gradient(ellipse 55% 45% at 20% 75%, hsl(270 95% 65% / 0.12), transparent 65%),
+      linear-gradient(180deg, hsl(240 10% 5%), hsl(240 10% 4%));
   }
   .bg-aurora-crimson {
     background:
-      radial-gradient(ellipse 75% 60% at 50% 50%, oklch(0.32 0.18 16 / 0.42), transparent 65%),
-      linear-gradient(180deg, oklch(0.08 0.018 280), oklch(0.10 0.022 278));
+      radial-gradient(ellipse 75% 60% at 50% 50%, hsl(0 85% 55% / 0.28), transparent 65%),
+      linear-gradient(180deg, hsl(240 10% 4%), hsl(240 10% 6%));
   }
   .bg-aurora-steel {
     background:
-      radial-gradient(ellipse 75% 60% at 50% 50%, oklch(0.34 0.10 245 / 0.36), transparent 65%),
-      linear-gradient(180deg, oklch(0.10 0.022 278), oklch(0.08 0.018 280));
+      radial-gradient(ellipse 75% 60% at 50% 50%, hsl(270 95% 65% / 0.26), transparent 65%),
+      linear-gradient(180deg, hsl(240 10% 6%), hsl(240 10% 4%));
   }
 }

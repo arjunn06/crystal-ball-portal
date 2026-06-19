@@ -67,7 +67,7 @@ export function SectionShell({
   );
 }
 
-export function StatCard({ label, value, sub }: { label: string; value: string; sub?: React.ReactNode }) {
+export function StatCard({ label, value, sub }: { label: string; value: string; sub?: ReactNode }) {
   return (
     <div className="rounded-xl border border-border bg-card p-5">
       <p className="label-mono text-muted-foreground">{label}</p>

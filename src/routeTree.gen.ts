@@ -17,6 +17,7 @@ import { Route as AuthenticatedChooseRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticated/blue-pill'
 import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authenticated/account/route'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
+import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account/profile'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
 
 const AuthRoute = AuthRouteImport.update({
@@ -60,6 +61,12 @@ const AuthenticatedAccountIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAccountRouteRoute,
   } as any)
+const AuthenticatedAccountProfileRoute =
+  AuthenticatedAccountProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedAccountRouteRoute,
+  } as any)
 const ApiPublicWebhooksRazorpayRoute =
   ApiPublicWebhooksRazorpayRouteImport.update({
     id: '/api/public/webhooks/razorpay',
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
+  '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
@@ -83,6 +91,7 @@ export interface FileRoutesByTo {
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
+  '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
@@ -95,6 +104,7 @@ export interface FileRoutesById {
   '/_authenticated/blue-pill': typeof AuthenticatedBluePillRoute
   '/_authenticated/choose': typeof AuthenticatedChooseRoute
   '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
+  '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
+    | '/account/profile'
     | '/account/'
     | '/api/public/webhooks/razorpay'
   fileRoutesByTo: FileRoutesByTo
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
+    | '/account/profile'
     | '/account'
     | '/api/public/webhooks/razorpay'
   id:
@@ -127,6 +139,7 @@ export interface FileRouteTypes {
     | '/_authenticated/blue-pill'
     | '/_authenticated/choose'
     | '/_authenticated/red-pill'
+    | '/_authenticated/account/profile'
     | '/_authenticated/account/'
     | '/api/public/webhooks/razorpay'
   fileRoutesById: FileRoutesById
@@ -196,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountIndexRouteImport
       parentRoute: typeof AuthenticatedAccountRouteRoute
     }
+    '/_authenticated/account/profile': {
+      id: '/_authenticated/account/profile'
+      path: '/profile'
+      fullPath: '/account/profile'
+      preLoaderRoute: typeof AuthenticatedAccountProfileRouteImport
+      parentRoute: typeof AuthenticatedAccountRouteRoute
+    }
     '/api/public/webhooks/razorpay': {
       id: '/api/public/webhooks/razorpay'
       path: '/api/public/webhooks/razorpay'
@@ -207,11 +227,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAccountRouteRouteChildren {
+  AuthenticatedAccountProfileRoute: typeof AuthenticatedAccountProfileRoute
   AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute
 }
 
 const AuthenticatedAccountRouteRouteChildren: AuthenticatedAccountRouteRouteChildren =
   {
+    AuthenticatedAccountProfileRoute: AuthenticatedAccountProfileRoute,
     AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
   }
 

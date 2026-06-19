@@ -22,6 +22,7 @@ import { Route as AuthenticatedAccountCoursesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAccountBillingRouteImport } from './routes/_authenticated/account/billing'
 import { Route as AuthenticatedAccountApplicationRouteImport } from './routes/_authenticated/account/application'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
+import { Route as AuthenticatedAccountCoursesSlugRouteImport } from './routes/_authenticated/account/courses.$slug'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -94,6 +95,12 @@ const ApiPublicWebhooksRazorpayRoute =
     path: '/api/public/webhooks/razorpay',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAccountCoursesSlugRoute =
+  AuthenticatedAccountCoursesSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedAccountCoursesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -104,9 +111,10 @@ export interface FileRoutesByFullPath {
   '/red-pill': typeof AuthenticatedRedPillRoute
   '/account/application': typeof AuthenticatedAccountApplicationRoute
   '/account/billing': typeof AuthenticatedAccountBillingRoute
-  '/account/courses': typeof AuthenticatedAccountCoursesRoute
+  '/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
+  '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRoutesByTo {
@@ -117,9 +125,10 @@ export interface FileRoutesByTo {
   '/red-pill': typeof AuthenticatedRedPillRoute
   '/account/application': typeof AuthenticatedAccountApplicationRoute
   '/account/billing': typeof AuthenticatedAccountBillingRoute
-  '/account/courses': typeof AuthenticatedAccountCoursesRoute
+  '/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account': typeof AuthenticatedAccountIndexRoute
+  '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRoutesById {
@@ -133,9 +142,10 @@ export interface FileRoutesById {
   '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
   '/_authenticated/account/application': typeof AuthenticatedAccountApplicationRoute
   '/_authenticated/account/billing': typeof AuthenticatedAccountBillingRoute
-  '/_authenticated/account/courses': typeof AuthenticatedAccountCoursesRoute
+  '/_authenticated/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
   '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
+  '/_authenticated/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
 }
 export interface FileRouteTypes {
@@ -152,6 +162,7 @@ export interface FileRouteTypes {
     | '/account/courses'
     | '/account/profile'
     | '/account/'
+    | '/account/courses/$slug'
     | '/api/public/webhooks/razorpay'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -165,6 +176,7 @@ export interface FileRouteTypes {
     | '/account/courses'
     | '/account/profile'
     | '/account'
+    | '/account/courses/$slug'
     | '/api/public/webhooks/razorpay'
   id:
     | '__root__'
@@ -180,6 +192,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account/courses'
     | '/_authenticated/account/profile'
     | '/_authenticated/account/'
+    | '/_authenticated/account/courses/$slug'
     | '/api/public/webhooks/razorpay'
   fileRoutesById: FileRoutesById
 }
@@ -283,13 +296,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksRazorpayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/account/courses/$slug': {
+      id: '/_authenticated/account/courses/$slug'
+      path: '/$slug'
+      fullPath: '/account/courses/$slug'
+      preLoaderRoute: typeof AuthenticatedAccountCoursesSlugRouteImport
+      parentRoute: typeof AuthenticatedAccountCoursesRoute
+    }
   }
 }
+
+interface AuthenticatedAccountCoursesRouteChildren {
+  AuthenticatedAccountCoursesSlugRoute: typeof AuthenticatedAccountCoursesSlugRoute
+}
+
+const AuthenticatedAccountCoursesRouteChildren: AuthenticatedAccountCoursesRouteChildren =
+  {
+    AuthenticatedAccountCoursesSlugRoute: AuthenticatedAccountCoursesSlugRoute,
+  }
+
+const AuthenticatedAccountCoursesRouteWithChildren =
+  AuthenticatedAccountCoursesRoute._addFileChildren(
+    AuthenticatedAccountCoursesRouteChildren,
+  )
 
 interface AuthenticatedAccountRouteRouteChildren {
   AuthenticatedAccountApplicationRoute: typeof AuthenticatedAccountApplicationRoute
   AuthenticatedAccountBillingRoute: typeof AuthenticatedAccountBillingRoute
-  AuthenticatedAccountCoursesRoute: typeof AuthenticatedAccountCoursesRoute
+  AuthenticatedAccountCoursesRoute: typeof AuthenticatedAccountCoursesRouteWithChildren
   AuthenticatedAccountProfileRoute: typeof AuthenticatedAccountProfileRoute
   AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute
 }
@@ -298,7 +332,8 @@ const AuthenticatedAccountRouteRouteChildren: AuthenticatedAccountRouteRouteChil
   {
     AuthenticatedAccountApplicationRoute: AuthenticatedAccountApplicationRoute,
     AuthenticatedAccountBillingRoute: AuthenticatedAccountBillingRoute,
-    AuthenticatedAccountCoursesRoute: AuthenticatedAccountCoursesRoute,
+    AuthenticatedAccountCoursesRoute:
+      AuthenticatedAccountCoursesRouteWithChildren,
     AuthenticatedAccountProfileRoute: AuthenticatedAccountProfileRoute,
     AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
   }

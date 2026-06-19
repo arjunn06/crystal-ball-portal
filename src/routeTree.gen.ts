@@ -15,6 +15,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRedPillRouteImport } from './routes/_authenticated/red-pill'
 import { Route as AuthenticatedChooseRouteImport } from './routes/_authenticated/choose'
 import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticated/blue-pill'
+import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authenticated/account/route'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
 
 const AuthRoute = AuthRouteImport.update({
@@ -46,6 +47,12 @@ const AuthenticatedBluePillRoute = AuthenticatedBluePillRouteImport.update({
   path: '/blue-pill',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAccountRouteRoute =
+  AuthenticatedAccountRouteRouteImport.update({
+    id: '/account',
+    path: '/account',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const ApiPublicWebhooksRazorpayRoute =
   ApiPublicWebhooksRazorpayRouteImport.update({
     id: '/api/public/webhooks/razorpay',
@@ -56,6 +63,7 @@ const ApiPublicWebhooksRazorpayRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/account': typeof AuthenticatedAccountRouteRoute
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
@@ -64,6 +72,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/account': typeof AuthenticatedAccountRouteRoute
   '/blue-pill': typeof AuthenticatedBluePillRoute
   '/choose': typeof AuthenticatedChooseRoute
   '/red-pill': typeof AuthenticatedRedPillRoute
@@ -74,6 +83,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/_authenticated/account': typeof AuthenticatedAccountRouteRoute
   '/_authenticated/blue-pill': typeof AuthenticatedBluePillRoute
   '/_authenticated/choose': typeof AuthenticatedChooseRoute
   '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/account'
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
@@ -92,6 +103,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/account'
     | '/blue-pill'
     | '/choose'
     | '/red-pill'
@@ -101,6 +113,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/_authenticated/account'
     | '/_authenticated/blue-pill'
     | '/_authenticated/choose'
     | '/_authenticated/red-pill'
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBluePillRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/account': {
+      id: '/_authenticated/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthenticatedAccountRouteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/public/webhooks/razorpay': {
       id: '/api/public/webhooks/razorpay'
       path: '/api/public/webhooks/razorpay'
@@ -169,12 +189,14 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAccountRouteRoute: typeof AuthenticatedAccountRouteRoute
   AuthenticatedBluePillRoute: typeof AuthenticatedBluePillRoute
   AuthenticatedChooseRoute: typeof AuthenticatedChooseRoute
   AuthenticatedRedPillRoute: typeof AuthenticatedRedPillRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAccountRouteRoute: AuthenticatedAccountRouteRoute,
   AuthenticatedBluePillRoute: AuthenticatedBluePillRoute,
   AuthenticatedChooseRoute: AuthenticatedChooseRoute,
   AuthenticatedRedPillRoute: AuthenticatedRedPillRoute,

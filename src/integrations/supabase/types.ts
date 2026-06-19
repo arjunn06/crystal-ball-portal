@@ -44,6 +44,192 @@ export type Database = {
         }
         Relationships: []
       }
+      course_modules: {
+        Row: {
+          course_id: string
+          created_at: string
+          id: string
+          sort_order: number
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          cover_url: string | null
+          created_at: string
+          id: string
+          published: boolean
+          required_pill: Database["public"]["Enums"]["pill_type"]
+          slug: string
+          sort_order: number
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          required_pill?: Database["public"]["Enums"]["pill_type"]
+          slug: string
+          sort_order?: number
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          cover_url?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          required_pill?: Database["public"]["Enums"]["pill_type"]
+          slug?: string
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      discord_role_claims: {
+        Row: {
+          actioned_at: string | null
+          actioned_by: string | null
+          created_at: string
+          discord_user_id: string
+          error_message: string | null
+          id: string
+          role_kind: string
+          status: Database["public"]["Enums"]["discord_claim_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actioned_at?: string | null
+          actioned_by?: string | null
+          created_at?: string
+          discord_user_id: string
+          error_message?: string | null
+          id?: string
+          role_kind?: string
+          status?: Database["public"]["Enums"]["discord_claim_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actioned_at?: string | null
+          actioned_by?: string | null
+          created_at?: string
+          discord_user_id?: string
+          error_message?: string | null
+          id?: string
+          role_kind?: string
+          status?: Database["public"]["Enums"]["discord_claim_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          completed_at: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          id: string
+          module_id: string
+          sort_order: number
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          module_id: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          id?: string
+          module_id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_paise: number
@@ -104,6 +290,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          banned_at: string | null
           created_at: string
           discord_user_id: string | null
           discord_username: string | null
@@ -115,6 +302,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          banned_at?: string | null
           created_at?: string
           discord_user_id?: string | null
           discord_username?: string | null
@@ -126,6 +314,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          banned_at?: string | null
           created_at?: string
           discord_user_id?: string | null
           discord_username?: string | null
@@ -243,6 +432,7 @@ export type Database = {
         | "approved"
         | "rejected"
         | "paid"
+      discord_claim_status: "pending" | "assigned" | "failed" | "revoked"
       payment_status: "created" | "pending" | "success" | "failed" | "refunded"
       pill_type: "red" | "blue"
       subscription_status:
@@ -387,6 +577,7 @@ export const Constants = {
         "rejected",
         "paid",
       ],
+      discord_claim_status: ["pending", "assigned", "failed", "revoked"],
       payment_status: ["created", "pending", "success", "failed", "refunded"],
       pill_type: ["red", "blue"],
       subscription_status: [

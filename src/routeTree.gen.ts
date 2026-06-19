@@ -9,38 +9,103 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRedPillRouteImport } from './routes/_authenticated/red-pill'
+import { Route as AuthenticatedChooseRouteImport } from './routes/_authenticated/choose'
+import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticated/blue-pill'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRedPillRoute = AuthenticatedRedPillRouteImport.update({
+  id: '/red-pill',
+  path: '/red-pill',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedChooseRoute = AuthenticatedChooseRouteImport.update({
+  id: '/choose',
+  path: '/choose',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedBluePillRoute = AuthenticatedBluePillRouteImport.update({
+  id: '/blue-pill',
+  path: '/blue-pill',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/blue-pill': typeof AuthenticatedBluePillRoute
+  '/choose': typeof AuthenticatedChooseRoute
+  '/red-pill': typeof AuthenticatedRedPillRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/blue-pill': typeof AuthenticatedBluePillRoute
+  '/choose': typeof AuthenticatedChooseRoute
+  '/red-pill': typeof AuthenticatedRedPillRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/blue-pill': typeof AuthenticatedBluePillRoute
+  '/_authenticated/choose': typeof AuthenticatedChooseRoute
+  '/_authenticated/red-pill': typeof AuthenticatedRedPillRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/auth' | '/blue-pill' | '/choose' | '/red-pill'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/auth' | '/blue-pill' | '/choose' | '/red-pill'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/blue-pill'
+    | '/_authenticated/choose'
+    | '/_authenticated/red-pill'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +113,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/red-pill': {
+      id: '/_authenticated/red-pill'
+      path: '/red-pill'
+      fullPath: '/red-pill'
+      preLoaderRoute: typeof AuthenticatedRedPillRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/choose': {
+      id: '/_authenticated/choose'
+      path: '/choose'
+      fullPath: '/choose'
+      preLoaderRoute: typeof AuthenticatedChooseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/blue-pill': {
+      id: '/_authenticated/blue-pill'
+      path: '/blue-pill'
+      fullPath: '/blue-pill'
+      preLoaderRoute: typeof AuthenticatedBluePillRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedBluePillRoute: typeof AuthenticatedBluePillRoute
+  AuthenticatedChooseRoute: typeof AuthenticatedChooseRoute
+  AuthenticatedRedPillRoute: typeof AuthenticatedRedPillRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedBluePillRoute: AuthenticatedBluePillRoute,
+  AuthenticatedChooseRoute: AuthenticatedChooseRoute,
+  AuthenticatedRedPillRoute: AuthenticatedRedPillRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

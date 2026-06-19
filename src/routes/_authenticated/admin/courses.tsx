@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { adminDeleteCourse, adminListCourses, adminUpsertCourse } from "@/lib/courses.functions";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -96,6 +96,6 @@ function CourseForm({ initial, onSave, onCancel }: { initial: any; onSave: (v: a
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return <div className="space-y-1"><Label className="text-xs text-muted-foreground">{label}</Label>{children}</div>;
 }

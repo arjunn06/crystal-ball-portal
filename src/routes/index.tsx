@@ -23,7 +23,7 @@ function Landing() {
             <span className="font-display text-xl font-semibold tracking-tight">
               blueprint<span className="text-primary">.</span>
             </span>
-            <span className="label-mono text-muted-foreground hidden sm:inline">by Arjun · IFVG</span>
+            <span className="label-mono text-muted-foreground hidden sm:inline">FROM ARJUN IFVG</span>
           </Link>
           <nav className="flex items-center gap-6">
             <a href="#paths" className="hidden md:inline label-mono text-muted-foreground hover:text-foreground transition-colors">The Paths</a>
@@ -46,7 +46,7 @@ function Landing() {
           <div className="max-w-3xl">
             <p className="label-mono text-platinum mb-6 flex items-center gap-3">
               <span className="inline-block h-px w-10 bg-platinum/60" />
-              A private community, by invitation
+              A PRIVATE COMMUNITY, BY INVITATION
             </p>
             <h1 className="text-balance text-5xl md:text-7xl lg:text-[5.5rem] font-display font-semibold leading-[1.02] tracking-tight">
               Two pills.
@@ -221,7 +221,7 @@ function Landing() {
             <span className="font-display text-lg font-semibold">blueprint<span className="text-primary">.</span></span>
             <span className="label-mono text-muted-foreground">by Arjun · IFVG · est. 2026</span>
           </div>
-          <p className="label-mono text-muted-foreground">Members only. By invitation.</p>
+          <p className="label-mono text-muted-foreground">THE INNER CIRCLE</p>
         </div>
       </footer>
     </div>

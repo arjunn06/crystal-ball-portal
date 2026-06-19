@@ -67,53 +67,58 @@
   --radius: 0.75rem;
 
   /* Surfaces */
-  --background: oklch(0.10 0.012 264);
-  --foreground: oklch(0.97 0.005 250);
-  --card: oklch(0.14 0.014 264);
-  --card-foreground: oklch(0.97 0.005 250);
-  --popover: oklch(0.13 0.014 264);
-  --popover-foreground: oklch(0.97 0.005 250);
+  /* Midnight + Crimson — luxury obsidian canvas */
+  --background: oklch(0.08 0.018 280);          /* #0a0a12 */
+  --foreground: oklch(0.96 0.006 260);
+  --card: oklch(0.13 0.022 278);                /* #16162a */
+  --card-foreground: oklch(0.96 0.006 260);
+  --popover: oklch(0.11 0.020 278);
+  --popover-foreground: oklch(0.96 0.006 260);
 
-  /* Brand — Red Pill is the primary CTA accent */
-  --primary: oklch(0.62 0.235 22);
+  /* Brand — restrained crimson is the primary CTA accent */
+  --primary: oklch(0.52 0.20 16);               /* #b91c3c */
   --primary-foreground: oklch(0.98 0.005 250);
-  --secondary: oklch(0.20 0.018 264);
+  --secondary: oklch(0.18 0.020 278);
   --secondary-foreground: oklch(0.97 0.005 250);
 
-  --muted: oklch(0.18 0.014 264);
-  --muted-foreground: oklch(0.65 0.022 256);
-  --accent: oklch(0.22 0.020 264);
+  --muted: oklch(0.16 0.018 278);
+  --muted-foreground: oklch(0.66 0.020 260);
+  --accent: oklch(0.20 0.024 278);
   --accent-foreground: oklch(0.97 0.005 250);
-  --destructive: oklch(0.62 0.235 22);
+  --destructive: oklch(0.52 0.22 16);
   --destructive-foreground: oklch(0.98 0.005 250);
 
-  --border: oklch(0.24 0.018 264);
-  --input: oklch(0.20 0.018 264);
-  --ring: oklch(0.62 0.20 240);
+  --border: oklch(0.22 0.020 278 / 0.7);
+  --input: oklch(0.18 0.020 278);
+  --ring: oklch(0.52 0.20 16);
 
-  /* Pill brand tokens */
-  --red-pill: oklch(0.62 0.245 22);
+  /* Pill brand tokens — Midnight + Crimson */
+  --red-pill: oklch(0.52 0.22 16);              /* #b91c3c crimson */
   --red-pill-foreground: oklch(0.98 0.01 22);
-  --red-pill-glow: oklch(0.55 0.27 22 / 0.45);
-  --blue-pill: oklch(0.70 0.18 240);
-  --blue-pill-foreground: oklch(0.10 0.02 250);
-  --blue-pill-glow: oklch(0.65 0.22 240 / 0.45);
+  --red-pill-glow: oklch(0.55 0.25 16 / 0.55);
+  --blue-pill: oklch(0.56 0.10 245);            /* #3b6fa0 steel blue */
+  --blue-pill-foreground: oklch(0.98 0.005 250);
+  --blue-pill-glow: oklch(0.55 0.14 245 / 0.50);
+
+  /* Luxury accent — antique gold for hairline detail */
+  --gold: oklch(0.78 0.11 85);                  /* #c9a84c */
+  --gold-soft: oklch(0.85 0.08 85 / 0.4);
 
   /* Charts */
-  --chart-1: oklch(0.62 0.245 22);
-  --chart-2: oklch(0.70 0.18 240);
+  --chart-1: oklch(0.52 0.22 16);
+  --chart-2: oklch(0.56 0.14 245);
   --chart-3: oklch(0.75 0.12 180);
   --chart-4: oklch(0.78 0.18 80);
   --chart-5: oklch(0.65 0.20 300);
 
-  --sidebar: oklch(0.12 0.014 264);
+  --sidebar: oklch(0.10 0.020 278);
   --sidebar-foreground: oklch(0.97 0.005 250);
-  --sidebar-primary: oklch(0.62 0.245 22);
+  --sidebar-primary: oklch(0.52 0.22 16);
   --sidebar-primary-foreground: oklch(0.98 0.005 250);
-  --sidebar-accent: oklch(0.20 0.018 264);
+  --sidebar-accent: oklch(0.18 0.020 278);
   --sidebar-accent-foreground: oklch(0.97 0.005 250);
-  --sidebar-border: oklch(0.24 0.018 264);
-  --sidebar-ring: oklch(0.62 0.20 240);
+  --sidebar-border: oklch(0.22 0.020 278);
+  --sidebar-ring: oklch(0.52 0.20 16);
 }
 
 @layer base {

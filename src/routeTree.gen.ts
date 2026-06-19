@@ -18,6 +18,7 @@ import { Route as AuthenticatedBluePillRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAccountRouteRouteImport } from './routes/_authenticated/account/route'
 import { Route as AuthenticatedAccountIndexRouteImport } from './routes/_authenticated/account/index'
 import { Route as AuthenticatedAccountProfileRouteImport } from './routes/_authenticated/account/profile'
+import { Route as AuthenticatedAccountDiscordRouteImport } from './routes/_authenticated/account/discord'
 import { Route as AuthenticatedAccountCoursesRouteImport } from './routes/_authenticated/account/courses'
 import { Route as AuthenticatedAccountBillingRouteImport } from './routes/_authenticated/account/billing'
 import { Route as AuthenticatedAccountApplicationRouteImport } from './routes/_authenticated/account/application'
@@ -71,6 +72,12 @@ const AuthenticatedAccountProfileRoute =
     path: '/profile',
     getParentRoute: () => AuthenticatedAccountRouteRoute,
   } as any)
+const AuthenticatedAccountDiscordRoute =
+  AuthenticatedAccountDiscordRouteImport.update({
+    id: '/discord',
+    path: '/discord',
+    getParentRoute: () => AuthenticatedAccountRouteRoute,
+  } as any)
 const AuthenticatedAccountCoursesRoute =
   AuthenticatedAccountCoursesRouteImport.update({
     id: '/courses',
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/account/application': typeof AuthenticatedAccountApplicationRoute
   '/account/billing': typeof AuthenticatedAccountBillingRoute
   '/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
+  '/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account/': typeof AuthenticatedAccountIndexRoute
   '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
@@ -126,6 +134,7 @@ export interface FileRoutesByTo {
   '/account/application': typeof AuthenticatedAccountApplicationRoute
   '/account/billing': typeof AuthenticatedAccountBillingRoute
   '/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
+  '/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/account/profile': typeof AuthenticatedAccountProfileRoute
   '/account': typeof AuthenticatedAccountIndexRoute
   '/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
@@ -143,6 +152,7 @@ export interface FileRoutesById {
   '/_authenticated/account/application': typeof AuthenticatedAccountApplicationRoute
   '/_authenticated/account/billing': typeof AuthenticatedAccountBillingRoute
   '/_authenticated/account/courses': typeof AuthenticatedAccountCoursesRouteWithChildren
+  '/_authenticated/account/discord': typeof AuthenticatedAccountDiscordRoute
   '/_authenticated/account/profile': typeof AuthenticatedAccountProfileRoute
   '/_authenticated/account/': typeof AuthenticatedAccountIndexRoute
   '/_authenticated/account/courses/$slug': typeof AuthenticatedAccountCoursesSlugRoute
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/account/application'
     | '/account/billing'
     | '/account/courses'
+    | '/account/discord'
     | '/account/profile'
     | '/account/'
     | '/account/courses/$slug'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/account/application'
     | '/account/billing'
     | '/account/courses'
+    | '/account/discord'
     | '/account/profile'
     | '/account'
     | '/account/courses/$slug'
@@ -190,6 +202,7 @@ export interface FileRouteTypes {
     | '/_authenticated/account/application'
     | '/_authenticated/account/billing'
     | '/_authenticated/account/courses'
+    | '/_authenticated/account/discord'
     | '/_authenticated/account/profile'
     | '/_authenticated/account/'
     | '/_authenticated/account/courses/$slug'
@@ -268,6 +281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAccountProfileRouteImport
       parentRoute: typeof AuthenticatedAccountRouteRoute
     }
+    '/_authenticated/account/discord': {
+      id: '/_authenticated/account/discord'
+      path: '/discord'
+      fullPath: '/account/discord'
+      preLoaderRoute: typeof AuthenticatedAccountDiscordRouteImport
+      parentRoute: typeof AuthenticatedAccountRouteRoute
+    }
     '/_authenticated/account/courses': {
       id: '/_authenticated/account/courses'
       path: '/courses'
@@ -324,6 +344,7 @@ interface AuthenticatedAccountRouteRouteChildren {
   AuthenticatedAccountApplicationRoute: typeof AuthenticatedAccountApplicationRoute
   AuthenticatedAccountBillingRoute: typeof AuthenticatedAccountBillingRoute
   AuthenticatedAccountCoursesRoute: typeof AuthenticatedAccountCoursesRouteWithChildren
+  AuthenticatedAccountDiscordRoute: typeof AuthenticatedAccountDiscordRoute
   AuthenticatedAccountProfileRoute: typeof AuthenticatedAccountProfileRoute
   AuthenticatedAccountIndexRoute: typeof AuthenticatedAccountIndexRoute
 }
@@ -334,6 +355,7 @@ const AuthenticatedAccountRouteRouteChildren: AuthenticatedAccountRouteRouteChil
     AuthenticatedAccountBillingRoute: AuthenticatedAccountBillingRoute,
     AuthenticatedAccountCoursesRoute:
       AuthenticatedAccountCoursesRouteWithChildren,
+    AuthenticatedAccountDiscordRoute: AuthenticatedAccountDiscordRoute,
     AuthenticatedAccountProfileRoute: AuthenticatedAccountProfileRoute,
     AuthenticatedAccountIndexRoute: AuthenticatedAccountIndexRoute,
   }

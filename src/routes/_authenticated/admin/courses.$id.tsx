@@ -8,14 +8,34 @@ import {
   adminUpsertLesson,
   adminUpsertModule,
 } from "@/lib/courses.functions";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { PageHeader, Card, formatDuration } from "@/components/app/sidebar";
+import { formatDuration } from "@/components/app/sidebar";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { ChevronLeft, Film, Pencil, Plus, Trash2, X } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clipboard,
+  Film,
+  Link2,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Trash2,
+  Upload,
+  Video,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/courses/$id")({
   component: CourseStructure,
@@ -35,7 +55,8 @@ function CourseStructure() {
   });
 
   const [editingModule, setEditingModule] = useState<any | null>(null);
-  const [editingLesson, setEditingLesson] = useState<any | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<string | null>(null);
+  const [openModules, setOpenModules] = useState<Record<string, boolean>>({});
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin", "course", id] });
   const onErr = (e: any) => toast.error(e.message);
@@ -59,9 +80,9 @@ function CourseStructure() {
   });
   const upLesMut = useMutation({
     mutationFn: (v: any) => upsertLesson({ data: v }),
-    onSuccess: () => {
+    onSuccess: (row: any) => {
       toast.success("Saved");
-      setEditingLesson(null);
+      if (row?.id) setSelectedLessonId(row.id);
       refresh();
     },
     onError: onErr,
@@ -70,312 +91,471 @@ function CourseStructure() {
     mutationFn: (lid: string) => delLesson({ data: { id: lid } }),
     onSuccess: () => {
       toast.success("Removed");
+      setSelectedLessonId(null);
       refresh();
     },
     onError: onErr,
   });
 
+  const selectedLesson = useMemo(
+    () => data?.lessons.find((l: any) => l.id === selectedLessonId) ?? null,
+    [data, selectedLessonId],
+  );
+
+  // Auto-select first lesson when data loads
+  useEffect(() => {
+    if (!data) return;
+    // open all modules by default
+    setOpenModules((cur) => {
+      const next = { ...cur };
+      for (const m of data.modules) if (next[m.id] === undefined) next[m.id] = true;
+      return next;
+    });
+    if (!selectedLessonId && data.lessons.length > 0) {
+      setSelectedLessonId(data.lessons[0].id);
+    }
+  }, [data, selectedLessonId]);
+
   if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (!data?.course) return <p>Not found.</p>;
 
-  const totalLessons = data.lessons.length;
-  const totalDuration = data.lessons.reduce(
-    (s: number, l: any) => s + (l.duration_seconds ?? 0),
-    0,
-  );
+  const addLesson = (moduleId: string, sortOrder: number) => {
+    upLesMut.mutate({
+      module_id: moduleId,
+      title: "New lesson",
+      description: "",
+      video_url: "",
+      duration_seconds: null,
+      sort_order: sortOrder,
+    });
+  };
 
   return (
-    <>
-      <Link
-        to="/admin/courses"
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-6"
-      >
-        <ChevronLeft className="size-3.5" /> All courses
-      </Link>
+    <div className="-mx-6 md:-mx-10 -my-8 md:-my-10 min-h-[calc(100vh-0px)]">
+      {/* Top back bar */}
+      <div className="h-12 border-b border-border/70 flex items-center px-4 md:px-6">
+        <Link
+          to="/admin/courses"
+          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ChevronLeft className="size-4" /> Back
+        </Link>
+        <div className="ml-4 text-sm font-medium truncate">{data.course.title}</div>
+        <div className="ml-auto flex items-center gap-2">
+          <span className="text-xs text-muted-foreground px-2 py-1 rounded-md bg-surface-2 border border-border">
+            Saved
+          </span>
+        </div>
+      </div>
 
-      <PageHeader
-        title={data.course.title}
-        description={`${data.modules.length} modules · ${totalLessons} lessons · ${formatDuration(totalDuration)}`}
-        actions={
-          <Button
+      <div className="grid grid-cols-1 lg:grid-cols-[340px_1fr] min-h-[calc(100vh-3rem)]">
+        {/* Left: chapters */}
+        <aside className="border-r border-border/70 bg-surface/40 p-4 space-y-3 overflow-y-auto">
+          {data.modules.map((m: any, mi: number) => {
+            const mLessons = data.lessons.filter((l: any) => l.module_id === m.id);
+            const open = openModules[m.id] ?? true;
+            return (
+              <div
+                key={m.id}
+                className="rounded-xl border border-border bg-surface overflow-hidden"
+              >
+                <div className="flex items-center gap-1 px-2 py-2">
+                  <button
+                    onClick={() =>
+                      setOpenModules((o) => ({ ...o, [m.id]: !open }))
+                    }
+                    className="size-6 grid place-items-center text-muted-foreground hover:text-foreground"
+                    aria-label="Toggle"
+                  >
+                    {open ? (
+                      <ChevronDown className="size-4" />
+                    ) : (
+                      <ChevronRight className="size-4" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setEditingModule(m)}
+                    className="flex-1 text-left text-sm font-medium truncate hover:text-primary"
+                  >
+                    {m.title || `Chapter ${mi + 1}`}
+                  </button>
+                  <button
+                    onClick={() =>
+                      addLesson(m.id, mLessons.length * 10)
+                    }
+                    className="size-7 grid place-items-center rounded-md hover:bg-hover text-muted-foreground hover:text-foreground"
+                    aria-label="Add lesson"
+                  >
+                    <Plus className="size-4" />
+                  </button>
+                  <button
+                    onClick={() =>
+                      confirm("Delete chapter and all lessons?") && delModMut.mutate(m.id)
+                    }
+                    className="size-7 grid place-items-center rounded-md hover:bg-hover text-muted-foreground hover:text-destructive"
+                    aria-label="Delete chapter"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+                {open && (
+                  <div className="px-2 pb-2 space-y-1">
+                    {mLessons.map((l: any) => {
+                      const active = l.id === selectedLessonId;
+                      return (
+                        <button
+                          key={l.id}
+                          onClick={() => setSelectedLessonId(l.id)}
+                          className={
+                            "w-full flex items-center gap-3 p-2 rounded-lg text-left transition-colors " +
+                            (active
+                              ? "bg-hover ring-1 ring-primary/40"
+                              : "hover:bg-hover/60")
+                          }
+                        >
+                          <div className="size-10 rounded-md bg-surface-2 border border-border grid place-items-center shrink-0">
+                            <Video className="size-4 text-muted-foreground" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm truncate">{l.title || "Untitled"}</p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {l.video_url ? "Multimedia" : "Empty"}
+                              {l.duration_seconds
+                                ? ` · ${formatDuration(l.duration_seconds)}`
+                                : ""}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              confirm("Delete lesson?") && delLesMut.mutate(l.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 size-6 grid place-items-center text-muted-foreground hover:text-destructive"
+                          >
+                            <MoreVertical className="size-4" />
+                          </button>
+                        </button>
+                      );
+                    })}
+                    {mLessons.length === 0 && (
+                      <button
+                        onClick={() => addLesson(m.id, 0)}
+                        className="w-full py-3 text-xs text-muted-foreground hover:text-foreground border border-dashed border-border rounded-lg"
+                      >
+                        + Add first lesson
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          <button
             onClick={() =>
               setEditingModule({
                 course_id: id,
-                title: "",
+                title: `Chapter ${data.modules.length + 1}`,
                 summary: "",
                 sort_order: data.modules.length * 10,
               })
             }
-            className="rounded-lg h-9"
+            className="w-full rounded-xl border border-dashed border-border hover:border-primary/60 hover:bg-hover/40 transition-colors py-4 text-sm text-muted-foreground hover:text-foreground inline-flex items-center justify-center gap-2"
           >
-            <Plus className="size-4 mr-1" /> Add module
-          </Button>
-        }
-      />
+            <div className="size-6 rounded-full border border-border grid place-items-center">
+              <Plus className="size-3.5" />
+            </div>
+            Add new chapter
+          </button>
+        </aside>
 
-      {editingModule && (
-        <Card className="p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-sm font-semibold">
-              {editingModule.id ? "Edit module" : "New module"}
-            </p>
-            <button
-              onClick={() => setEditingModule(null)}
-              className="text-muted-foreground hover:text-foreground"
-            >
-              <X className="size-4" />
-            </button>
-          </div>
-          <div className="grid gap-3 md:grid-cols-[1fr_140px]">
-            <FieldLabel label="Title">
-              <Input
-                value={editingModule.title}
-                onChange={(e) => setEditingModule({ ...editingModule, title: e.target.value })}
-                className="bg-surface border-border h-10 rounded-lg"
-              />
-            </FieldLabel>
-            <FieldLabel label="Sort order">
-              <Input
-                type="number"
-                value={editingModule.sort_order}
-                onChange={(e) =>
-                  setEditingModule({ ...editingModule, sort_order: Number(e.target.value) })
-                }
-                className="bg-surface border-border h-10 rounded-lg"
-              />
-            </FieldLabel>
-          </div>
-          <FieldLabel label="Summary" className="mt-3">
-            <Textarea
-              value={editingModule.summary ?? ""}
-              onChange={(e) => setEditingModule({ ...editingModule, summary: e.target.value })}
-              rows={2}
-              className="bg-surface border-border rounded-lg"
+        {/* Right: lesson editor */}
+        <section className="p-6 md:p-10 overflow-y-auto">
+          {selectedLesson ? (
+            <LessonEditor
+              key={selectedLesson.id}
+              lesson={selectedLesson}
+              module={data.modules.find((m: any) => m.id === selectedLesson.module_id)}
+              onSave={(v) => upLesMut.mutate(v)}
+              onDelete={() =>
+                confirm("Delete lesson?") && delLesMut.mutate(selectedLesson.id)
+              }
+              saving={upLesMut.isPending}
             />
-          </FieldLabel>
-          <div className="mt-4 flex justify-end gap-2">
-            <Button variant="ghost" onClick={() => setEditingModule(null)}>Cancel</Button>
-            <Button onClick={() => upModMut.mutate(editingModule)} className="rounded-lg h-10">
-              Save
-            </Button>
-          </div>
-        </Card>
-      )}
-
-      <div className="space-y-4">
-        {data.modules.map((m: any, mi: number) => {
-          const mLessons = data.lessons.filter((l: any) => l.module_id === m.id);
-          const mDur = mLessons.reduce(
-            (s: number, l: any) => s + (l.duration_seconds ?? 0),
-            0,
-          );
-          return (
-            <Card key={m.id} className="overflow-hidden">
-              <header className="p-5 border-b border-border/60 flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <p className="text-[11px] text-muted-foreground tabular-nums">
-                    Module {String(mi + 1).padStart(2, "0")}
-                  </p>
-                  <h2 className="mt-1 font-semibold tracking-tight">{m.title}</h2>
-                  {m.summary && (
-                    <p className="mt-1 text-xs text-muted-foreground">{m.summary}</p>
-                  )}
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    {mLessons.length} lessons · {formatDuration(mDur)}
-                  </p>
+          ) : (
+            <div className="h-full min-h-[60vh] grid place-items-center text-center">
+              <div className="max-w-sm">
+                <div className="mx-auto size-14 rounded-full border border-border grid place-items-center text-muted-foreground mb-4">
+                  <Film className="size-6" />
                 </div>
-                <div className="flex flex-wrap justify-end gap-1.5 shrink-0">
-                  <IconBtn
-                    onClick={() =>
-                      setEditingLesson({
-                        module_id: m.id,
-                        title: "",
-                        description: "",
-                        video_url: "",
-                        duration_seconds: null,
-                        sort_order: mLessons.length * 10,
-                      })
-                    }
-                  >
-                    <Plus className="size-3.5" /> Lesson
-                  </IconBtn>
-                  <IconBtn onClick={() => setEditingModule(m)}>
-                    <Pencil className="size-3.5" />
-                  </IconBtn>
-                  <IconBtn
-                    tone="destructive"
-                    onClick={() =>
-                      confirm("Delete module and all lessons?") && delModMut.mutate(m.id)
-                    }
-                  >
-                    <Trash2 className="size-3.5" />
-                  </IconBtn>
-                </div>
-              </header>
-              <ul className="divide-y divide-border/50">
-                {mLessons.map((l: any, li: number) => (
-                  <li
-                    key={l.id}
-                    className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-4 px-5 py-3 hover:bg-hover/40"
-                  >
-                    <span className="text-[11px] text-muted-foreground tabular-nums w-10">
-                      {String(mi + 1).padStart(2, "0")}.{String(li + 1).padStart(2, "0")}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-sm truncate flex items-center gap-2">
-                        {l.video_url && (
-                          <Film className="size-3.5 text-primary shrink-0" />
-                        )}
-                        {l.title}
-                      </p>
-                      {l.video_url && (
-                        <p className="text-[11px] text-muted-foreground/70 font-mono truncate max-w-md">
-                          {l.video_url}
-                        </p>
-                      )}
-                    </div>
-                    <span className="text-xs text-muted-foreground whitespace-nowrap">
-                      {formatDuration(l.duration_seconds)}
-                    </span>
-                    <div className="flex gap-1">
-                      <IconBtn onClick={() => setEditingLesson(l)}>
-                        <Pencil className="size-3.5" />
-                      </IconBtn>
-                      <IconBtn
-                        tone="destructive"
-                        onClick={() =>
-                          confirm("Delete lesson?") && delLesMut.mutate(l.id)
-                        }
-                      >
-                        <Trash2 className="size-3.5" />
-                      </IconBtn>
-                    </div>
-                  </li>
-                ))}
-                {mLessons.length === 0 && (
-                  <li className="px-5 py-6 text-center text-xs text-muted-foreground">
-                    No lessons in this module.
-                  </li>
-                )}
-              </ul>
-            </Card>
-          );
-        })}
-        {data.modules.length === 0 && (
-          <Card className="p-10 text-center">
-            <p className="text-sm text-muted-foreground">
-              No modules yet. Add the first one above.
-            </p>
-          </Card>
-        )}
+                <p className="font-medium">Select a lesson</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Choose a lesson on the left, or add a new chapter to get started.
+                </p>
+              </div>
+            </div>
+          )}
+        </section>
       </div>
 
-      {editingLesson && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm grid place-items-center p-6">
-          <Card className="p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-semibold">
-                {editingLesson.id ? "Edit lesson" : "New lesson"}
-              </p>
-              <button
-                onClick={() => setEditingLesson(null)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="size-4" />
-              </button>
-            </div>
-            <FieldLabel label="Title">
-              <Input
-                value={editingLesson.title}
-                onChange={(e) => setEditingLesson({ ...editingLesson, title: e.target.value })}
-                className="bg-surface border-border h-10 rounded-lg"
-              />
-            </FieldLabel>
-            <FieldLabel label="Description" className="mt-3">
-              <Textarea
-                value={editingLesson.description ?? ""}
-                onChange={(e) =>
-                  setEditingLesson({ ...editingLesson, description: e.target.value })
-                }
-                rows={3}
-                className="bg-surface border-border rounded-lg"
-              />
-            </FieldLabel>
-            <FieldLabel label="Video URL (YouTube / Vimeo / mp4)" className="mt-3">
-              <Input
-                value={editingLesson.video_url ?? ""}
-                onChange={(e) =>
-                  setEditingLesson({ ...editingLesson, video_url: e.target.value })
-                }
-                placeholder="https://youtube.com/watch?v=…"
-                className="bg-surface border-border h-10 rounded-lg"
-              />
-            </FieldLabel>
-            <div className="mt-3 grid grid-cols-2 gap-3">
-              <FieldLabel label="Duration (sec)">
+      {/* Chapter dialog */}
+      <Dialog
+        open={!!editingModule}
+        onOpenChange={(o) => !o && setEditingModule(null)}
+      >
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingModule?.id ? "Edit chapter" : "Create chapter"}
+            </DialogTitle>
+          </DialogHeader>
+          {editingModule && (
+            <div className="space-y-4">
+              <FieldLabel label="Name">
                 <Input
-                  type="number"
-                  value={editingLesson.duration_seconds ?? ""}
+                  value={editingModule.title}
                   onChange={(e) =>
-                    setEditingLesson({
-                      ...editingLesson,
-                      duration_seconds: e.target.value ? Number(e.target.value) : null,
-                    })
+                    setEditingModule({ ...editingModule, title: e.target.value })
                   }
-                  className="bg-surface border-border h-10 rounded-lg"
+                  className="h-11 rounded-lg"
+                  placeholder="Enter a name"
                 />
               </FieldLabel>
-              <FieldLabel label="Sort order">
-                <Input
-                  type="number"
-                  value={editingLesson.sort_order}
+              <FieldLabel label="Description">
+                <Textarea
+                  value={editingModule.summary ?? ""}
                   onChange={(e) =>
-                    setEditingLesson({
-                      ...editingLesson,
-                      sort_order: Number(e.target.value),
-                    })
+                    setEditingModule({ ...editingModule, summary: e.target.value })
                   }
-                  className="bg-surface border-border h-10 rounded-lg"
+                  rows={3}
+                  className="rounded-lg"
+                  placeholder="Enter a description"
                 />
               </FieldLabel>
             </div>
-            <div className="mt-5 flex justify-end gap-2">
-              <Button variant="ghost" onClick={() => setEditingLesson(null)}>Cancel</Button>
-              <Button
-                onClick={() => upLesMut.mutate(editingLesson)}
-                className="rounded-lg h-10"
-              >
-                Save
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
-    </>
+          )}
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setEditingModule(null)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => upModMut.mutate(editingModule)}
+              disabled={!editingModule?.title}
+              className="rounded-lg"
+            >
+              {editingModule?.id ? "Save" : "Create"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 
-function IconBtn({
-  children,
-  onClick,
-  tone,
+function LessonEditor({
+  lesson,
+  module,
+  onSave,
+  onDelete,
+  saving,
 }: {
-  children: React.ReactNode;
-  onClick: () => void;
-  tone?: "destructive";
+  lesson: any;
+  module: any;
+  onSave: (v: any) => void;
+  onDelete: () => void;
+  saving: boolean;
 }) {
-  const cls =
-    tone === "destructive"
-      ? "border-destructive/40 text-destructive hover:bg-destructive/10"
-      : "border-border text-muted-foreground hover:text-foreground hover:bg-hover";
+  const [f, setF] = useState<any>(lesson);
+  useEffect(() => setF(lesson), [lesson.id]);
+
+  const dirty =
+    f.title !== lesson.title ||
+    (f.description ?? "") !== (lesson.description ?? "") ||
+    (f.video_url ?? "") !== (lesson.video_url ?? "") ||
+    (f.duration_seconds ?? null) !== (lesson.duration_seconds ?? null);
+
+  return (
+    <div className="max-w-3xl mx-auto">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="text-xs text-muted-foreground">{module?.title ?? "Chapter"}</p>
+          <input
+            value={f.title}
+            onChange={(e) => setF({ ...f, title: e.target.value })}
+            className="mt-1 w-full bg-transparent text-3xl font-semibold tracking-tight outline-none focus:ring-0 border-0"
+            placeholder="Lesson title"
+          />
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            variant="ghost"
+            className="text-destructive hover:text-destructive"
+            onClick={onDelete}
+          >
+            <Trash2 className="size-4 mr-1" /> Delete
+          </Button>
+          <Button
+            onClick={() => onSave(f)}
+            disabled={!dirty || saving}
+            className="rounded-lg"
+          >
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </div>
+      </div>
+
+      {/* Video area */}
+      <div className="mt-6 rounded-2xl border border-border bg-surface/60 bg-gradient-subtle min-h-[360px] p-6 md:p-10">
+        {f.video_url ? (
+          <div className="space-y-4">
+            <div className="aspect-video rounded-xl border border-border bg-black overflow-hidden">
+              {/youtube\.com|youtu\.be|vimeo\.com/.test(f.video_url) ? (
+                <iframe
+                  src={toEmbed(f.video_url)}
+                  className="size-full"
+                  allow="autoplay; encrypted-media"
+                  allowFullScreen
+                />
+              ) : (
+                <video src={f.video_url} controls className="size-full" />
+              )}
+            </div>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono truncate">
+              <Film className="size-3.5 text-primary" /> {f.video_url}
+              <button
+                onClick={() => setF({ ...f, video_url: "" })}
+                className="ml-auto text-muted-foreground hover:text-destructive"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center text-center py-10">
+            <p className="text-lg font-semibold">Add a video to this lesson</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Paste a YouTube, Vimeo, or direct .mp4 / .mov / .webm link.
+            </p>
+            <div className="mt-6 w-full max-w-md space-y-2">
+              <UploadRow
+                icon={<Upload className="size-4" />}
+                title="Upload video"
+                subtitle="Bring your own .mov, .mp4, etc."
+                onClick={() => {
+                  const url = prompt("Paste a direct video URL (.mp4 / .mov / .webm)");
+                  if (url) setF({ ...f, video_url: url });
+                }}
+              />
+              <UploadRow
+                icon={<Link2 className="size-4" />}
+                title="Embed video"
+                subtitle="Paste a YouTube or Vimeo link"
+                onClick={() => {
+                  const url = prompt("Paste a YouTube or Vimeo URL");
+                  if (url) setF({ ...f, video_url: url });
+                }}
+              />
+              <UploadRow
+                icon={<Clipboard className="size-4" />}
+                title="Paste video"
+                subtitle="Copy a video from another lesson"
+                onClick={async () => {
+                  try {
+                    const t = await navigator.clipboard.readText();
+                    if (t) setF({ ...f, video_url: t });
+                  } catch {
+                    /* ignore */
+                  }
+                }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Description + meta */}
+      <div className="mt-8 space-y-6">
+        <FieldLabel label="Description">
+          <Textarea
+            value={f.description ?? ""}
+            onChange={(e) => setF({ ...f, description: e.target.value })}
+            rows={4}
+            placeholder="What does this lesson cover?"
+            className="rounded-lg"
+          />
+        </FieldLabel>
+        <div className="grid grid-cols-2 gap-4">
+          <FieldLabel label="Duration (seconds)">
+            <Input
+              type="number"
+              value={f.duration_seconds ?? ""}
+              onChange={(e) =>
+                setF({
+                  ...f,
+                  duration_seconds: e.target.value ? Number(e.target.value) : null,
+                })
+              }
+              className="h-10 rounded-lg"
+              placeholder="e.g. 540"
+            />
+          </FieldLabel>
+          <FieldLabel label="Sort order">
+            <Input
+              type="number"
+              value={f.sort_order ?? 0}
+              onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) })}
+              className="h-10 rounded-lg"
+            />
+          </FieldLabel>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function UploadRow({
+  icon,
+  title,
+  subtitle,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
-      className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-md border transition-colors ${cls}`}
+      className="w-full text-left rounded-lg border border-border bg-surface hover:bg-hover transition-colors px-4 py-3 flex items-start gap-3"
     >
-      {children}
+      <div className="mt-0.5 text-muted-foreground">{icon}</div>
+      <div>
+        <p className="text-sm font-medium">{title}</p>
+        <p className="text-xs text-muted-foreground">{subtitle}</p>
+      </div>
     </button>
   );
+}
+
+function toEmbed(url: string): string {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtu.be")) {
+      return `https://www.youtube.com/embed${u.pathname}`;
+    }
+    if (u.hostname.includes("youtube.com")) {
+      const v = u.searchParams.get("v");
+      if (v) return `https://www.youtube.com/embed/${v}`;
+    }
+    if (u.hostname.includes("vimeo.com")) {
+      const id = u.pathname.split("/").filter(Boolean).pop();
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
 }
 
 function FieldLabel({
@@ -389,7 +569,7 @@ function FieldLabel({
 }) {
   return (
     <div className={"space-y-1.5 " + (className ?? "")}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Label className="text-sm font-medium">{label}</Label>
       {children}
     </div>
   );

@@ -7,13 +7,21 @@ import {
   adminUpsertCourse,
 } from "@/lib/courses.functions";
 import { toast } from "sonner";
-import { useState } from "react";
-import { PageHeader, Card } from "@/components/app/sidebar";
+import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/app/sidebar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, ArrowRight } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, ImageIcon, MoreHorizontal } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/courses")({
   component: CoursesAdmin,
@@ -73,165 +81,236 @@ function CoursesAdmin() {
         }
       />
 
-      {editing && (
-        <CourseForm
-          initial={editing}
-          onCancel={() => setEditing(null)}
-          onSave={(v) => upsertMut.mutate(v)}
-          saving={upsertMut.isPending}
-        />
-      )}
-
       {isLoading ? (
         <p className="text-sm text-muted-foreground mt-4">Loading…</p>
       ) : (
-        <div className="space-y-3 mt-4">
+        <div className="mt-2 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {(data ?? []).map((c: any) => (
-            <Card
+            <CourseCard
               key={c.id}
-              className="p-4 flex items-center justify-between gap-4 card-hover"
-            >
-              <div className="flex items-center gap-4 min-w-0">
-                <div className="size-12 rounded-lg bg-surface-2 border border-border overflow-hidden shrink-0 grid place-items-center">
-                  {c.cover_url ? (
-                    <img src={c.cover_url} alt="" className="size-full object-cover" />
-                  ) : (
-                    <div className="size-2 rounded-full bg-primary" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold truncate">{c.title}</p>
-                    <span
-                      className={
-                        c.published
-                          ? "text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary/15 text-primary border border-primary/30"
-                          : "text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-surface-2 text-muted-foreground border border-border"
-                      }
-                    >
-                      {c.published ? "Live" : "Draft"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground font-mono">/{c.slug}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <Link
-                  to="/admin/courses/$id"
-                  params={{ id: c.id }}
-                  className="text-xs px-2.5 py-1.5 rounded-md border border-border bg-surface hover:bg-hover inline-flex items-center gap-1"
-                >
-                  Curriculum <ArrowRight className="size-3" />
-                </Link>
-                <button
-                  onClick={() => setEditing(c)}
-                  className="text-xs px-2 py-1.5 rounded-md border border-border bg-surface hover:bg-hover"
-                >
-                  <Pencil className="size-3.5" />
-                </button>
-                <button
-                  onClick={() =>
-                    confirm(`Delete "${c.title}" and all its lessons?`) && delMut.mutate(c.id)
-                  }
-                  className="text-xs px-2 py-1.5 rounded-md border border-destructive/40 text-destructive"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
-              </div>
-            </Card>
+              course={c}
+              onEdit={() => setEditing(c)}
+              onDelete={() =>
+                confirm(`Delete "${c.title}" and all its lessons?`) && delMut.mutate(c.id)
+              }
+            />
           ))}
-          {(data ?? []).length === 0 && (
-            <Card className="p-10 text-center">
-              <p className="text-sm text-muted-foreground">No courses yet. Add one above.</p>
-            </Card>
-          )}
+          {/* Empty add tile */}
+          <button
+            onClick={() =>
+              setEditing({
+                slug: "",
+                title: "",
+                summary: "",
+                cover_url: "",
+                sort_order: (data?.length ?? 0) * 10,
+                published: false,
+              })
+            }
+            className="group aspect-[16/10] rounded-2xl border border-dashed border-border hover:border-primary/60 hover:bg-hover/40 transition-colors grid place-items-center text-muted-foreground hover:text-foreground"
+          >
+            <div className="flex flex-col items-center gap-2">
+              <div className="size-10 rounded-full border border-border grid place-items-center group-hover:border-primary/60">
+                <Plus className="size-4" />
+              </div>
+              <span className="text-sm">New course</span>
+            </div>
+          </button>
         </div>
       )}
+
+      <CourseDialog
+        editing={editing}
+        onClose={() => setEditing(null)}
+        onSave={(v) => upsertMut.mutate(v)}
+        saving={upsertMut.isPending}
+      />
     </>
   );
 }
 
-function CourseForm({
-  initial,
+function CourseCard({
+  course,
+  onEdit,
+  onDelete,
+}: {
+  course: any;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const [menu, setMenu] = useState(false);
+  return (
+    <div className="group relative rounded-2xl border border-border bg-surface overflow-hidden card-hover">
+      <Link
+        to="/admin/courses/$id"
+        params={{ id: course.id }}
+        className="block"
+      >
+        <div className="aspect-[16/10] bg-gradient-surface relative overflow-hidden">
+          {course.cover_url ? (
+            <img src={course.cover_url} alt="" className="size-full object-cover" />
+          ) : (
+            <div className="size-full grid place-items-center bg-gradient-subtle">
+              <ImageIcon className="size-8 text-muted-foreground/40" />
+            </div>
+          )}
+          <div className="absolute top-3 left-3">
+            <span
+              className={
+                course.published
+                  ? "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-background/70 backdrop-blur border border-primary/40 text-primary"
+                  : "text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-background/70 backdrop-blur border border-border text-muted-foreground"
+              }
+            >
+              {course.published ? "Live" : "Draft"}
+            </span>
+          </div>
+        </div>
+        <div className="p-4">
+          <p className="font-semibold tracking-tight truncate">{course.title || "Untitled"}</p>
+          {course.summary ? (
+            <p className="mt-1 text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
+              {course.summary}
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-muted-foreground/70 font-mono">/{course.slug}</p>
+          )}
+        </div>
+      </Link>
+      <div className="absolute top-2 right-2">
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            setMenu((m) => !m);
+          }}
+          className="size-8 rounded-full bg-background/70 backdrop-blur border border-border grid place-items-center text-muted-foreground hover:text-foreground"
+          aria-label="Course actions"
+        >
+          <MoreHorizontal className="size-4" />
+        </button>
+        {menu && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={() => setMenu(false)} />
+            <div className="absolute right-0 mt-1 w-36 rounded-lg border border-border bg-popover shadow-lg z-20 py-1 text-sm">
+              <button
+                className="w-full text-left px-3 py-1.5 hover:bg-hover flex items-center gap-2"
+                onClick={() => {
+                  setMenu(false);
+                  onEdit();
+                }}
+              >
+                <Pencil className="size-3.5" /> Edit
+              </button>
+              <button
+                className="w-full text-left px-3 py-1.5 hover:bg-hover flex items-center gap-2 text-destructive"
+                onClick={() => {
+                  setMenu(false);
+                  onDelete();
+                }}
+              >
+                <Trash2 className="size-3.5" /> Delete
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CourseDialog({
+  editing,
+  onClose,
   onSave,
-  onCancel,
   saving,
 }: {
-  initial: any;
+  editing: any | null;
+  onClose: () => void;
   onSave: (v: any) => void;
-  onCancel: () => void;
   saving: boolean;
 }) {
-  const [f, setF] = useState({ ...initial });
+  const [f, setF] = useState<any>(editing ?? {});
+  useEffect(() => {
+    if (editing) setF({ ...editing });
+  }, [editing]);
+
   return (
-    <Card className="p-6 mb-4">
-      <div className="flex items-center justify-between">
-        <p className="text-sm font-semibold">{f.id ? "Edit course" : "New course"}</p>
-        <button onClick={onCancel} className="text-xs text-muted-foreground hover:text-foreground">
-          Close
-        </button>
-      </div>
-      <div className="mt-5 grid gap-3 md:grid-cols-2">
-        <Field label="Title">
-          <Input
-            value={f.title}
-            onChange={(e) => setF({ ...f, title: e.target.value })}
-            className="bg-surface border-border h-10 rounded-lg"
-          />
-        </Field>
-        <Field label="Slug">
-          <Input
-            value={f.slug}
-            onChange={(e) => setF({ ...f, slug: e.target.value })}
-            placeholder="ict-foundations"
-            className="bg-surface border-border h-10 rounded-lg font-mono"
-          />
-        </Field>
-      </div>
-      <Field label="Summary" className="mt-3">
-        <Textarea
-          value={f.summary ?? ""}
-          onChange={(e) => setF({ ...f, summary: e.target.value })}
-          rows={2}
-          className="bg-surface border-border rounded-lg"
-        />
-      </Field>
-      <div className="mt-3 grid gap-3 md:grid-cols-2">
-        <Field label="Cover URL">
-          <Input
-            value={f.cover_url ?? ""}
-            onChange={(e) => setF({ ...f, cover_url: e.target.value })}
-            className="bg-surface border-border h-10 rounded-lg"
-          />
-        </Field>
-        <Field label="Sort order">
-          <Input
-            type="number"
-            value={f.sort_order}
-            onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) })}
-            className="bg-surface border-border h-10 rounded-lg"
-          />
-        </Field>
-      </div>
-      <label className="mt-4 flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={f.published}
-          onChange={(e) => setF({ ...f, published: e.target.checked })}
-        />
-        Published (visible to members)
-      </label>
-      <div className="mt-5 flex justify-end gap-2">
-        <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-        <Button
-          onClick={() => onSave(f)}
-          disabled={saving}
-          className="rounded-lg h-10"
-        >
-          {saving ? "Saving…" : "Save"}
-        </Button>
-      </div>
-    </Card>
+    <Dialog open={!!editing} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{f?.id ? "Edit course" : "Create course"}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <Field label="Name">
+            <Input
+              value={f.title ?? ""}
+              onChange={(e) => setF({ ...f, title: e.target.value })}
+              placeholder="Enter a name"
+              className="h-11 rounded-lg"
+            />
+          </Field>
+          <Field label="Slug">
+            <Input
+              value={f.slug ?? ""}
+              onChange={(e) => setF({ ...f, slug: e.target.value })}
+              placeholder="ict-foundations"
+              className="h-11 rounded-lg font-mono"
+            />
+          </Field>
+          <Field label="Description">
+            <Textarea
+              value={f.summary ?? ""}
+              onChange={(e) => setF({ ...f, summary: e.target.value })}
+              placeholder="Enter a description"
+              rows={3}
+              className="rounded-lg"
+            />
+          </Field>
+
+          <div className="flex items-center justify-between rounded-lg border border-border bg-surface-2 px-4 py-3">
+            <span className="text-sm">Set course to hidden</span>
+            <Switch
+              checked={!f.published}
+              onCheckedChange={(v) => setF({ ...f, published: !v })}
+            />
+          </div>
+
+          <div className="rounded-lg border border-border bg-surface-2 p-4 flex items-center gap-4">
+            <div className="w-32 aspect-[16/9] rounded-md border border-border bg-background grid place-items-center overflow-hidden">
+              {f.cover_url ? (
+                <img src={f.cover_url} alt="" className="size-full object-cover" />
+              ) : (
+                <ImageIcon className="size-5 text-muted-foreground/60" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0 space-y-2">
+              <div>
+                <p className="text-sm font-medium">Cover</p>
+                <p className="text-xs text-muted-foreground">1500 × 840 px</p>
+              </div>
+              <Input
+                value={f.cover_url ?? ""}
+                onChange={(e) => setF({ ...f, cover_url: e.target.value })}
+                placeholder="Paste image URL"
+                className="h-9 rounded-md text-xs"
+              />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button
+            onClick={() =>
+              onSave({ ...f, sort_order: f.sort_order ?? 0 })
+            }
+            disabled={saving || !f.title || !f.slug}
+            className="rounded-lg"
+          >
+            {saving ? "Saving…" : f?.id ? "Save" : "Create"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -246,7 +325,7 @@ function Field({
 }) {
   return (
     <div className={"space-y-1.5 " + (className ?? "")}>
-      <Label className="text-xs text-muted-foreground">{label}</Label>
+      <Label className="text-sm font-medium">{label}</Label>
       {children}
     </div>
   );

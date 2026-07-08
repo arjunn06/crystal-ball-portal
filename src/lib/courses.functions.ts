@@ -158,26 +158,53 @@ export const adminGetCourse = createServerFn({ method: "GET" })
 
 const courseSchema = z.object({
   id: z.string().uuid().optional(),
-  slug: z.string().min(1).max(80),
+  slug: z.string().max(80).optional().nullable(),
   title: z.string().min(1).max(160),
   summary: z.string().max(1000).optional().nullable(),
   cover_url: z.string().max(500).optional().nullable(),
   sort_order: z.number().int().default(0),
   published: z.boolean().default(false),
 });
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "course";
+}
+
 export const adminUpsertCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => courseSchema.parse(d))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    // Derive slug from title when missing / empty.
+    let slug = (data.slug ?? "").trim();
+    if (!slug) {
+      const base = slugify(data.title);
+      slug = base;
+      let n = 2;
+      // ensure uniqueness (ignore self on edit)
+      while (true) {
+        const { data: existing } = await supabaseAdmin
+          .from("courses")
+          .select("id")
+          .eq("slug", slug)
+          .maybeSingle();
+        if (!existing || existing.id === data.id) break;
+        slug = `${base}-${n++}`;
+      }
+    }
     if (data.id) {
       const { id, ...rest } = data;
-      await supabaseAdmin.from("courses").update(rest).eq("id", id);
+      await supabaseAdmin.from("courses").update({ ...rest, slug }).eq("id", id);
     } else {
       const { id: _, ...rest } = data;
       void _;
-      await supabaseAdmin.from("courses").insert(rest);
+      await supabaseAdmin.from("courses").insert({ ...rest, slug });
     }
     return { ok: true };
   });

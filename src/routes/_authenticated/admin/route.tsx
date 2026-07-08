@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { checkIsAdmin } from "@/lib/admin.functions";
 import { AppShell, AppSidebar, type NavItem } from "@/components/app/sidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { SignOutButton } from "@/components/app/sign-out-button";
 import {
   LayoutDashboard,
@@ -50,7 +51,12 @@ function AdminLayout() {
       <AppSidebar
         items={items}
         brand={{ label: "Blueprint", sub: "Admin" }}
-        footer={<SignOutButton />}
+        footer={
+          <div className="flex items-center gap-2">
+            <div className="flex-1"><SignOutButton /></div>
+            <ThemeToggle />
+          </div>
+        }
       />
       <AppShell>
         <Outlet />

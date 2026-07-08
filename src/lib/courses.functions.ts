@@ -3,78 +3,127 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(ctx: { supabase: any; userId: string }) {
-  const { data, error } = await ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" });
+  const { data, error } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden");
 }
 
-/* ---------- Public (members) ---------- */
-export const listCoursesForMember = createServerFn({ method: "GET" })
+async function assertMember(ctx: { supabase: any; userId: string }) {
+  const { data: sub } = await ctx.supabase
+    .from("subscriptions")
+    .select("status")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  if (sub?.status !== "active") throw new Error("Membership required.");
+}
+
+/* ---------------- MEMBER ---------------- */
+
+export const listCourses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await assertMember(context);
     const { supabase, userId } = context;
-    const { data: courses } = await supabase
-      .from("courses")
-      .select("id, slug, title, summary, cover_url, required_pill, sort_order, published")
-      .eq("published", true)
-      .order("sort_order");
-    const { data: progress } = await supabase
-      .from("lesson_progress")
-      .select("lesson_id")
-      .eq("user_id", userId);
-    return { courses: courses ?? [], completedLessonIds: (progress ?? []).map((p: any) => p.lesson_id) };
+    const [{ data: courses }, { data: modules }, { data: lessons }, { data: progress }] =
+      await Promise.all([
+        supabase
+          .from("courses")
+          .select("id, slug, title, summary, cover_url, sort_order")
+          .eq("published", true)
+          .order("sort_order"),
+        supabase.from("course_modules").select("id, course_id"),
+        supabase.from("lessons").select("id, module_id, duration_seconds"),
+        supabase.from("lesson_progress").select("lesson_id").eq("user_id", userId),
+      ]);
+
+    const doneSet = new Set((progress ?? []).map((p) => p.lesson_id));
+    const modulesByCourse = new Map<string, string[]>();
+    (modules ?? []).forEach((m) => {
+      const arr = modulesByCourse.get(m.course_id) ?? [];
+      arr.push(m.id);
+      modulesByCourse.set(m.course_id, arr);
+    });
+
+    const enriched = (courses ?? []).map((c) => {
+      const modIds = modulesByCourse.get(c.id) ?? [];
+      const cLessons = (lessons ?? []).filter((l) => modIds.includes(l.module_id));
+      const done = cLessons.filter((l) => doneSet.has(l.id)).length;
+      const totalDuration = cLessons.reduce((s, l) => s + (l.duration_seconds ?? 0), 0);
+      return {
+        ...c,
+        moduleCount: modIds.length,
+        lessonCount: cLessons.length,
+        completedCount: done,
+        totalDurationSeconds: totalDuration,
+      };
+    });
+    return enriched;
   });
 
-export const getCourseDetail = createServerFn({ method: "GET" })
+export const getCourse = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ slug: z.string() }).parse(d))
   .handler(async ({ context, data }) => {
-    const { supabase } = context;
+    await assertMember(context);
+    const { supabase, userId } = context;
     const { data: course } = await supabase
       .from("courses")
-      .select("id, slug, title, summary, cover_url, required_pill, published")
+      .select("id, slug, title, summary, cover_url")
       .eq("slug", data.slug)
+      .eq("published", true)
       .maybeSingle();
-    if (!course) throw new Error("Not found");
+    if (!course) throw new Error("Course not found");
+
     const { data: modules } = await supabase
       .from("course_modules")
       .select("id, title, summary, sort_order")
       .eq("course_id", course.id)
       .order("sort_order");
-    const moduleIds = (modules ?? []).map((m: any) => m.id);
+    const moduleIds = (modules ?? []).map((m) => m.id);
     const { data: lessons } = moduleIds.length
       ? await supabase
           .from("lessons")
           .select("id, module_id, title, description, video_url, duration_seconds, sort_order")
           .in("module_id", moduleIds)
           .order("sort_order")
-      : { data: [] as any[] };
+      : { data: [] };
     const { data: progress } = await supabase
       .from("lesson_progress")
       .select("lesson_id")
-      .eq("user_id", context.userId);
+      .eq("user_id", userId);
+
     return {
       course,
       modules: modules ?? [],
       lessons: lessons ?? [],
-      completed: new Set((progress ?? []).map((p: any) => p.lesson_id)),
+      completedLessonIds: (progress ?? []).map((p) => p.lesson_id),
     };
   });
 
-export const markLessonComplete = createServerFn({ method: "POST" })
+export const setLessonComplete = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ lesson_id: z.string().uuid(), completed: z.boolean() }).parse(d))
+  .inputValidator((d) =>
+    z.object({ lesson_id: z.string().uuid(), completed: z.boolean() }).parse(d),
+  )
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     if (data.completed) {
-      await supabase.from("lesson_progress").upsert({ user_id: userId, lesson_id: data.lesson_id });
+      await supabase.from("lesson_progress").insert({ user_id: userId, lesson_id: data.lesson_id });
     } else {
-      await supabase.from("lesson_progress").delete().eq("user_id", userId).eq("lesson_id", data.lesson_id);
+      await supabase
+        .from("lesson_progress")
+        .delete()
+        .eq("user_id", userId)
+        .eq("lesson_id", data.lesson_id);
     }
     return { ok: true };
   });
 
-/* ---------- Admin ---------- */
+/* ---------------- ADMIN ---------------- */
+
 export const adminListCourses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -84,28 +133,50 @@ export const adminListCourses = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export const adminGetCourse = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ course_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: course } = await supabaseAdmin
+      .from("courses")
+      .select("*")
+      .eq("id", data.course_id)
+      .maybeSingle();
+    const { data: modules } = await supabaseAdmin
+      .from("course_modules")
+      .select("*")
+      .eq("course_id", data.course_id)
+      .order("sort_order");
+    const ids = (modules ?? []).map((m) => m.id);
+    const { data: lessons } = ids.length
+      ? await supabaseAdmin.from("lessons").select("*").in("module_id", ids).order("sort_order")
+      : { data: [] };
+    return { course, modules: modules ?? [], lessons: lessons ?? [] };
+  });
+
+const courseSchema = z.object({
+  id: z.string().uuid().optional(),
+  slug: z.string().min(1).max(80),
+  title: z.string().min(1).max(160),
+  summary: z.string().max(1000).optional().nullable(),
+  cover_url: z.string().max(500).optional().nullable(),
+  sort_order: z.number().int().default(0),
+  published: z.boolean().default(false),
+});
 export const adminUpsertCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({
-      id: z.string().uuid().optional(),
-      slug: z.string().min(1),
-      title: z.string().min(1),
-      summary: z.string().optional().nullable(),
-      cover_url: z.string().optional().nullable(),
-      required_pill: z.enum(["blue", "red"]).default("blue"),
-      sort_order: z.number().int().default(0),
-      published: z.boolean().default(false),
-    }).parse(d),
-  )
+  .inputValidator((d) => courseSchema.parse(d))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     if (data.id) {
-      await supabaseAdmin.from("courses").update(data).eq("id", data.id);
-    } else {
       const { id, ...rest } = data;
-      void id;
+      await supabaseAdmin.from("courses").update(rest).eq("id", id);
+    } else {
+      const { id: _, ...rest } = data;
+      void _;
       await supabaseAdmin.from("courses").insert(rest);
     }
     return { ok: true };
@@ -121,37 +192,27 @@ export const adminDeleteCourse = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-export const adminGetCourseStructure = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ course_id: z.string().uuid() }).parse(d))
-  .handler(async ({ context, data }) => {
-    await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: course } = await supabaseAdmin.from("courses").select("*").eq("id", data.course_id).maybeSingle();
-    const { data: modules } = await supabaseAdmin.from("course_modules").select("*").eq("course_id", data.course_id).order("sort_order");
-    const ids = (modules ?? []).map((m: any) => m.id);
-    const { data: lessons } = ids.length
-      ? await supabaseAdmin.from("lessons").select("*").in("module_id", ids).order("sort_order")
-      : { data: [] as any[] };
-    return { course, modules: modules ?? [], lessons: lessons ?? [] };
-  });
-
+const moduleSchema = z.object({
+  id: z.string().uuid().optional(),
+  course_id: z.string().uuid(),
+  title: z.string().min(1).max(160),
+  summary: z.string().max(1000).optional().nullable(),
+  sort_order: z.number().int().default(0),
+});
 export const adminUpsertModule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({
-      id: z.string().uuid().optional(),
-      course_id: z.string().uuid(),
-      title: z.string().min(1),
-      summary: z.string().optional().nullable(),
-      sort_order: z.number().int().default(0),
-    }).parse(d),
-  )
+  .inputValidator((d) => moduleSchema.parse(d))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    if (data.id) await supabaseAdmin.from("course_modules").update(data).eq("id", data.id);
-    else { const { id, ...rest } = data; void id; await supabaseAdmin.from("course_modules").insert(rest); }
+    if (data.id) {
+      const { id, ...rest } = data;
+      await supabaseAdmin.from("course_modules").update(rest).eq("id", id);
+    } else {
+      const { id: _, ...rest } = data;
+      void _;
+      await supabaseAdmin.from("course_modules").insert(rest);
+    }
     return { ok: true };
   });
 
@@ -165,24 +226,29 @@ export const adminDeleteModule = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+const lessonSchema = z.object({
+  id: z.string().uuid().optional(),
+  module_id: z.string().uuid(),
+  title: z.string().min(1).max(200),
+  description: z.string().max(4000).optional().nullable(),
+  video_url: z.string().max(600).optional().nullable(),
+  duration_seconds: z.number().int().optional().nullable(),
+  sort_order: z.number().int().default(0),
+});
 export const adminUpsertLesson = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
-    z.object({
-      id: z.string().uuid().optional(),
-      module_id: z.string().uuid(),
-      title: z.string().min(1),
-      description: z.string().optional().nullable(),
-      video_url: z.string().optional().nullable(),
-      duration_seconds: z.number().int().optional().nullable(),
-      sort_order: z.number().int().default(0),
-    }).parse(d),
-  )
+  .inputValidator((d) => lessonSchema.parse(d))
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    if (data.id) await supabaseAdmin.from("lessons").update(data).eq("id", data.id);
-    else { const { id, ...rest } = data; void id; await supabaseAdmin.from("lessons").insert(rest); }
+    if (data.id) {
+      const { id, ...rest } = data;
+      await supabaseAdmin.from("lessons").update(rest).eq("id", id);
+    } else {
+      const { id: _, ...rest } = data;
+      void _;
+      await supabaseAdmin.from("lessons").insert(rest);
+    }
     return { ok: true };
   });
 

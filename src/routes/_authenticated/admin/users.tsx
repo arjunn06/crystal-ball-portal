@@ -1,92 +1,107 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminListUsers, adminSetBan, adminToggleAdmin } from "@/lib/admin.functions";
-import { toast } from "sonner";
-import { useState } from "react";
+import { adminListUsers } from "@/lib/admin.functions";
+import { PageHeader, Card } from "@/components/app/sidebar";
 import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/admin/users")({
   component: UsersPage,
 });
 
 function UsersPage() {
-  const qc = useQueryClient();
-  const list = useServerFn(adminListUsers);
-  const role = useServerFn(adminToggleAdmin);
-  const ban = useServerFn(adminSetBan);
-  const { data, isLoading } = useQuery({ queryKey: ["admin", "users"], queryFn: () => list() });
+  const fn = useServerFn(adminListUsers);
+  const { data, isLoading } = useQuery({ queryKey: ["admin", "users"], queryFn: () => fn() });
   const [q, setQ] = useState("");
 
-  const roleMut = useMutation({
-    mutationFn: (v: { user_id: string; grant: boolean }) => role({ data: v }),
-    onSuccess: () => { toast.success("Role updated"); qc.invalidateQueries({ queryKey: ["admin", "users"] }); },
-    onError: (e: any) => toast.error(e.message),
-  });
-  const banMut = useMutation({
-    mutationFn: (v: { user_id: string; banned: boolean }) => ban({ data: v }),
-    onSuccess: () => { toast.success("Updated"); qc.invalidateQueries({ queryKey: ["admin", "users"] }); },
-    onError: (e: any) => toast.error(e.message),
-  });
-
-  const filtered = (data ?? []).filter((u: any) =>
-    !q || (u.email ?? "").toLowerCase().includes(q.toLowerCase()) || (u.full_name ?? "").toLowerCase().includes(q.toLowerCase()),
+  const filtered = (data ?? []).filter(
+    (u: any) =>
+      !q ||
+      (u.email ?? "").toLowerCase().includes(q.toLowerCase()) ||
+      (u.full_name ?? "").toLowerCase().includes(q.toLowerCase()),
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-end gap-4">
-        <h1 className="font-display text-3xl font-semibold">Users</h1>
-        <Input placeholder="Search by email or name" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" />
-      </div>
-      {isLoading ? <p className="text-muted-foreground">Loading…</p> : (
-        <div className="rounded-xl border border-border bg-card overflow-x-auto">
+    <>
+      <PageHeader
+        title="Users"
+        description="Everyone who has an account."
+        actions={
+          <Input
+            placeholder="Search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="h-9 w-56 bg-surface border-border rounded-lg"
+          />
+        }
+      />
+
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      ) : (
+        <Card className="overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="text-left text-muted-foreground border-b border-border">
+            <thead className="text-left text-xs text-muted-foreground border-b border-border/70">
               <tr>
-                <th className="py-3 px-4">User</th>
-                <th>Pill</th>
-                <th>Sub</th>
-                <th>Roles</th>
-                <th>Status</th>
-                <th className="text-right pr-4">Actions</th>
+                <th className="py-3 px-4 font-medium">User</th>
+                <th className="py-3 px-4 font-medium">Membership</th>
+                <th className="py-3 px-4 font-medium">Roles</th>
+                <th className="py-3 px-4 font-medium">Joined</th>
               </tr>
             </thead>
-            <tbody>
-              {filtered.map((u: any) => {
-                const isAdmin = u.roles.includes("admin");
-                const isBanned = !!u.banned_at;
-                return (
-                  <tr key={u.id} className="border-b border-border/40">
-                    <td className="py-3 px-4">
-                      <p>{u.full_name ?? "—"}</p>
-                      <p className="text-xs text-muted-foreground">{u.email}</p>
-                    </td>
-                    <td className="uppercase font-mono text-xs">{u.pill ?? "—"}</td>
-                    <td className="font-mono text-xs">{u.sub_status ?? "—"}</td>
-                    <td className="font-mono text-xs">{u.roles.join(", ") || "user"}</td>
-                    <td className={`font-mono text-xs ${isBanned ? "text-destructive" : "text-blue-pill"}`}>{isBanned ? "BANNED" : "ACTIVE"}</td>
-                    <td className="text-right pr-4 py-3 space-x-2 whitespace-nowrap">
-                      <button
-                        onClick={() => roleMut.mutate({ user_id: u.id, grant: !isAdmin })}
-                        className="label-mono px-2 py-1 rounded border border-border hover:bg-muted/30"
-                      >
-                        {isAdmin ? "REVOKE ADMIN" : "MAKE ADMIN"}
-                      </button>
-                      <button
-                        onClick={() => banMut.mutate({ user_id: u.id, banned: !isBanned })}
-                        className={`label-mono px-2 py-1 rounded border ${isBanned ? "border-blue-pill text-blue-pill" : "border-destructive text-destructive"} hover:bg-muted/30`}
-                      >
-                        {isBanned ? "UNBAN" : "BAN"}
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+            <tbody className="divide-y divide-border/50">
+              {filtered.map((u: any) => (
+                <tr key={u.id} className="hover:bg-hover/40">
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <div className="size-8 rounded-full bg-surface-2 border border-border grid place-items-center text-[11px] font-medium">
+                        {(u.full_name ?? u.email ?? "··").slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate">{u.full_name ?? "—"}</p>
+                        <p className="text-xs text-muted-foreground truncate">{u.email}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-3 px-4">
+                    <StatusPill status={u.subscription?.status ?? null} />
+                  </td>
+                  <td className="py-3 px-4 text-xs text-muted-foreground">
+                    {(u.roles ?? []).length ? u.roles.join(", ") : "member"}
+                  </td>
+                  <td className="py-3 px-4 text-xs text-muted-foreground">
+                    {new Date(u.created_at).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={4} className="py-10 text-center text-sm text-muted-foreground">
+                    No matches.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
-        </div>
+        </Card>
       )}
-    </div>
+    </>
+  );
+}
+
+function StatusPill({ status }: { status: string | null }) {
+  const isActive = status === "active";
+  return (
+    <span
+      className={
+        isActive
+          ? "inline-flex items-center gap-1.5 rounded-full bg-primary/15 text-primary border border-primary/30 px-2 py-0.5 text-[11px] font-medium"
+          : "inline-flex items-center gap-1.5 rounded-full bg-surface-2 text-muted-foreground border border-border px-2 py-0.5 text-[11px] font-medium"
+      }
+    >
+      <span className={`size-1.5 rounded-full ${isActive ? "bg-primary" : "bg-muted-foreground"}`} />
+      {status ?? "none"}
+    </span>
   );
 }

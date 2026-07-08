@@ -1,9 +1,18 @@
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { checkIsAdmin } from "@/lib/admin.functions";
-import { SectionShell } from "@/components/section-shell";
 import { useEffect } from "react";
+import { checkIsAdmin } from "@/lib/admin.functions";
+import { AppShell, AppSidebar, type NavItem } from "@/components/app/sidebar";
+import { SignOutButton } from "@/components/app/sign-out-button";
+import {
+  LayoutDashboard,
+  Users,
+  BookOpen,
+  CreditCard,
+  MessageCircle,
+  ArrowLeft,
+} from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Blueprint" }] }),
@@ -16,33 +25,36 @@ function AdminLayout() {
   const { data, isLoading } = useQuery({ queryKey: ["isAdmin"], queryFn: () => fn() });
 
   useEffect(() => {
-    if (!isLoading && data && !data.isAdmin) navigate({ to: "/account" });
+    if (!isLoading && data && !data.isAdmin) navigate({ to: "/app" });
   }, [isLoading, data, navigate]);
 
   if (isLoading || !data?.isAdmin) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-muted-foreground">
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
         {isLoading ? "Loading…" : "Forbidden — redirecting"}
       </div>
     );
   }
 
+  const items: NavItem[] = [
+    { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
+    { to: "/admin/users", label: "Users", icon: <Users className="size-4" /> },
+    { to: "/admin/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
+    { to: "/admin/subscriptions", label: "Subscriptions", icon: <CreditCard className="size-4" /> },
+    { to: "/admin/discord", label: "Discord claims", icon: <MessageCircle className="size-4" /> },
+    { to: "/app", label: "Back to app", icon: <ArrowLeft className="size-4" /> },
+  ];
+
   return (
-    <SectionShell
-      eyebrow="CONTROL ROOM"
-      title="ADMIN"
-      isAdmin
-      nav={[
-        { to: "/admin", label: "Dashboard" },
-        { to: "/admin/users", label: "Users" },
-        { to: "/admin/applications", label: "Applications" },
-        { to: "/admin/payments", label: "Payments & subs" },
-        { to: "/admin/bookings", label: "Bookings" },
-        { to: "/admin/courses", label: "Courses" },
-        { to: "/admin/discord", label: "Discord claims" },
-      ]}
-    >
-      <Outlet />
-    </SectionShell>
+    <div className="min-h-screen bg-background text-foreground">
+      <AppSidebar
+        items={items}
+        brand={{ label: "Blueprint", sub: "Admin" }}
+        footer={<SignOutButton />}
+      />
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </div>
   );
 }

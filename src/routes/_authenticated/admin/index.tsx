@@ -2,63 +2,69 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { adminMetrics } from "@/lib/admin.functions";
-import { StatCard, formatINR, PageHeading } from "@/components/section-shell";
+import { PageHeader, Card, formatINR } from "@/components/app/sidebar";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
-  component: AdminDashboard,
+  component: AdminHome,
 });
 
-function AdminDashboard() {
+function AdminHome() {
   const fn = useServerFn(adminMetrics);
   const { data, isLoading } = useQuery({ queryKey: ["admin", "metrics"], queryFn: () => fn() });
 
-  if (isLoading) return <p className="label-mono text-muted-foreground">Loading dashboard…</p>;
+  if (isLoading) return <p className="text-sm text-muted-foreground">Loading…</p>;
   if (!data) return null;
 
   return (
-    <div className="space-y-12">
-      <PageHeading
-        eyebrow="CONTROL ROOM · 001"
-        title="The room, at a glance."
-        description="A quiet ledger of everything moving inside the Blueprint. Members, revenue, and the pulse of the community."
-      />
+    <>
+      <PageHeader title="Dashboard" description="Everything moving in the room." />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard label="Total members" value={String(data.totalUsers)} sub="All-time signups" />
-        <StatCard label="Active Blue Pill" value={String(data.activeBlueSubs)} sub={`MRR ~ ${formatINR(data.mrrPaise)}`} />
-        <StatCard label="Red Pill paid" value={String(data.paidRedPill)} sub="Lifetime conversions" />
-        <StatCard label="Lifetime revenue" value={formatINR(data.totalRevenuePaise)} sub="Every successful payment" />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+        <Stat label="Members" value={String(data.totalUsers)} />
+        <Stat label="Active subscriptions" value={String(data.activeSubs)} />
+        <Stat label="MRR" value={formatINR(data.mrrPaise)} />
+        <Stat label="Published courses" value={String(data.publishedCourses)} />
       </div>
 
-      <section className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 backdrop-blur-sm">
-        <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
-        <div className="relative p-8 md:p-10">
-          <div className="flex items-end justify-between gap-4 mb-6">
-            <div>
-              <p className="label-mono text-platinum flex items-center gap-3">
-                <span className="inline-block h-px w-6 bg-platinum/60" />
-                RECENT SIGNUPS
-              </p>
-              <h2 className="mt-2 font-display text-2xl md:text-3xl font-semibold">The newest through the door.</h2>
-            </div>
-            <span className="label-mono text-muted-foreground">{data.recentSignups.length} of many</span>
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="font-semibold tracking-tight">Recent signups</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Newest members first.</p>
           </div>
-          <div className="hairline mb-4" />
-          <ul>
-            {data.recentSignups.map((u: any, i: number) => (
-              <li key={u.id} className="grid grid-cols-[auto_1fr_auto] items-center gap-4 py-4 border-b border-border/40 last:border-0">
-                <span className="label-mono text-platinum opacity-60 w-8">{String(i + 1).padStart(2, "0")}</span>
+          <p className="text-xs text-muted-foreground">{data.recentSignups.length} shown</p>
+        </div>
+        <ul className="divide-y divide-border/60">
+          {data.recentSignups.map((u: any) => (
+            <li key={u.id} className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="size-8 rounded-full bg-surface-2 border border-border grid place-items-center text-[11px] font-medium shrink-0">
+                  {(u.full_name ?? u.email ?? "··").slice(0, 2).toUpperCase()}
+                </div>
                 <div className="min-w-0">
-                  <p className="font-medium truncate">{u.full_name ?? "Unnamed"}</p>
+                  <p className="text-sm truncate">{u.full_name ?? "Unnamed"}</p>
                   <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                 </div>
-                <p className="label-mono text-muted-foreground text-right">{new Date(u.created_at).toLocaleDateString()}</p>
-              </li>
-            ))}
-            {data.recentSignups.length === 0 && <li className="py-6 text-center text-muted-foreground">No signups yet.</li>}
-          </ul>
-        </div>
-      </section>
-    </div>
+              </div>
+              <p className="text-xs text-muted-foreground shrink-0">
+                {new Date(u.created_at).toLocaleDateString()}
+              </p>
+            </li>
+          ))}
+          {data.recentSignups.length === 0 && (
+            <li className="py-8 text-center text-sm text-muted-foreground">No signups yet.</li>
+          )}
+        </ul>
+      </Card>
+    </>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <Card className="p-5">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
+    </Card>
   );
 }

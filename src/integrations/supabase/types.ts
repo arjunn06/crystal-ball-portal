@@ -14,36 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      bookings: {
-        Row: {
-          created_at: string
-          google_event_id: string | null
-          id: string
-          kind: string
-          notes: string | null
-          scheduled_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          google_event_id?: string | null
-          id?: string
-          kind: string
-          notes?: string | null
-          scheduled_at: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          google_event_id?: string | null
-          id?: string
-          kind?: string
-          notes?: string | null
-          scheduled_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       course_modules: {
         Row: {
           course_id: string
@@ -52,7 +22,6 @@ export type Database = {
           sort_order: number
           summary: string | null
           title: string
-          updated_at: string
         }
         Insert: {
           course_id: string
@@ -61,7 +30,6 @@ export type Database = {
           sort_order?: number
           summary?: string | null
           title: string
-          updated_at?: string
         }
         Update: {
           course_id?: string
@@ -70,7 +38,6 @@ export type Database = {
           sort_order?: number
           summary?: string | null
           title?: string
-          updated_at?: string
         }
         Relationships: [
           {
@@ -88,7 +55,6 @@ export type Database = {
           created_at: string
           id: string
           published: boolean
-          required_pill: Database["public"]["Enums"]["pill_type"]
           slug: string
           sort_order: number
           summary: string | null
@@ -100,7 +66,6 @@ export type Database = {
           created_at?: string
           id?: string
           published?: boolean
-          required_pill?: Database["public"]["Enums"]["pill_type"]
           slug: string
           sort_order?: number
           summary?: string | null
@@ -112,7 +77,6 @@ export type Database = {
           created_at?: string
           id?: string
           published?: boolean
-          required_pill?: Database["public"]["Enums"]["pill_type"]
           slug?: string
           sort_order?: number
           summary?: string | null
@@ -129,9 +93,7 @@ export type Database = {
           discord_user_id: string
           error_message: string | null
           id: string
-          role_kind: string
-          status: Database["public"]["Enums"]["discord_claim_status"]
-          updated_at: string
+          status: string
           user_id: string
         }
         Insert: {
@@ -141,9 +103,7 @@ export type Database = {
           discord_user_id: string
           error_message?: string | null
           id?: string
-          role_kind?: string
-          status?: Database["public"]["Enums"]["discord_claim_status"]
-          updated_at?: string
+          status?: string
           user_id: string
         }
         Update: {
@@ -153,9 +113,7 @@ export type Database = {
           discord_user_id?: string
           error_message?: string | null
           id?: string
-          role_kind?: string
-          status?: Database["public"]["Enums"]["discord_claim_status"]
-          updated_at?: string
+          status?: string
           user_id?: string
         }
         Relationships: []
@@ -195,7 +153,6 @@ export type Database = {
           module_id: string
           sort_order: number
           title: string
-          updated_at: string
           video_url: string | null
         }
         Insert: {
@@ -206,7 +163,6 @@ export type Database = {
           module_id: string
           sort_order?: number
           title: string
-          updated_at?: string
           video_url?: string | null
         }
         Update: {
@@ -217,7 +173,6 @@ export type Database = {
           module_id?: string
           sort_order?: number
           title?: string
-          updated_at?: string
           video_url?: string | null
         }
         Relationships: [
@@ -230,160 +185,64 @@ export type Database = {
           },
         ]
       }
-      payments: {
-        Row: {
-          amount_paise: number
-          created_at: string
-          currency: string
-          id: string
-          pill: Database["public"]["Enums"]["pill_type"]
-          razorpay_order_id: string | null
-          razorpay_payment_id: string | null
-          status: Database["public"]["Enums"]["payment_status"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount_paise: number
-          created_at?: string
-          currency?: string
-          id?: string
-          pill: Database["public"]["Enums"]["pill_type"]
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          status?: Database["public"]["Enums"]["payment_status"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          amount_paise?: number
-          created_at?: string
-          currency?: string
-          id?: string
-          pill?: Database["public"]["Enums"]["pill_type"]
-          razorpay_order_id?: string | null
-          razorpay_payment_id?: string | null
-          status?: Database["public"]["Enums"]["payment_status"]
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      pill_choices: {
-        Row: {
-          chosen_at: string
-          pill: Database["public"]["Enums"]["pill_type"]
-          user_id: string
-        }
-        Insert: {
-          chosen_at?: string
-          pill: Database["public"]["Enums"]["pill_type"]
-          user_id: string
-        }
-        Update: {
-          chosen_at?: string
-          pill?: Database["public"]["Enums"]["pill_type"]
-          user_id?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
-          banned_at: string | null
           created_at: string
           discord_user_id: string | null
-          discord_username: string | null
           email: string | null
           full_name: string | null
           id: string
-          phone: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
-          banned_at?: string | null
           created_at?: string
           discord_user_id?: string | null
-          discord_username?: string | null
           email?: string | null
           full_name?: string | null
           id: string
-          phone?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
-          banned_at?: string | null
           created_at?: string
           discord_user_id?: string | null
-          discord_username?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
-          phone?: string | null
           updated_at?: string
-        }
-        Relationships: []
-      }
-      red_pill_applications: {
-        Row: {
-          admin_notes: string | null
-          call_scheduled_at: string | null
-          created_at: string
-          google_event_id: string | null
-          id: string
-          status: Database["public"]["Enums"]["application_status"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          admin_notes?: string | null
-          call_scheduled_at?: string | null
-          created_at?: string
-          google_event_id?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["application_status"]
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          admin_notes?: string | null
-          call_scheduled_at?: string | null
-          created_at?: string
-          google_event_id?: string | null
-          id?: string
-          status?: Database["public"]["Enums"]["application_status"]
-          updated_at?: string
-          user_id?: string
         }
         Relationships: []
       }
       subscriptions: {
         Row: {
+          cancelled_at: string | null
           created_at: string
           current_period_end: string | null
           id: string
           razorpay_subscription_id: string | null
-          status: Database["public"]["Enums"]["subscription_status"]
+          status: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancelled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           id?: string
           razorpay_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
+          status?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancelled_at?: string | null
           created_at?: string
           current_period_end?: string | null
           id?: string
           razorpay_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
+          status?: string
           updated_at?: string
           user_id?: string
         }
@@ -391,19 +250,19 @@ export type Database = {
       }
       user_roles: {
         Row: {
-          granted_at: string
+          created_at: string
           id: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Insert: {
-          granted_at?: string
+          created_at?: string
           id?: string
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }
         Update: {
-          granted_at?: string
+          created_at?: string
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
@@ -424,7 +283,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "red_pill" | "blue_pill"
+      app_role: "admin" | "member"
       application_status:
         | "pending_call"
         | "call_scheduled"
@@ -568,7 +427,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "red_pill", "blue_pill"],
+      app_role: ["admin", "member"],
       application_status: [
         "pending_call",
         "call_scheduled",

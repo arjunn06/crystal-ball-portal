@@ -1,12 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 
+/**
+ * Razorpay webhook — subscription lifecycle only. This is the source of truth
+ * for a member's paid/cancelled state.
+ */
 export const Route = createFileRoute("/api/public/webhooks/razorpay")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
-        if (!secret) return new Response("Webhook secret not configured", { status: 500 });
+        if (!secret) return new Response("Webhook not configured", { status: 500 });
 
         const signature = request.headers.get("x-razorpay-signature") ?? "";
         const body = await request.text();
@@ -17,7 +21,7 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           return new Response("Invalid signature", { status: 401 });
         }
 
-        let payload: any;
+        let payload: { event?: string; payload?: { subscription?: { entity?: { id?: string; current_end?: number } } } };
         try {
           payload = JSON.parse(body);
         } catch {
@@ -25,42 +29,15 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const event = payload?.event as string;
+        const event = payload.event;
+        const s = payload.payload?.subscription?.entity;
 
         try {
-          if (event === "payment.captured") {
-            const p = payload.payload?.payment?.entity;
-            if (p?.order_id) {
-              await supabaseAdmin
-                .from("payments")
-                .update({
-                  razorpay_payment_id: p.id,
-                  status: "success",
-                })
-                .eq("razorpay_order_id", p.order_id);
-              const userId = p.notes?.user_id as string | undefined;
-              if (userId && p.notes?.pill === "red") {
-                await supabaseAdmin
-                  .from("red_pill_applications")
-                  .update({ status: "paid" })
-                  .eq("user_id", userId)
-                  .eq("status", "approved");
-              }
-            }
-          } else if (event === "payment.failed") {
-            const p = payload.payload?.payment?.entity;
-            if (p?.order_id) {
-              await supabaseAdmin
-                .from("payments")
-                .update({ status: "failed", razorpay_payment_id: p.id })
-                .eq("razorpay_order_id", p.order_id);
-            }
-          } else if (
+          if (
             event === "subscription.activated" ||
             event === "subscription.charged" ||
             event === "subscription.resumed"
           ) {
-            const s = payload.payload?.subscription?.entity;
             if (s?.id) {
               await supabaseAdmin
                 .from("subscriptions")
@@ -78,11 +55,10 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
             event === "subscription.halted" ||
             event === "subscription.paused"
           ) {
-            const s = payload.payload?.subscription?.entity;
             if (s?.id) {
               await supabaseAdmin
                 .from("subscriptions")
-                .update({ status: "cancelled" })
+                .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
                 .eq("razorpay_subscription_id", s.id);
             }
           }

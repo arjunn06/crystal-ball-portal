@@ -21,7 +21,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, ImageIcon, MoreHorizontal } from "lucide-react";
+import { Plus, Pencil, Trash2, ImageIcon, MoreHorizontal, Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/admin/courses")({
   component: CoursesAdmin,
@@ -249,14 +250,6 @@ function CourseDialog({
               className="h-11 rounded-lg"
             />
           </Field>
-          <Field label="Slug">
-            <Input
-              value={f.slug ?? ""}
-              onChange={(e) => setF({ ...f, slug: e.target.value })}
-              placeholder="ict-foundations"
-              className="h-11 rounded-lg font-mono"
-            />
-          </Field>
           <Field label="Description">
             <Textarea
               value={f.summary ?? ""}
@@ -275,27 +268,10 @@ function CourseDialog({
             />
           </div>
 
-          <div className="rounded-lg border border-border bg-surface-2 p-4 flex items-center gap-4">
-            <div className="w-32 aspect-[16/9] rounded-md border border-border bg-background grid place-items-center overflow-hidden">
-              {f.cover_url ? (
-                <img src={f.cover_url} alt="" className="size-full object-cover" />
-              ) : (
-                <ImageIcon className="size-5 text-muted-foreground/60" />
-              )}
-            </div>
-            <div className="flex-1 min-w-0 space-y-2">
-              <div>
-                <p className="text-sm font-medium">Cover</p>
-                <p className="text-xs text-muted-foreground">1500 × 840 px</p>
-              </div>
-              <Input
-                value={f.cover_url ?? ""}
-                onChange={(e) => setF({ ...f, cover_url: e.target.value })}
-                placeholder="Paste image URL"
-                className="h-9 rounded-md text-xs"
-              />
-            </div>
-          </div>
+          <CoverUploader
+            value={f.cover_url ?? ""}
+            onChange={(url) => setF({ ...f, cover_url: url })}
+          />
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
@@ -303,7 +279,7 @@ function CourseDialog({
             onClick={() =>
               onSave({ ...f, sort_order: f.sort_order ?? 0 })
             }
-            disabled={saving || !f.title || !f.slug}
+            disabled={saving || !f.title}
             className="rounded-lg"
           >
             {saving ? "Saving…" : f?.id ? "Save" : "Create"}
@@ -311,6 +287,97 @@ function CourseDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function CoverUploader({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const inputId = "course-cover-upload";
+
+  async function handleFile(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const path = `covers/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("course-covers")
+        .upload(path, file, { upsert: false, contentType: file.type });
+      if (error) throw error;
+      // Signed URL (private bucket) valid for ~10 years
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("course-covers")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (sErr || !signed) throw sErr ?? new Error("Signing failed");
+      onChange(signed.signedUrl);
+      toast.success("Cover uploaded");
+    } catch (e: any) {
+      toast.error(e.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="rounded-lg border border-border bg-surface-2 p-4 flex items-center gap-4">
+      <label
+        htmlFor={inputId}
+        className="w-32 aspect-[16/9] rounded-md border border-dashed border-border bg-background grid place-items-center overflow-hidden cursor-pointer hover:border-primary/60 hover:bg-hover/40 transition-colors"
+      >
+        {uploading ? (
+          <Loader2 className="size-5 animate-spin text-muted-foreground" />
+        ) : value ? (
+          <img src={value} alt="" className="size-full object-cover" />
+        ) : (
+          <ImageIcon className="size-5 text-muted-foreground/60" />
+        )}
+      </label>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium">Cover</p>
+        <p className="text-xs text-muted-foreground">1500 × 840 px · JPG, PNG, WebP</p>
+        <div className="mt-2 flex items-center gap-2">
+          <label
+            htmlFor={inputId}
+            className="inline-flex items-center gap-1.5 h-8 px-3 text-xs rounded-md border border-border bg-surface hover:bg-hover cursor-pointer"
+          >
+            <Upload className="size-3.5" /> {value ? "Change" : "Upload"}
+          </label>
+          {value && (
+            <button
+              type="button"
+              onClick={() => onChange("")}
+              className="text-xs text-muted-foreground hover:text-destructive"
+            >
+              Remove
+            </button>
+          )}
+        </div>
+        <input
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) handleFile(f);
+            e.target.value = "";
+          }}
+        />
+      </div>
+    </div>
   );
 }
 

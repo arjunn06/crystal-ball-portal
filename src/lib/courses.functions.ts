@@ -12,12 +12,18 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 }
 
 async function assertMember(ctx: { supabase: any; userId: string }) {
+  // Admins always have access.
+  const { data: isAdmin } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
+  if (isAdmin) return true;
   const { data: sub } = await ctx.supabase
     .from("subscriptions")
     .select("status")
     .eq("user_id", ctx.userId)
     .maybeSingle();
-  if (sub?.status !== "active") throw new Error("Membership required.");
+  return sub?.status === "active";
 }
 
 /* ---------------- MEMBER ---------------- */
@@ -25,7 +31,8 @@ async function assertMember(ctx: { supabase: any; userId: string }) {
 export const listCourses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertMember(context);
+    const ok = await assertMember(context);
+    if (!ok) return [];
     const { supabase, userId } = context;
     const [{ data: courses }, { data: modules }, { data: lessons }, { data: progress }] =
       await Promise.all([
@@ -67,7 +74,8 @@ export const getCourse = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ slug: z.string() }).parse(d))
   .handler(async ({ context, data }) => {
-    await assertMember(context);
+    const ok = await assertMember(context);
+    if (!ok) throw new Error("Membership required");
     const { supabase, userId } = context;
     const { data: course } = await supabase
       .from("courses")

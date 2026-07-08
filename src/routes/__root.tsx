@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider, useTheme } from "@/components/theme-provider";
 
 function NotFoundComponent() {
   return (
@@ -106,10 +107,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
+  const noFlash = `(function(){try{var t=localStorage.getItem('theme');var d=t?t==='dark':true;document.documentElement.classList.toggle('dark',d);}catch(e){document.documentElement.classList.add('dark');}})();`;
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
+        <script dangerouslySetInnerHTML={{ __html: noFlash }} />
       </head>
       <body>
         {children}
@@ -134,8 +137,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster theme="dark" position="top-center" />
+      <ThemeProvider>
+        <Outlet />
+        <ThemedToaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+function ThemedToaster() {
+  const { theme } = useTheme();
+  return <Toaster theme={theme} position="top-center" />;
 }

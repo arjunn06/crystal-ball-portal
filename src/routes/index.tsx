@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Play, Check, TrendingUp } from "lucide-react";
+import { ArrowRight, Play, Check } from "lucide-react";
+import { LogoIcon } from "@/components/logo-icon";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -445,12 +446,7 @@ function PriceChip() {
       style={{ transform: "rotate(-4deg)" }}
     >
       <div className="flex items-center gap-3">
-        <div
-          className="size-10 rounded-xl grid place-items-center"
-          style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
-        >
-          <TrendingUp className="size-4 text-white" strokeWidth={2.6} />
-        </div>
+        <LogoIcon className="size-10 text-white" />
         <div>
           <p className="text-[9px] font-bold tracking-[0.18em] text-white/60 uppercase">
             Membership

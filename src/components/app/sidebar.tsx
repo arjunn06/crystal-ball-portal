@@ -8,19 +8,35 @@ export type NavItem = {
   icon: ReactNode;
 };
 
+export type NavSection = {
+  label?: string;
+  items: NavItem[];
+};
+
 export function AppSidebar({
   items,
+  sections,
   footer,
   brand,
+  topOffset = false,
 }: {
-  items: NavItem[];
+  items?: NavItem[];
+  sections?: NavSection[];
   footer?: ReactNode;
   brand?: { label: string; sub?: string };
+  topOffset?: boolean;
 }) {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
+  const groups: NavSection[] = sections ?? [{ items: items ?? [] }];
   return (
-    <aside className="hidden md:flex fixed inset-y-0 left-0 w-60 flex-col border-r border-border/70 bg-sidebar z-30">
-      <div className="px-5 pt-5 pb-4">
+    <aside
+      className={cn(
+        "hidden md:flex fixed left-0 w-60 flex-col border-r border-border/70 bg-sidebar z-30",
+        topOffset ? "top-14 bottom-0" : "inset-y-0",
+      )}
+    >
+      {!topOffset && (
+        <div className="px-5 pt-5 pb-4">
         <Link to="/" className="flex items-center gap-2.5 group">
           <div className="size-8 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center">
             <div className="size-2.5 rounded-full bg-primary" />
@@ -32,9 +48,18 @@ export function AppSidebar({
             {brand?.sub && <p className="text-[11px] text-muted-foreground mt-1">{brand.sub}</p>}
           </div>
         </Link>
-      </div>
-      <nav className="flex-1 overflow-y-auto no-scrollbar px-3 pb-6 space-y-0.5">
-        {items.map((item) => {
+        </div>
+      )}
+      <nav className={cn("flex-1 overflow-y-auto no-scrollbar px-3 pb-6", topOffset ? "pt-5" : "")}>
+        {groups.map((group, gi) => (
+          <div key={gi} className={cn(gi > 0 && "mt-6")}>
+            {group.label && (
+              <p className="px-3 mb-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground/80">
+                {group.label}
+              </p>
+            )}
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
           const active =
             item.to === pathname ||
             (item.to !== "/app" && item.to !== "/admin" && pathname.startsWith(item.to + "/")) ||
@@ -47,7 +72,7 @@ export function AppSidebar({
               className={cn(
                 "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                 active
-                  ? "bg-hover text-foreground"
+                  ? "bg-primary/10 text-primary font-medium"
                   : "text-muted-foreground hover:bg-hover/60 hover:text-foreground",
               )}
             >
@@ -62,20 +87,48 @@ export function AppSidebar({
               <span className="truncate">{item.label}</span>
             </Link>
           );
-        })}
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
       {footer && <div className="border-t border-border/70 p-3">{footer}</div>}
     </aside>
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, topOffset = false }: { children: ReactNode; topOffset?: boolean }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <main className="md:pl-60 min-h-screen">
+      <main className={cn("md:pl-60 min-h-screen", topOffset && "pt-14")}>
         <div className="mx-auto max-w-6xl px-6 md:px-10 py-8 md:py-10">{children}</div>
       </main>
     </div>
+  );
+}
+
+export function TopBar({
+  brand,
+  right,
+}: {
+  brand?: { label: string; sub?: string };
+  right?: ReactNode;
+}) {
+  return (
+    <header className="fixed top-0 inset-x-0 h-14 z-40 border-b border-border/70 bg-background/95 backdrop-blur flex items-center justify-between px-5 md:px-6">
+      <Link to="/" className="flex items-center gap-2.5">
+        <div className="size-8 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center">
+          <div className="size-2.5 rounded-full bg-primary" />
+        </div>
+        <div className="min-w-0 leading-tight">
+          <p className="text-[14px] font-semibold tracking-tight">
+            {brand?.label ?? "Blueprint"}
+          </p>
+          {brand?.sub && <p className="text-[11px] text-muted-foreground">{brand.sub}</p>}
+        </div>
+      </Link>
+      {right && <div className="flex items-center gap-2">{right}</div>}
+    </header>
   );
 }
 

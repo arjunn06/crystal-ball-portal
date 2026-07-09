@@ -24,6 +24,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminSubscriptionsRouteImport } from './routes/_authenticated/admin/subscriptions'
 import { Route as AuthenticatedAdminDiscordRouteImport } from './routes/_authenticated/admin/discord'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
+import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin/courses.index'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
 import { Route as AuthenticatedAppCoursesSlugRouteImport } from './routes/_authenticated/app/courses.$slug'
 import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
@@ -106,6 +107,12 @@ const AuthenticatedAdminCoursesRoute =
     path: '/courses',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminCoursesIndexRoute =
+  AuthenticatedAdminCoursesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAdminCoursesRoute,
+  } as any)
 const ApiPublicWebhooksRazorpayRoute =
   ApiPublicWebhooksRazorpayRouteImport.update({
     id: '/api/public/webhooks/razorpay',
@@ -143,12 +150,12 @@ export interface FileRoutesByFullPath {
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
+  '/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
-  '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
+  '/admin/courses': typeof AuthenticatedAdminCoursesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,6 +189,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/_authenticated/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
+  '/_authenticated/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,12 +211,12 @@ export interface FileRouteTypes {
     | '/admin/courses/$id'
     | '/app/courses/$slug'
     | '/api/public/webhooks/razorpay'
+    | '/admin/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/subscribe'
-    | '/admin/courses'
     | '/admin/discord'
     | '/admin/subscriptions'
     | '/admin/users'
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/admin/courses/$id'
     | '/app/courses/$slug'
     | '/api/public/webhooks/razorpay'
+    | '/admin/courses'
   id:
     | '__root__'
     | '/'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/courses/$id'
     | '/_authenticated/app/courses/$slug'
     | '/api/public/webhooks/razorpay'
+    | '/_authenticated/admin/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -355,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/courses/': {
+      id: '/_authenticated/admin/courses/'
+      path: '/'
+      fullPath: '/admin/courses/'
+      preLoaderRoute: typeof AuthenticatedAdminCoursesIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminCoursesRoute
+    }
     '/api/public/webhooks/razorpay': {
       id: '/api/public/webhooks/razorpay'
       path: '/api/public/webhooks/razorpay'
@@ -381,11 +399,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminCoursesRouteChildren {
   AuthenticatedAdminCoursesIdRoute: typeof AuthenticatedAdminCoursesIdRoute
+  AuthenticatedAdminCoursesIndexRoute: typeof AuthenticatedAdminCoursesIndexRoute
 }
 
 const AuthenticatedAdminCoursesRouteChildren: AuthenticatedAdminCoursesRouteChildren =
   {
     AuthenticatedAdminCoursesIdRoute: AuthenticatedAdminCoursesIdRoute,
+    AuthenticatedAdminCoursesIndexRoute: AuthenticatedAdminCoursesIndexRoute,
   }
 
 const AuthenticatedAdminCoursesRouteWithChildren =

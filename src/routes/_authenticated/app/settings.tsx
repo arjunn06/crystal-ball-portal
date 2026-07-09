@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { LogOut } from "lucide-react";
+import { useConfirm } from "@/components/app/confirm";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
   component: SettingsPage,
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/app/settings")({
 
 function SettingsPage() {
   const qc = useQueryClient();
+  const { confirm } = useConfirm();
   const acct = useServerFn(getAccountOverview);
   const save = useServerFn(updateMyProfile);
   const cancel = useServerFn(cancelMySubscription);
@@ -135,7 +137,15 @@ function SettingsPage() {
               </p>
               <Button
                 variant="outline"
-                onClick={() => confirm("Cancel your membership at period end?") && cancelMut.mutate()}
+                onClick={() =>
+                  confirm({
+                    title: "Cancel membership?",
+                    description: "Your access continues until the end of the current billing period.",
+                    confirmLabel: "Cancel membership",
+                    cancelLabel: "Keep it",
+                    destructive: true,
+                  }).then((ok) => ok && cancelMut.mutate())
+                }
                 disabled={cancelMut.isPending}
                 className="rounded-lg h-9 border-border bg-surface hover:bg-hover"
               >

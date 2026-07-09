@@ -87,8 +87,8 @@ function Landing() {
       <section className="relative z-10 mx-auto max-w-7xl px-6 pt-10 lg:pt-16 pb-24 grid lg:grid-cols-2 gap-12 lg:gap-6 items-center">
         <div>
           <h1
-            style={clash}
-            className="text-[52px] md:text-[72px] leading-[0.95] font-bold tracking-tight text-[#0B0B10]"
+            style={{ ...clash, letterSpacing: "-0.01em" }}
+            className="text-[52px] md:text-[72px] leading-[0.98] font-bold text-[#0B0B10]"
           >
             Trade the NY Session
             <br />
@@ -157,8 +157,8 @@ function Landing() {
             <span className="size-1.5 rounded-full bg-[#FF6B35]" />
           </div>
           <h2
-            style={clash}
-            className="mt-6 text-[40px] md:text-[54px] font-bold tracking-tight leading-[1.02] text-[#0B0B10] max-w-2xl"
+            style={{ ...clash, letterSpacing: "-0.005em" }}
+            className="mt-6 text-[40px] md:text-[54px] font-bold leading-[1.05] text-[#0B0B10] max-w-2xl"
           >
             Get in the room in 3 simple steps
           </h2>
@@ -207,8 +207,8 @@ function Landing() {
                 Blue Pill · ₹499/month
               </div>
               <h3
-                style={clash}
-                className="mt-4 text-[36px] md:text-[44px] font-bold leading-[1.05] tracking-tight"
+                style={{ ...clash, letterSpacing: "-0.005em" }}
+                className="mt-4 text-[36px] md:text-[44px] font-bold leading-[1.08]"
               >
                 Everything you need
                 <br />
@@ -494,8 +494,8 @@ function Step({
         </span>
       </div>
       <h3
-        style={clash}
-        className="text-[24px] font-bold tracking-tight text-[#0B0B10] leading-tight"
+        style={{ ...clash, letterSpacing: "0" }}
+        className="text-[24px] font-bold text-[#0B0B10] leading-tight"
       >
         {title}
       </h3>

@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { LogoIcon } from "@/components/logo-icon";
 
 export type NavItem = {
   to: string;

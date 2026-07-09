@@ -387,6 +387,7 @@ function LessonEditor({
   useEffect(() => setF(lesson), [lesson.id]);
   const signUpload = useServerFn(adminSignVideoUpload);
   const getSigned = useServerFn(getLessonVideoUrl);
+  const { prompt } = useConfirm();
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [hostedUrl, setHostedUrl] = useState<string | null>(null);
@@ -535,8 +536,13 @@ function LessonEditor({
                 icon={<Link2 className="size-4" />}
                 title="Embed video"
                 subtitle="Paste a YouTube or Vimeo link"
-                onClick={() => {
-                  const url = prompt("Paste a YouTube or Vimeo URL");
+                onClick={async () => {
+                  const url = await prompt({
+                    title: "Embed video",
+                    description: "Paste a YouTube or Vimeo URL.",
+                    placeholder: "https://youtu.be/...",
+                    confirmLabel: "Add",
+                  });
                   if (url) setF({ ...f, video_url: url });
                 }}
               />

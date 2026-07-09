@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Play, Check, TrendingUp } from "lucide-react";
+import { LogoIcon } from "@/components/logo-icon";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,12 +45,7 @@ function Landing() {
       <header className="relative z-10">
         <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div
-              className="size-9 rounded-xl grid place-items-center shadow-[0_6px_20px_-6px_rgba(229,57,53,0.55)]"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
-            >
-              <TrendingUp className="size-4 text-white" strokeWidth={2.6} />
-            </div>
+            <LogoIcon className="size-9 text-black" />
             <div>
               <div style={clash} className="text-[17px] font-bold tracking-tight leading-none">
                 BLUEPRINT
@@ -450,12 +446,7 @@ function PriceChip() {
       style={{ transform: "rotate(-4deg)" }}
     >
       <div className="flex items-center gap-3">
-        <div
-          className="size-10 rounded-xl grid place-items-center"
-          style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
-        >
-          <TrendingUp className="size-4 text-white" strokeWidth={2.6} />
-        </div>
+        <LogoIcon className="size-10 text-white" />
         <div>
           <p className="text-[9px] font-bold tracking-[0.18em] text-white/60 uppercase">
             Membership

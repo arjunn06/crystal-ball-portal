@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { LogoIcon } from "@/components/logo-icon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -85,9 +86,7 @@ function AuthPage() {
       <header className="border-b border-border/70">
         <div className="mx-auto max-w-6xl px-6 h-14 flex items-center">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="size-7 rounded-md bg-primary/15 border border-primary/30 grid place-items-center">
-              <div className="size-2 rounded-full bg-primary" />
-            </div>
+            <LogoIcon className="size-7 text-foreground" />
             <span className="font-semibold tracking-tight">Blueprint</span>
           </Link>
         </div>

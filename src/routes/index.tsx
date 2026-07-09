@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Play, Check } from "lucide-react";
+import { ArrowRight, Play, Check, TrendingUp } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 
 export const Route = createFileRoute("/")({

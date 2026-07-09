@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { checkIsAdmin } from "@/lib/admin.functions";
-import { AppShell, AppSidebar, type NavItem } from "@/components/app/sidebar";
+import { AppShell, AppSidebar, TopBar, type NavSection } from "@/components/app/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SignOutButton } from "@/components/app/sign-out-button";
 import {
@@ -37,28 +37,41 @@ function AdminLayout() {
     );
   }
 
-  const items: NavItem[] = [
-    { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
-    { to: "/admin/users", label: "Users", icon: <Users className="size-4" /> },
-    { to: "/admin/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
-    { to: "/admin/subscriptions", label: "Subscriptions", icon: <CreditCard className="size-4" /> },
-    { to: "/admin/discord", label: "Discord claims", icon: <MessageCircle className="size-4" /> },
-    { to: "/app", label: "Back to app", icon: <ArrowLeft className="size-4" /> },
+  const sections: NavSection[] = [
+    {
+      label: "Overview",
+      items: [
+        { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
+        { to: "/admin/subscriptions", label: "Payments", icon: <CreditCard className="size-4" /> },
+        { to: "/admin/users", label: "Users", icon: <Users className="size-4" /> },
+        { to: "/admin/discord", label: "Support Chats", icon: <MessageCircle className="size-4" /> },
+      ],
+    },
+    {
+      label: "Your Apps",
+      items: [
+        { to: "/admin/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
+        { to: "/app", label: "Back to app", icon: <ArrowLeft className="size-4" /> },
+      ],
+    },
   ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <AppSidebar
-        items={items}
-        brand={{ label: "Blueprint", sub: "Admin" }}
-        footer={
-          <div className="flex items-center gap-2">
-            <div className="flex-1"><SignOutButton /></div>
+      <TopBar
+        brand={{ label: "The Blueprint", sub: "by Arjun IFVG" }}
+        right={
+          <>
             <ThemeToggle />
-          </div>
+            <SignOutButton />
+          </>
         }
       />
-      <AppShell>
+      <AppSidebar
+        sections={sections}
+        topOffset
+      />
+      <AppShell topOffset>
         <Outlet />
       </AppShell>
     </div>

@@ -44,12 +44,7 @@ function Landing() {
       <header className="relative z-10">
         <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
-            <div
-              className="size-9 rounded-xl grid place-items-center shadow-[0_6px_20px_-6px_rgba(229,57,53,0.55)]"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
-            >
-              <TrendingUp className="size-4 text-white" strokeWidth={2.6} />
-            </div>
+            <LogoIcon className="size-9 text-black" />
             <div>
               <div style={clash} className="text-[17px] font-bold tracking-tight leading-none">
                 BLUEPRINT

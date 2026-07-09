@@ -1,9 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminListSubscriptions } from "@/lib/admin.functions";
+import { adminListSubscriptions, adminGetInvoiceUrl } from "@/lib/admin.functions";
 import { formatINR } from "@/components/app/sidebar";
-import { Check, X, MoreHorizontal, Plus, Filter, Download, Pencil } from "lucide-react";
+import { Check, X, MoreHorizontal, Plus, Filter, Download } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/admin/subscriptions")({
@@ -103,9 +110,7 @@ function PaymentsPage() {
                     </Td>
                     <Td className="text-muted-foreground">{paidAt ? timeAgo(paidAt) : "—"}</Td>
                     <Td>
-                      <button className="size-6 grid place-items-center rounded-md text-muted-foreground hover:bg-hover">
-                        <MoreHorizontal className="size-4" />
-                      </button>
+                      <RowMenu sub={s} />
                     </Td>
                   </tr>
                 );

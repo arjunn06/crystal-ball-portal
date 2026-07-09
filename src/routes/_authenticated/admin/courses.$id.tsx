@@ -588,12 +588,25 @@ function UploadRow({
   title,
   subtitle,
   onClick,
+  asLabel,
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
   onClick: () => void;
+  asLabel?: boolean;
 }) {
+  if (asLabel) {
+    return (
+      <span className="w-full text-left rounded-lg border border-border bg-surface hover:bg-hover transition-colors px-4 py-3 flex items-start gap-3 cursor-pointer">
+        <span className="mt-0.5 text-muted-foreground">{icon}</span>
+        <span>
+          <span className="block text-sm font-medium">{title}</span>
+          <span className="block text-xs text-muted-foreground">{subtitle}</span>
+        </span>
+      </span>
+    );
+  }
   return (
     <button
       onClick={onClick}
@@ -605,6 +618,23 @@ function UploadRow({
         <p className="text-xs text-muted-foreground">{subtitle}</p>
       </div>
     </button>
+  );
+}
+
+// Video with anti-casual-piracy controls: no download button, no PiP,
+// no remote playback, no right-click context menu. Not DRM — a
+// determined user can still capture the stream — but blocks the easy
+// "right-click → save video as" and the built-in download button.
+function ProtectedVideo({ src }: { src: string }) {
+  return (
+    <video
+      src={src}
+      controls
+      controlsList="nodownload noremoteplayback noplaybackrate"
+      disablePictureInPicture
+      onContextMenu={(e) => e.preventDefault()}
+      className="size-full select-none"
+    />
   );
 }
 

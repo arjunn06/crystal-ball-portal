@@ -11,6 +11,7 @@ import {
   getLessonVideoUrl,
 } from "@/lib/courses.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { useConfirm } from "@/components/app/confirm";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { formatDuration } from "@/components/app/sidebar";
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/_authenticated/admin/courses/$id")({
 function CourseStructure() {
   const { id } = Route.useParams();
   const qc = useQueryClient();
+  const { confirm } = useConfirm();
   const get = useServerFn(adminGetCourse);
   const upsertModule = useServerFn(adminUpsertModule);
   const delModule = useServerFn(adminDeleteModule);
@@ -193,7 +195,12 @@ function CourseStructure() {
                   </button>
                   <button
                     onClick={() =>
-                      confirm("Delete chapter and all lessons?") && delModMut.mutate(m.id)
+                      confirm({
+                        title: "Delete chapter?",
+                        description: "This removes the chapter and all its lessons.",
+                        confirmLabel: "Delete",
+                        destructive: true,
+                      }).then((ok) => ok && delModMut.mutate(m.id))
                     }
                     className="size-7 grid place-items-center rounded-md hover:bg-hover text-muted-foreground hover:text-destructive"
                     aria-label="Delete chapter"
@@ -231,7 +238,11 @@ function CourseStructure() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              confirm("Delete lesson?") && delLesMut.mutate(l.id);
+                              confirm({
+                                title: "Delete lesson?",
+                                confirmLabel: "Delete",
+                                destructive: true,
+                              }).then((ok) => ok && delLesMut.mutate(l.id));
                             }}
                             className="opacity-0 group-hover:opacity-100 size-6 grid place-items-center text-muted-foreground hover:text-destructive"
                           >
@@ -281,7 +292,11 @@ function CourseStructure() {
               module={data.modules.find((m: any) => m.id === selectedLesson.module_id)}
               onSave={(v) => upLesMut.mutate(v)}
               onDelete={() =>
-                confirm("Delete lesson?") && delLesMut.mutate(selectedLesson.id)
+                confirm({
+                  title: "Delete lesson?",
+                  confirmLabel: "Delete",
+                  destructive: true,
+                }).then((ok) => ok && delLesMut.mutate(selectedLesson.id))
               }
               saving={upLesMut.isPending}
             />
@@ -372,6 +387,7 @@ function LessonEditor({
   useEffect(() => setF(lesson), [lesson.id]);
   const signUpload = useServerFn(adminSignVideoUpload);
   const getSigned = useServerFn(getLessonVideoUrl);
+  const { prompt } = useConfirm();
   const [uploading, setUploading] = useState(false);
   const [uploadPct, setUploadPct] = useState(0);
   const [hostedUrl, setHostedUrl] = useState<string | null>(null);
@@ -520,8 +536,13 @@ function LessonEditor({
                 icon={<Link2 className="size-4" />}
                 title="Embed video"
                 subtitle="Paste a YouTube or Vimeo link"
-                onClick={() => {
-                  const url = prompt("Paste a YouTube or Vimeo URL");
+                onClick={async () => {
+                  const url = await prompt({
+                    title: "Embed video",
+                    description: "Paste a YouTube or Vimeo URL.",
+                    placeholder: "https://youtu.be/...",
+                    confirmLabel: "Add",
+                  });
                   if (url) setF({ ...f, video_url: url });
                 }}
               />

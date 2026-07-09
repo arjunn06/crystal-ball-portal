@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, ImageIcon, MoreHorizontal, Upload, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useConfirm } from "@/components/app/confirm";
 
 export const Route = createFileRoute("/_authenticated/admin/courses/")({
   component: CoursesAdmin,
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/_authenticated/admin/courses/")({
 
 function CoursesAdmin() {
   const qc = useQueryClient();
+  const { confirm } = useConfirm();
   const list = useServerFn(adminListCourses);
   const upsert = useServerFn(adminUpsertCourse);
   const del = useServerFn(adminDeleteCourse);
@@ -92,7 +94,12 @@ function CoursesAdmin() {
               course={c}
               onEdit={() => setEditing(c)}
               onDelete={() =>
-                confirm(`Delete "${c.title}" and all its lessons?`) && delMut.mutate(c.id)
+                confirm({
+                  title: `Delete "${c.title}"?`,
+                  description: "This removes the course and all its chapters and lessons.",
+                  confirmLabel: "Delete",
+                  destructive: true,
+                }).then((ok) => ok && delMut.mutate(c.id))
               }
             />
           ))}

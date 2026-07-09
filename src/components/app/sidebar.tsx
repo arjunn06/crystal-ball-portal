@@ -39,9 +39,7 @@ export function AppSidebar({
       {!topOffset && (
         <div className="px-5 pt-5 pb-4">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="size-8 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center">
-            <div className="size-2.5 rounded-full bg-primary" />
-          </div>
+          <LogoIcon className="size-8 text-foreground" />
           <div className="min-w-0">
             <p className="text-[15px] font-semibold tracking-tight leading-none">
               {brand?.label ?? "Blueprint"}
@@ -118,9 +116,7 @@ export function TopBar({
   return (
     <header className="fixed top-0 inset-x-0 h-14 z-40 border-b border-border/70 bg-background/95 backdrop-blur flex items-center justify-between px-5 md:px-6">
       <Link to="/" className="flex items-center gap-2.5">
-        <div className="size-8 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center">
-          <div className="size-2.5 rounded-full bg-primary" />
-        </div>
+        <LogoIcon className="size-8 text-foreground" />
         <div className="min-w-0 leading-tight">
           <p className="text-[14px] font-semibold tracking-tight">
             {brand?.label ?? "Blueprint"}

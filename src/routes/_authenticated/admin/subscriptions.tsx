@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { adminListSubscriptions, adminGetInvoiceUrl } from "@/lib/admin.functions";
 import { formatINR } from "@/components/app/sidebar";
-import { Check, X, MoreHorizontal, Plus, Filter, Download } from "lucide-react";
+import { Check, X, MoreHorizontal, Plus, Filter, Download, Pencil } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -224,6 +224,37 @@ function UserCell({ name, email }: { name?: string | null; email?: string | null
       </div>
       <span className="truncate">{name ?? email?.split("@")[0] ?? "—"}</span>
     </div>
+  );
+}
+
+function RowMenu({ sub }: { sub: Sub }) {
+  const invoiceFn = useServerFn(adminGetInvoiceUrl);
+  const invoice = useMutation({
+    mutationFn: () =>
+      invoiceFn({ data: { subscription_id: sub.razorpay_subscription_id ?? "" } }),
+    onSuccess: (r: any) => {
+      if (r?.url) window.open(r.url, "_blank");
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not fetch invoice."),
+  });
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className="size-6 grid place-items-center rounded-md text-muted-foreground hover:bg-hover">
+          <MoreHorizontal className="size-4" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-44">
+        <DropdownMenuItem
+          disabled={!sub.razorpay_subscription_id || invoice.isPending}
+          onClick={() => invoice.mutate()}
+          className="text-xs"
+        >
+          <Download className="size-3.5 mr-2" />
+          {invoice.isPending ? "Loading…" : "Download invoice"}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(ctx: { supabase: any; userId: string }) {
@@ -8,6 +9,27 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
   });
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Forbidden");
+}
+
+function razorpayAuth() {
+  const id = process.env.RAZORPAY_KEY_ID;
+  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!id || !secret) throw new Error("Razorpay is not configured.");
+  return "Basic " + Buffer.from(`${id}:${secret}`).toString("base64");
+}
+
+async function razorpay(path: string, init: RequestInit = {}) {
+  const res = await fetch(`https://api.razorpay.com/v1${path}`, {
+    ...init,
+    headers: {
+      Authorization: razorpayAuth(),
+      "Content-Type": "application/json",
+      ...(init.headers ?? {}),
+    },
+  });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body?.error?.description ?? `Razorpay error (${res.status})`);
+  return body;
 }
 
 export const checkIsAdmin = createServerFn({ method: "GET" })
@@ -145,4 +167,82 @@ export const adminListSubscriptions = createServerFn({ method: "GET" })
       .in("id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
     const m = new Map((profs ?? []).map((p) => [p.id, p]));
     return (subs ?? []).map((s) => ({ ...s, profile: m.get(s.user_id) ?? null }));
+  });
+
+/** Fetch the latest Razorpay invoice for a subscription and return its short URL. */
+export const adminGetInvoiceUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ subscription_id: z.string() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const body = await razorpay(
+      `/invoices?subscription_id=${encodeURIComponent(data.subscription_id)}&count=1`,
+    );
+    const inv = body?.items?.[0];
+    if (!inv?.short_url) throw new Error("No invoice available yet.");
+    return { url: inv.short_url as string };
+  });
+
+/** Terminate a user's subscription immediately (not at cycle end). */
+export const adminTerminateSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("razorpay_subscription_id, status")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (!sub?.razorpay_subscription_id) throw new Error("No subscription found.");
+    if (sub.razorpay_subscription_id && sub.status !== "cancelled") {
+      await razorpay(`/subscriptions/${sub.razorpay_subscription_id}/cancel`, {
+        method: "POST",
+        body: JSON.stringify({ cancel_at_cycle_end: 0 }),
+      }).catch(() => null);
+    }
+    await supabaseAdmin
+      .from("subscriptions")
+      .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+      .eq("user_id", data.user_id);
+    return { ok: true };
+  });
+
+/** Reinitiate payment — return the hosted URL for the pending invoice. */
+export const adminReinitiatePayment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("razorpay_subscription_id")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (!sub?.razorpay_subscription_id) throw new Error("No subscription found.");
+    const body = await razorpay(
+      `/invoices?subscription_id=${encodeURIComponent(sub.razorpay_subscription_id)}&count=10`,
+    );
+    const pending = (body?.items ?? []).find(
+      (i: any) => i.status === "issued" || i.status === "partially_paid" || i.status === "expired",
+    );
+    const inv = pending ?? body?.items?.[0];
+    if (!inv?.short_url) throw new Error("No pending invoice to pay.");
+    return { url: inv.short_url as string };
+  });
+
+/** Ban / unban a user via Supabase Auth admin API. */
+export const adminBanUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ user_id: z.string().uuid(), ban: z.boolean() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
+      ban_duration: data.ban ? "876000h" : "none",
+    } as any);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

@@ -7,7 +7,10 @@ import {
   adminGetCourse,
   adminUpsertLesson,
   adminUpsertModule,
+  adminSignVideoUpload,
+  getLessonVideoUrl,
 } from "@/lib/courses.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { formatDuration } from "@/components/app/sidebar";
@@ -367,6 +370,53 @@ function LessonEditor({
 }) {
   const [f, setF] = useState<any>(lesson);
   useEffect(() => setF(lesson), [lesson.id]);
+  const signUpload = useServerFn(adminSignVideoUpload);
+  const getSigned = useServerFn(getLessonVideoUrl);
+  const [uploading, setUploading] = useState(false);
+  const [uploadPct, setUploadPct] = useState(0);
+  const [hostedUrl, setHostedUrl] = useState<string | null>(null);
+
+  const isHosted = (f.video_url ?? "").startsWith("storage:");
+
+  // Fetch a signed URL when we're previewing a hosted (private-bucket) video.
+  useEffect(() => {
+    setHostedUrl(null);
+    if (!isHosted || !f.id) return;
+    let cancelled = false;
+    getSigned({ data: { lesson_id: f.id } })
+      .then((r: any) => { if (!cancelled) setHostedUrl(r.url); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [f.video_url, f.id, isHosted, getSigned]);
+
+  const handleUpload = async (file: File) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024 * 1024) {
+      toast.error("Max 2GB");
+      return;
+    }
+    setUploading(true);
+    setUploadPct(0);
+    try {
+      const signed: any = await signUpload({
+        data: { filename: file.name, content_type: file.type },
+      });
+      const { error } = await supabase.storage
+        .from("lesson-videos")
+        .uploadToSignedUrl(signed.path, signed.token, file, {
+          contentType: file.type || "video/mp4",
+          upsert: false,
+        });
+      if (error) throw error;
+      setUploadPct(100);
+      setF({ ...f, video_url: signed.storage_key });
+      toast.success("Video uploaded — remember to Save");
+    } catch (e: any) {
+      toast.error(e?.message ?? "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const dirty =
     f.title !== lesson.title ||
@@ -409,7 +459,15 @@ function LessonEditor({
         {f.video_url ? (
           <div className="space-y-4">
             <div className="aspect-video rounded-xl border border-border bg-black overflow-hidden">
-              {/youtube\.com|youtu\.be|vimeo\.com/.test(f.video_url) ? (
+              {isHosted ? (
+                hostedUrl ? (
+                  <ProtectedVideo src={hostedUrl} />
+                ) : (
+                  <div className="size-full grid place-items-center text-xs text-muted-foreground">
+                    Preparing preview…
+                  </div>
+                )
+              ) : /youtube\.com|youtu\.be|vimeo\.com/.test(f.video_url) ? (
                 <iframe
                   src={toEmbed(f.video_url)}
                   className="size-full"
@@ -417,11 +475,12 @@ function LessonEditor({
                   allowFullScreen
                 />
               ) : (
-                <video src={f.video_url} controls className="size-full" />
+                <ProtectedVideo src={f.video_url} />
               )}
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground font-mono truncate">
-              <Film className="size-3.5 text-primary" /> {f.video_url}
+              <Film className="size-3.5 text-primary" />{" "}
+              {isHosted ? "Hosted video (protected)" : f.video_url}
               <button
                 onClick={() => setF({ ...f, video_url: "" })}
                 className="ml-auto text-muted-foreground hover:text-destructive"
@@ -434,18 +493,29 @@ function LessonEditor({
           <div className="flex flex-col items-center justify-center text-center py-10">
             <p className="text-lg font-semibold">Add a video to this lesson</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Paste a YouTube, Vimeo, or direct .mp4 / .mov / .webm link.
+              Upload a file to our protected player, or paste a YouTube / Vimeo link.
             </p>
             <div className="mt-6 w-full max-w-md space-y-2">
-              <UploadRow
-                icon={<Upload className="size-4" />}
-                title="Upload video"
-                subtitle="Bring your own .mov, .mp4, etc."
-                onClick={() => {
-                  const url = prompt("Paste a direct video URL (.mp4 / .mov / .webm)");
-                  if (url) setF({ ...f, video_url: url });
-                }}
-              />
+              <label className="block">
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleUpload(file);
+                    e.target.value = "";
+                  }}
+                />
+                <UploadRow
+                  icon={<Upload className="size-4" />}
+                  title={uploading ? `Uploading… ${uploadPct}%` : "Upload video (protected)"}
+                  subtitle="Streamed via short-lived signed URLs. Download disabled."
+                  onClick={() => { /* label handles click */ }}
+                  asLabel
+                />
+              </label>
               <UploadRow
                 icon={<Link2 className="size-4" />}
                 title="Embed video"
@@ -518,12 +588,25 @@ function UploadRow({
   title,
   subtitle,
   onClick,
+  asLabel,
 }: {
   icon: React.ReactNode;
   title: string;
   subtitle: string;
   onClick: () => void;
+  asLabel?: boolean;
 }) {
+  if (asLabel) {
+    return (
+      <span className="w-full text-left rounded-lg border border-border bg-surface hover:bg-hover transition-colors px-4 py-3 flex items-start gap-3 cursor-pointer">
+        <span className="mt-0.5 text-muted-foreground">{icon}</span>
+        <span>
+          <span className="block text-sm font-medium">{title}</span>
+          <span className="block text-xs text-muted-foreground">{subtitle}</span>
+        </span>
+      </span>
+    );
+  }
   return (
     <button
       onClick={onClick}
@@ -535,6 +618,23 @@ function UploadRow({
         <p className="text-xs text-muted-foreground">{subtitle}</p>
       </div>
     </button>
+  );
+}
+
+// Video with anti-casual-piracy controls: no download button, no PiP,
+// no remote playback, no right-click context menu. Not DRM — a
+// determined user can still capture the stream — but blocks the easy
+// "right-click → save video as" and the built-in download button.
+function ProtectedVideo({ src }: { src: string }) {
+  return (
+    <video
+      src={src}
+      controls
+      controlsList="nodownload noremoteplayback noplaybackrate"
+      disablePictureInPicture
+      onContextMenu={(e) => e.preventDefault()}
+      className="size-full select-none"
+    />
   );
 }
 

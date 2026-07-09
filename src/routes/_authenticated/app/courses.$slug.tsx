@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { getCourse, setLessonComplete } from "@/lib/courses.functions";
-import { useMemo, useState } from "react";
+import { getCourse, getLessonVideoUrl, setLessonComplete } from "@/lib/courses.functions";
+import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, Play } from "lucide-react";
 import { Card, formatDuration } from "@/components/app/sidebar";
 
@@ -54,7 +54,7 @@ function CoursePlayer() {
           <Card className="overflow-hidden">
             <div className="aspect-video bg-black relative">
               {active?.video_url ? (
-                <VideoEmbed url={active.video_url} />
+                <VideoEmbed url={active.video_url} lessonId={active.id} />
               ) : (
                 <div className="absolute inset-0 grid place-items-center text-muted-foreground text-sm">
                   No video yet
@@ -207,7 +207,34 @@ function CoursePlayer() {
   );
 }
 
-function VideoEmbed({ url }: { url: string }) {
+function VideoEmbed({ url, lessonId }: { url: string; lessonId: string }) {
+  const getSigned = useServerFn(getLessonVideoUrl);
+  const [signed, setSigned] = useState<string | null>(null);
+  const isHosted = url.startsWith("storage:");
+  useEffect(() => {
+    if (!isHosted) return;
+    let cancelled = false;
+    const load = () =>
+      getSigned({ data: { lesson_id: lessonId } })
+        .then((r: any) => { if (!cancelled) setSigned(r.url); })
+        .catch(() => {});
+    load();
+    // Refresh the signed URL well before it expires (25 min).
+    const t = setInterval(load, 25 * 60 * 1000);
+    return () => { cancelled = true; clearInterval(t); };
+  }, [isHosted, lessonId, getSigned]);
+
+  if (isHosted) {
+    if (!signed) {
+      return (
+        <div className="absolute inset-0 grid place-items-center text-xs text-muted-foreground">
+          Loading video…
+        </div>
+      );
+    }
+    return <ProtectedVideo src={signed} />;
+  }
+
   const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]+)/);
   const vimeo = url.match(/vimeo\.com\/(\d+)/);
   if (yt)
@@ -228,5 +255,18 @@ function VideoEmbed({ url }: { url: string }) {
         allowFullScreen
       />
     );
-  return <video controls className="absolute inset-0 h-full w-full" src={url} />;
+  return <ProtectedVideo src={url} className="absolute inset-0 h-full w-full" />;
+}
+
+function ProtectedVideo({ src, className }: { src: string; className?: string }) {
+  return (
+    <video
+      src={src}
+      controls
+      controlsList="nodownload noremoteplayback noplaybackrate"
+      disablePictureInPicture
+      onContextMenu={(e) => e.preventDefault()}
+      className={className ?? "absolute inset-0 h-full w-full select-none"}
+    />
+  );
 }

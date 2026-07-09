@@ -296,3 +296,62 @@ export const adminDeleteLesson = createServerFn({ method: "POST" })
     await supabaseAdmin.from("lessons").delete().eq("id", data.id);
     return { ok: true };
   });
+
+/* ---------------- VIDEO STORAGE ---------------- */
+
+const VIDEO_BUCKET = "lesson-videos";
+
+// Admin: mint a short-lived signed URL the browser uses to PUT a video
+// directly to the private `lesson-videos` bucket. Returns the storage
+// path we persist in lessons.video_url as `storage:<path>`.
+export const adminSignVideoUpload = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        filename: z.string().min(1).max(200),
+        content_type: z.string().max(120).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const safe = data.filename.replace(/[^a-zA-Z0-9._-]+/g, "_").slice(-100);
+    const path = `${context.userId}/${Date.now()}-${crypto.randomUUID()}-${safe}`;
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from(VIDEO_BUCKET)
+      .createSignedUploadUrl(path);
+    if (error || !signed) throw new Error(error?.message ?? "Upload sign failed");
+    return {
+      storage_key: `storage:${path}`,
+      signed_url: signed.signedUrl,
+      token: signed.token,
+      path,
+    };
+  });
+
+// Member or admin: mint a short-lived signed download URL for a lesson's
+// video when it's stored in the private bucket. Enforces membership so we
+// don't hand out download tokens to non-subscribers.
+export const getLessonVideoUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ lesson_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const ok = await assertMember(context);
+    if (!ok) throw new Error("Membership required");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: lesson } = await supabaseAdmin
+      .from("lessons")
+      .select("video_url")
+      .eq("id", data.lesson_id)
+      .maybeSingle();
+    const url = lesson?.video_url ?? "";
+    if (!url.startsWith("storage:")) throw new Error("Not a hosted video");
+    const path = url.slice("storage:".length);
+    const { data: signed, error } = await supabaseAdmin.storage
+      .from(VIDEO_BUCKET)
+      .createSignedUrl(path, 60 * 30); // 30 minutes
+    if (error || !signed) throw new Error(error?.message ?? "Sign failed");
+    return { url: signed.signedUrl, expires_in: 60 * 30 };
+  });

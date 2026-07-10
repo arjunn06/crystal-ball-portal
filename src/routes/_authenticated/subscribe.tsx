@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createSubscription, verifySubscriptionPayment } from "@/lib/billing.functions";
+import { validatePromoCode } from "@/lib/promos.functions";
 import { getAccountOverview } from "@/lib/account.functions";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { openRazorpay } from "@/lib/razorpay-checkout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, LogOut } from "lucide-react";
+import { Check, ArrowRight, LogOut, Tag, X as XIcon, Loader2 } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,16 +25,43 @@ function Subscribe() {
   const acct = useServerFn(getAccountOverview);
   const create = useServerFn(createSubscription);
   const verify = useServerFn(verifySubscriptionPayment);
+  const validate = useServerFn(validatePromoCode);
   const { data } = useQuery({ queryKey: ["account", "overview"], queryFn: () => acct() });
+  const [codeInput, setCodeInput] = useState("");
+  const [applied, setApplied] = useState<{
+    code: string;
+    discount_type: "percent_off_first" | "amount_off_first" | "trial_days";
+    discount_value: number;
+    description: string | null;
+  } | null>(null);
+
+  const apply = useMutation({
+    mutationFn: () => validate({ data: { code: codeInput.trim() } }),
+    onError: (e: any) => toast.error(e.message ?? "Invalid code"),
+    onSuccess: (p) => {
+      setApplied({
+        code: p.code,
+        discount_type: p.discount_type,
+        discount_value: p.discount_value,
+        description: p.description,
+      });
+      toast.success(`Code ${p.code} applied`);
+    },
+  });
 
   useEffect(() => {
     if (data?.isSubscribed) navigate({ to: "/app" });
   }, [data?.isSubscribed, navigate]);
 
   const mut = useMutation({
-    mutationFn: () => create(),
+    mutationFn: () => create({ data: { promo_code: applied?.code ?? null } }),
     onError: (e: any) => toast.error(e.message),
-    onSuccess: async ({ subscriptionId, keyId }) => {
+    onSuccess: async ({ subscriptionId, keyId, trialEndsAt }) => {
+      if (trialEndsAt) {
+        toast.success(`Trial started — first charge on ${new Date(trialEndsAt).toLocaleDateString()}`);
+        navigate({ to: "/app" });
+        return;
+      }
       try {
         await openRazorpay({
           key: keyId,
@@ -186,11 +214,73 @@ function Subscribe() {
                   "Opening checkout…"
                 ) : (
                   <>
-                    Subscribe · ₹499/mo
+                    {applied?.discount_type === "trial_days"
+                      ? `Start ${applied.discount_value}-day free trial`
+                      : applied?.discount_type === "percent_off_first"
+                        ? `Subscribe · ${applied.discount_value}% off first month`
+                        : applied?.discount_type === "amount_off_first"
+                          ? `Subscribe · ₹${applied.discount_value} off first month`
+                          : "Subscribe · ₹499/mo"}
                     <ArrowRight className="size-4 ml-1" />
                   </>
                 )}
               </Button>
+
+              {/* Promo code */}
+              <div className="mt-4">
+                {applied ? (
+                  <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#E53935]/20 bg-[#FFF3EE] px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 text-[13px] text-[#0B0B10]">
+                      <Tag className="size-3.5 text-[#E53935]" />
+                      <span className="font-semibold">{applied.code}</span>
+                      <span className="text-[#6B6B72]">
+                        ·{" "}
+                        {applied.discount_type === "trial_days"
+                          ? `${applied.discount_value} free trial days`
+                          : applied.discount_type === "percent_off_first"
+                            ? `${applied.discount_value}% off first month`
+                            : `₹${applied.discount_value} off first month`}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setApplied(null);
+                        setCodeInput("");
+                      }}
+                      className="text-[#6B6B72] hover:text-[#0B0B10] transition-colors"
+                      aria-label="Remove code"
+                    >
+                      <XIcon className="size-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[#6B6B72]" />
+                      <input
+                        value={codeInput}
+                        onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && codeInput.trim()) {
+                            e.preventDefault();
+                            apply.mutate();
+                          }
+                        }}
+                        placeholder="Promo code"
+                        className="w-full h-10 rounded-full bg-[#F7F1E8] border border-black/5 pl-9 pr-3 text-[13px] text-[#0B0B10] placeholder:text-[#6B6B72] focus:outline-none focus:border-[#0B0B10]/20"
+                      />
+                    </div>
+                    <button
+                      onClick={() => codeInput.trim() && apply.mutate()}
+                      disabled={!codeInput.trim() || apply.isPending}
+                      className="h-10 px-4 rounded-full border border-black/10 bg-white text-[13px] font-semibold text-[#0B0B10] hover:bg-[#FAFAFA] disabled:opacity-50 inline-flex items-center gap-1.5"
+                    >
+                      {apply.isPending ? <Loader2 className="size-3.5 animate-spin" /> : "Apply"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
                 Secure checkout by Razorpay. Cancel anytime from Settings.
               </p>

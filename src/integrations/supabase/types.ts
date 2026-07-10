@@ -386,6 +386,95 @@ export type Database = {
         }
         Relationships: []
       }
+      promo_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discount_type: Database["public"]["Enums"]["promo_discount_type"]
+          discount_value: number
+          expires_at: string | null
+          id: string
+          max_redemptions: number | null
+          notes: string | null
+          per_user_limit: number
+          razorpay_offer_id: string | null
+          redemptions_count: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type: Database["public"]["Enums"]["promo_discount_type"]
+          discount_value: number
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number | null
+          notes?: string | null
+          per_user_limit?: number
+          razorpay_offer_id?: string | null
+          redemptions_count?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discount_type?: Database["public"]["Enums"]["promo_discount_type"]
+          discount_value?: number
+          expires_at?: string | null
+          id?: string
+          max_redemptions?: number | null
+          notes?: string | null
+          per_user_limit?: number
+          razorpay_offer_id?: string | null
+          redemptions_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      promo_redemptions: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          promo_id: string
+          subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          promo_id: string
+          subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          promo_id?: string
+          subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promo_redemptions_promo_id_fkey"
+            columns: ["promo_id"]
+            isOneToOne: false
+            referencedRelation: "promo_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reserved_handles: {
         Row: {
           handle: string
@@ -527,6 +616,10 @@ export type Database = {
       discord_claim_status: "pending" | "assigned" | "failed" | "revoked"
       payment_status: "created" | "pending" | "success" | "failed" | "refunded"
       pill_type: "red" | "blue"
+      promo_discount_type:
+        | "percent_off_first"
+        | "amount_off_first"
+        | "trial_days"
       subscription_status:
         | "created"
         | "active"
@@ -672,6 +765,11 @@ export const Constants = {
       discord_claim_status: ["pending", "assigned", "failed", "revoked"],
       payment_status: ["created", "pending", "success", "failed", "refunded"],
       pill_type: ["red", "blue"],
+      promo_discount_type: [
+        "percent_off_first",
+        "amount_off_first",
+        "trial_days",
+      ],
       subscription_status: [
         "created",
         "active",

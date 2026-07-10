@@ -21,6 +21,7 @@ import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
 import { Route as AuthenticatedAppDiscordRouteImport } from './routes/_authenticated/app/discord'
+import { Route as AuthenticatedAppCoursesRouteImport } from './routes/_authenticated/app/courses'
 import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin/users'
 import { Route as AuthenticatedAdminSubscriptionsRouteImport } from './routes/_authenticated/admin/subscriptions'
 import { Route as AuthenticatedAdminDiscordRouteImport } from './routes/_authenticated/admin/discord'
@@ -96,6 +97,11 @@ const AuthenticatedAppDiscordRoute = AuthenticatedAppDiscordRouteImport.update({
   path: '/discord',
   getParentRoute: () => AuthenticatedAppRouteRoute,
 } as any)
+const AuthenticatedAppCoursesRoute = AuthenticatedAppCoursesRouteImport.update({
+  id: '/courses',
+  path: '/courses',
+  getParentRoute: () => AuthenticatedAppRouteRoute,
+} as any)
 const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
   id: '/users',
   path: '/users',
@@ -121,9 +127,9 @@ const AuthenticatedAdminCoursesRoute =
   } as any)
 const AuthenticatedAppCoursesIndexRoute =
   AuthenticatedAppCoursesIndexRouteImport.update({
-    id: '/courses/',
-    path: '/courses/',
-    getParentRoute: () => AuthenticatedAppRouteRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppCoursesRoute,
   } as any)
 const AuthenticatedAdminCoursesIndexRoute =
   AuthenticatedAdminCoursesIndexRouteImport.update({
@@ -167,9 +173,9 @@ const ApiPublicDiscordCallbackRoute =
   } as any)
 const AuthenticatedAppCoursesSlugRoute =
   AuthenticatedAppCoursesSlugRouteImport.update({
-    id: '/courses/$slug',
-    path: '/courses/$slug',
-    getParentRoute: () => AuthenticatedAppRouteRoute,
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AuthenticatedAppCoursesRoute,
   } as any)
 const AuthenticatedAdminCoursesIdRoute =
   AuthenticatedAdminCoursesIdRouteImport.update({
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/app/courses': typeof AuthenticatedAppCoursesRouteWithChildren
   '/app/discord': typeof AuthenticatedAppDiscordRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -243,6 +250,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/_authenticated/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
+  '/_authenticated/app/courses': typeof AuthenticatedAppCoursesRouteWithChildren
   '/_authenticated/app/discord': typeof AuthenticatedAppDiscordRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -272,6 +280,7 @@ export interface FileRouteTypes {
     | '/admin/discord'
     | '/admin/subscriptions'
     | '/admin/users'
+    | '/app/courses'
     | '/app/discord'
     | '/app/settings'
     | '/admin/'
@@ -324,6 +333,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/discord'
     | '/_authenticated/admin/subscriptions'
     | '/_authenticated/admin/users'
+    | '/_authenticated/app/courses'
     | '/_authenticated/app/discord'
     | '/_authenticated/app/settings'
     | '/_authenticated/admin/'
@@ -438,6 +448,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppDiscordRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
     }
+    '/_authenticated/app/courses': {
+      id: '/_authenticated/app/courses'
+      path: '/courses'
+      fullPath: '/app/courses'
+      preLoaderRoute: typeof AuthenticatedAppCoursesRouteImport
+      parentRoute: typeof AuthenticatedAppRouteRoute
+    }
     '/_authenticated/admin/users': {
       id: '/_authenticated/admin/users'
       path: '/users'
@@ -468,10 +485,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/courses/': {
       id: '/_authenticated/app/courses/'
-      path: '/courses'
+      path: '/'
       fullPath: '/app/courses/'
       preLoaderRoute: typeof AuthenticatedAppCoursesIndexRouteImport
-      parentRoute: typeof AuthenticatedAppRouteRoute
+      parentRoute: typeof AuthenticatedAppCoursesRoute
     }
     '/_authenticated/admin/courses/': {
       id: '/_authenticated/admin/courses/'
@@ -524,10 +541,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/courses/$slug': {
       id: '/_authenticated/app/courses/$slug'
-      path: '/courses/$slug'
+      path: '/$slug'
       fullPath: '/app/courses/$slug'
       preLoaderRoute: typeof AuthenticatedAppCoursesSlugRouteImport
-      parentRoute: typeof AuthenticatedAppRouteRoute
+      parentRoute: typeof AuthenticatedAppCoursesRoute
     }
     '/_authenticated/admin/courses/$id': {
       id: '/_authenticated/admin/courses/$id'
@@ -577,20 +594,34 @@ const AuthenticatedAdminRouteRouteWithChildren =
     AuthenticatedAdminRouteRouteChildren,
   )
 
-interface AuthenticatedAppRouteRouteChildren {
-  AuthenticatedAppDiscordRoute: typeof AuthenticatedAppDiscordRoute
-  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
-  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+interface AuthenticatedAppCoursesRouteChildren {
   AuthenticatedAppCoursesSlugRoute: typeof AuthenticatedAppCoursesSlugRoute
   AuthenticatedAppCoursesIndexRoute: typeof AuthenticatedAppCoursesIndexRoute
 }
 
+const AuthenticatedAppCoursesRouteChildren: AuthenticatedAppCoursesRouteChildren =
+  {
+    AuthenticatedAppCoursesSlugRoute: AuthenticatedAppCoursesSlugRoute,
+    AuthenticatedAppCoursesIndexRoute: AuthenticatedAppCoursesIndexRoute,
+  }
+
+const AuthenticatedAppCoursesRouteWithChildren =
+  AuthenticatedAppCoursesRoute._addFileChildren(
+    AuthenticatedAppCoursesRouteChildren,
+  )
+
+interface AuthenticatedAppRouteRouteChildren {
+  AuthenticatedAppCoursesRoute: typeof AuthenticatedAppCoursesRouteWithChildren
+  AuthenticatedAppDiscordRoute: typeof AuthenticatedAppDiscordRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+}
+
 const AuthenticatedAppRouteRouteChildren: AuthenticatedAppRouteRouteChildren = {
+  AuthenticatedAppCoursesRoute: AuthenticatedAppCoursesRouteWithChildren,
   AuthenticatedAppDiscordRoute: AuthenticatedAppDiscordRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
-  AuthenticatedAppCoursesSlugRoute: AuthenticatedAppCoursesSlugRoute,
-  AuthenticatedAppCoursesIndexRoute: AuthenticatedAppCoursesIndexRoute,
 }
 
 const AuthenticatedAppRouteRouteWithChildren =

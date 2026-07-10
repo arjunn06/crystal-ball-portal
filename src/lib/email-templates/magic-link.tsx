@@ -24,8 +24,8 @@ export const MagicLinkEmail = ({ siteName, token }: MagicLinkEmailProps) => (
       <Container style={container}>
         <Heading style={h1}>Sign in to {siteName}</Heading>
         <Text style={text}>
-          Use the 6-digit code below to finish signing in. This code expires in
-          a few minutes.
+          Use the code below to finish signing in. This code expires in a few
+          minutes.
         </Text>
         <Text style={codeStyle}>{token}</Text>
         <Text style={footer}>

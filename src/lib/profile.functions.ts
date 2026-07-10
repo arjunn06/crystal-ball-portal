@@ -67,7 +67,11 @@ export const completeOnboarding = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) throw new Error("That handle is already taken.");
 
-    const patch: Record<string, unknown> = {
+    const patch: {
+      full_name: string;
+      handle: string;
+      avatar_url?: string | null;
+    } = {
       full_name: data.full_name,
       handle: data.handle,
     };

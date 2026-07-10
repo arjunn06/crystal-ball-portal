@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut } from "lucide-react";
+import { LogOut, Upload, User as UserIcon } from "lucide-react";
 import { useConfirm } from "@/components/app/confirm";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
@@ -30,6 +30,7 @@ function SettingsPage() {
 
   const [fullName, setFullName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (data?.profile) {
@@ -56,6 +57,38 @@ function SettingsPage() {
     },
     onError: (e: any) => toast.error(e.message),
   });
+
+  async function handleAvatarUpload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please select an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5 MB.");
+      return;
+    }
+    setUploading(true);
+    try {
+      const { data: userData, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userData.user) throw new Error("Not signed in.");
+      const ext = file.name.split(".").pop()?.toLowerCase() || "png";
+      const path = `${userData.user.id}/avatar-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("avatars")
+        .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+      if (upErr) throw upErr;
+      const { data: signed, error: signErr } = await supabase.storage
+        .from("avatars")
+        .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+      if (signErr || !signed) throw signErr ?? new Error("Could not generate URL.");
+      setAvatarUrl(signed.signedUrl);
+      saveMut.mutate({ full_name: fullName, avatar_url: signed.signedUrl });
+    } catch (e: any) {
+      toast.error(e.message ?? "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -93,14 +126,55 @@ function SettingsPage() {
               />
             </div>
             <div>
-              <Label htmlFor="avatar" className="text-xs text-muted-foreground">Avatar URL</Label>
-              <Input
-                id="avatar"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-                placeholder="https://…"
-                className="mt-1.5 bg-surface border-border h-10 rounded-lg"
-              />
+              <Label className="text-xs text-muted-foreground">Avatar</Label>
+              <div className="mt-1.5 flex items-center gap-4">
+                <div className="size-16 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <UserIcon className="size-6 text-muted-foreground" />
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => document.getElementById("avatar-file")?.click()}
+                    disabled={uploading}
+                    className="rounded-lg h-9 border-border bg-surface hover:bg-hover"
+                  >
+                    <Upload className="size-4 mr-2" />
+                    {uploading ? "Uploading…" : avatarUrl ? "Change" : "Upload image"}
+                  </Button>
+                  {avatarUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => {
+                        setAvatarUrl("");
+                        saveMut.mutate({ full_name: fullName, avatar_url: null });
+                      }}
+                      disabled={uploading}
+                      className="rounded-lg h-9"
+                    >
+                      Remove
+                    </Button>
+                  )}
+                  <input
+                    id="avatar-file"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleAvatarUpload(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="mt-2 text-[11px] text-muted-foreground">PNG, JPG or GIF. Max 5 MB.</p>
             </div>
             <div className="pt-2 flex justify-end">
               <Button

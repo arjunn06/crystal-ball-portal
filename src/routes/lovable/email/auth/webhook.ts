@@ -31,10 +31,12 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "crystal-ball-portal"
+const SITE_NAME = "Blueprint"
+const FROM_NAME = "Arjun IFVG - Login"
+const FROM_LOCAL = "auth"
 const SENDER_DOMAIN = "notify.blueprint.ifvg.in"
 const ROOT_DOMAIN = "blueprint.ifvg.in"
-const FROM_DOMAIN = "notify.blueprint.ifvg.in"
+const FROM_DOMAIN = "blueprint.ifvg.in"
 
 function redactEmail(email: string | null | undefined): string {
   if (!email) return '***'
@@ -177,7 +179,7 @@ export const Route = createFileRoute("/lovable/email/auth/webhook")({
             run_id,
             message_id: messageId,
             to: payload.data.email,
-            from: `${SITE_NAME} <noreply@${FROM_DOMAIN}>`,
+            from: `${FROM_NAME} <${FROM_LOCAL}@${FROM_DOMAIN}>`,
             sender_domain: SENDER_DOMAIN,
             subject: EMAIL_SUBJECTS[emailType] || 'Notification',
             html,

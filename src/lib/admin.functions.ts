@@ -84,7 +84,8 @@ export const adminMetrics = createServerFn({ method: "GET" })
       supabaseAdmin
         .from("subscriptions")
         .select("id", { count: "exact", head: true })
-        .eq("status", "active"),
+        .eq("status", "active")
+        .not("razorpay_subscription_id", "is", null),
       supabaseAdmin
         .from("courses")
         .select("id", { count: "exact", head: true })
@@ -106,7 +107,8 @@ export const adminMetrics = createServerFn({ method: "GET" })
       supabaseAdmin
         .from("subscriptions")
         .select("id", { count: "exact", head: true })
-        .eq("status", "cancelled"),
+        .eq("status", "cancelled")
+        .not("razorpay_subscription_id", "is", null),
     ]);
     const activeCount = active.count ?? 0;
 

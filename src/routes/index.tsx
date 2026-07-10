@@ -132,7 +132,6 @@ function Landing() {
           <ChartCard />
           <LiveSessionCard />
           <DiscordRolesCard />
-          <PriceChip />
         </div>
       </section>
 
@@ -430,26 +429,6 @@ function DiscordRolesCard() {
   );
 }
 
-function PriceChip() {
-  return (
-    <div
-      className="absolute -bottom-2 left-[38%] rounded-2xl bg-[#0B0B10] text-white p-4 pr-5 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)]"
-      style={{ transform: "rotate(-4deg)" }}
-    >
-      <div className="flex items-center gap-3">
-        <LogoIcon className="size-10 text-white" />
-        <div>
-          <p className="text-[9px] font-bold tracking-[0.18em] text-white/60 uppercase">
-            Membership
-          </p>
-          <p style={clash} className="text-[22px] font-bold leading-none mt-0.5">
-            ₹499<span className="text-[11px] font-medium text-white/60">/mo</span>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function Step({
   n,

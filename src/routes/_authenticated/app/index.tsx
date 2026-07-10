@@ -4,7 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { getAccountOverview } from "@/lib/account.functions";
 import { listCourses } from "@/lib/courses.functions";
 import { PageHeader, Card, formatDuration } from "@/components/app/sidebar";
-import { ArrowRight, BookOpen, MessageCircle, Play } from "lucide-react";
+import { ArrowRight, BookOpen, Play } from "lucide-react";
+import { DiscordIcon } from "@/components/discord-icon";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   component: Home,
@@ -72,7 +73,7 @@ function Home() {
         />
         <QuickLink
           to="/app/discord"
-          icon={<MessageCircle className="size-4" />}
+          icon={<DiscordIcon className="size-4" />}
           title="Claim your Discord role"
           description="Get the members-only role and access the private server."
         />

@@ -1,7 +1,9 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ReactNode } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { LogoIcon } from "@/components/logo-icon";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, User } from "lucide-react";
 
 export type NavItem = {
   to: string;
@@ -14,42 +16,37 @@ export type NavSection = {
   items: NavItem[];
 };
 
+export type SidebarUser = {
+  name?: string | null;
+  email?: string | null;
+  avatarUrl?: string | null;
+};
+
 export function AppSidebar({
   items,
   sections,
   footer,
   brand,
   topOffset = false,
+  user,
 }: {
   items?: NavItem[];
   sections?: NavSection[];
   footer?: ReactNode;
   brand?: { label: string; sub?: string };
   topOffset?: boolean;
+  user?: SidebarUser;
 }) {
   const pathname = useRouterState({ select: (r) => r.location.pathname });
   const groups: NavSection[] = sections ?? [{ items: items ?? [] }];
-  return (
-    <aside
-      className={cn(
-        "hidden md:flex fixed left-0 w-60 flex-col border-r border-border/70 bg-sidebar z-30",
-        topOffset ? "top-14 bottom-0" : "inset-y-0",
-      )}
-    >
-      {!topOffset && (
-        <div className="px-5 pt-5 pb-4">
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <LogoIcon className="size-8 text-foreground" />
-          <div className="min-w-0">
-            <p className="text-[15px] font-semibold tracking-tight leading-none">
-              {brand?.label ?? "Blueprint"}
-            </p>
-            {brand?.sub && <p className="text-[11px] text-muted-foreground mt-1">{brand.sub}</p>}
-          </div>
-        </Link>
-        </div>
-      )}
-      <nav className={cn("flex-1 overflow-y-auto no-scrollbar px-3 pb-6", topOffset ? "pt-5" : "")}>
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  const nav = (
+    <nav className={cn("flex-1 overflow-y-auto no-scrollbar px-3 pb-6", topOffset ? "pt-5" : "")}>
         {groups.map((group, gi) => (
           <div key={gi} className={cn(gi > 0 && "mt-6")}>
             {group.label && (
@@ -91,8 +88,106 @@ export function AppSidebar({
           </div>
         ))}
       </nav>
-      {footer && <div className="border-t border-border/70 p-3">{footer}</div>}
-    </aside>
+  );
+
+  const brandHeader = (
+    <div className="px-5 pt-5 pb-4">
+      <Link to="/" className="flex items-center gap-2.5 group">
+        <LogoIcon className="size-8 text-foreground" />
+        <div className="min-w-0">
+          <p className="text-[15px] font-semibold tracking-tight leading-none">
+            {brand?.label ?? "Blueprint"}
+          </p>
+          {brand?.sub && <p className="text-[11px] text-muted-foreground mt-1">{brand.sub}</p>}
+        </div>
+      </Link>
+    </div>
+  );
+
+  const userHeader = user && (
+    <div className="px-5 pt-5 pb-4 flex items-center gap-3">
+      <UserAvatar user={user} size={40} />
+      <div className="min-w-0">
+        <p className="text-sm font-medium truncate">{user.name ?? "Member"}</p>
+        {user.email && (
+          <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Mobile hamburger */}
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>
+          <button
+            type="button"
+            aria-label="Open menu"
+            className={cn(
+              "md:hidden fixed left-3 z-50 grid place-items-center size-10 rounded-lg border border-border/70 bg-background/90 backdrop-blur text-foreground shadow-sm",
+              topOffset ? "top-2" : "top-3",
+            )}
+          >
+            <Menu className="size-5" />
+          </button>
+        </SheetTrigger>
+        <SheetContent side="left" className="p-0 w-72 bg-sidebar flex flex-col border-r border-border/70">
+          {user ? userHeader : brandHeader}
+          {nav}
+          {footer && <div className="border-t border-border/70 p-3">{footer}</div>}
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop sidebar */}
+      <aside
+        className={cn(
+          "hidden md:flex fixed left-0 w-60 flex-col border-r border-border/70 bg-sidebar z-30",
+          topOffset ? "top-14 bottom-0" : "inset-y-0",
+        )}
+      >
+        {!topOffset && brandHeader}
+        {nav}
+        {footer && <div className="border-t border-border/70 p-3">{footer}</div>}
+      </aside>
+    </>
+  );
+}
+
+export function UserAvatar({
+  user,
+  size = 32,
+  className,
+}: {
+  user: SidebarUser;
+  size?: number;
+  className?: string;
+}) {
+  const initials =
+    user.name?.trim().slice(0, 2).toUpperCase() ??
+    user.email?.trim().slice(0, 2).toUpperCase() ??
+    "··";
+  return (
+    <div
+      className={cn(
+        "rounded-full bg-surface-2 border border-border grid place-items-center overflow-hidden shrink-0",
+        className,
+      )}
+      style={{ width: size, height: size }}
+    >
+      {user.avatarUrl ? (
+        <img
+          src={user.avatarUrl}
+          alt={user.name ?? user.email ?? "Avatar"}
+          className="size-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      ) : user.name || user.email ? (
+        <span className="text-[11px] font-medium leading-none">{initials}</span>
+      ) : (
+        <User className="size-1/2 text-muted-foreground" />
+      )}
+    </div>
   );
 }
 
@@ -100,7 +195,14 @@ export function AppShell({ children, topOffset = false }: { children: ReactNode;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className={cn("md:pl-60 min-h-screen", topOffset && "pt-14")}>
-        <div className="mx-auto max-w-6xl px-6 md:px-10 py-8 md:py-10">{children}</div>
+        <div
+          className={cn(
+            "mx-auto max-w-6xl px-6 md:px-10 md:py-10",
+            topOffset ? "py-8" : "pt-16 pb-8",
+          )}
+        >
+          {children}
+        </div>
       </main>
     </div>
   );
@@ -115,7 +217,7 @@ export function TopBar({
 }) {
   return (
     <header className="fixed top-0 inset-x-0 h-14 z-40 border-b border-border/70 bg-background/95 backdrop-blur flex items-center justify-between px-5 md:px-6">
-      <Link to="/" className="flex items-center gap-2.5">
+      <Link to="/" className="flex items-center gap-2.5 pl-12 md:pl-0">
         <LogoIcon className="size-8 text-foreground" />
         <div className="min-w-0 leading-tight">
           <p className="text-[14px] font-semibold tracking-tight">

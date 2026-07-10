@@ -9,7 +9,8 @@ import {
 } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Plus, Mail, MessageCircle, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw } from "lucide-react";
+import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw } from "lucide-react";
+import { DiscordIcon } from "@/components/discord-icon";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -210,7 +211,7 @@ function UsersPage() {
                         </IconBtn>
                         {u.discord_user_id && (
                           <IconBtn>
-                            <MessageCircle className="size-3.5" />
+                            <DiscordIcon className="size-3.5" />
                           </IconBtn>
                         )}
                       </div>

@@ -11,6 +11,36 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
   if (!data) throw new Error("Forbidden");
 }
 
+/** Best-effort audit trail — never throw from here. */
+async function logAudit(
+  ctx: { supabase: any; userId: string; claims?: any },
+  entry: {
+    action: string;
+    target_user_id?: string | null;
+    target_email?: string | null;
+    details?: Record<string, unknown>;
+  },
+) {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const actorEmail =
+      (ctx.claims as any)?.email ??
+      (await ctx.supabase.from("profiles").select("email").eq("id", ctx.userId).maybeSingle())
+        .data?.email ??
+      null;
+    await supabaseAdmin.from("admin_audit_log").insert({
+      actor_id: ctx.userId,
+      actor_email: actorEmail,
+      target_user_id: entry.target_user_id ?? null,
+      target_email: entry.target_email ?? null,
+      action: entry.action,
+      details: entry.details ?? {},
+    });
+  } catch (e) {
+    console.error("admin audit log failed", e);
+  }
+}
+
 function razorpayAuth() {
   const id = process.env.RAZORPAY_KEY_ID;
   const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -206,6 +236,11 @@ export const adminTerminateSubscription = createServerFn({ method: "POST" })
       .from("subscriptions")
       .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
       .eq("user_id", data.user_id);
+    await logAudit(context, {
+      action: "subscription.terminate",
+      target_user_id: data.user_id,
+      details: { razorpay_subscription_id: sub.razorpay_subscription_id },
+    });
     return { ok: true };
   });
 
@@ -230,6 +265,11 @@ export const adminReinitiatePayment = createServerFn({ method: "POST" })
     );
     const inv = pending ?? body?.items?.[0];
     if (!inv?.short_url) throw new Error("No pending invoice to pay.");
+    await logAudit(context, {
+      action: "payment.reinitiate",
+      target_user_id: data.user_id,
+      details: { invoice_id: inv?.id, invoice_status: inv?.status },
+    });
     return { url: inv.short_url as string };
   });
 
@@ -244,6 +284,10 @@ export const adminBanUser = createServerFn({ method: "POST" })
       ban_duration: data.ban ? "876000h" : "none",
     } as any);
     if (error) throw new Error(error.message);
+    await logAudit(context, {
+      action: data.ban ? "user.ban" : "user.unban",
+      target_user_id: data.user_id,
+    });
     return { ok: true };
   });
 
@@ -257,6 +301,13 @@ export const adminDeleteUser = createServerFn({ method: "POST" })
       throw new Error("You can't delete your own account.");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Capture identity before we wipe the row for the audit trail.
+    const { data: targetProfile } = await supabaseAdmin
+      .from("profiles")
+      .select("email, full_name")
+      .eq("id", data.user_id)
+      .maybeSingle();
 
     // Best-effort: cancel any live Razorpay subscription first.
     const { data: sub } = await supabaseAdmin
@@ -278,6 +329,15 @@ export const adminDeleteUser = createServerFn({ method: "POST" })
 
     const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
     if (error) throw new Error(error.message);
+    await logAudit(context, {
+      action: "user.delete",
+      target_user_id: data.user_id,
+      target_email: targetProfile?.email ?? null,
+      details: {
+        full_name: targetProfile?.full_name ?? null,
+        razorpay_subscription_id: sub?.razorpay_subscription_id ?? null,
+      },
+    });
     return { ok: true };
   });
 
@@ -303,6 +363,11 @@ export const adminSetUserRole = createServerFn({ method: "POST" })
           { onConflict: "user_id,role" },
         );
       if (error) throw new Error(error.message);
+      await logAudit(context, {
+        action: "role.grant",
+        target_user_id: data.user_id,
+        details: { role: "admin" },
+      });
     } else {
       if (data.user_id === context.userId) {
         throw new Error("You can't remove your own admin role.");
@@ -313,6 +378,11 @@ export const adminSetUserRole = createServerFn({ method: "POST" })
         .eq("user_id", data.user_id)
         .eq("role", "admin");
       if (error) throw new Error(error.message);
+      await logAudit(context, {
+        action: "role.revoke",
+        target_user_id: data.user_id,
+        details: { role: "admin" },
+      });
     }
     return { ok: true };
   });
@@ -391,5 +461,31 @@ export const adminInviteTrialUser = createServerFn({ method: "POST" })
       );
     if (subErr) throw new Error(subErr.message);
 
+    await logAudit(context, {
+      action: invited ? "user.invite_trial" : "trial.grant",
+      target_user_id: userId,
+      target_email: data.email,
+      details: {
+        trial_days: data.trial_days,
+        trial_ends: periodEnd,
+        full_name: data.full_name ?? null,
+      },
+    });
+
     return { ok: true, user_id: userId, invited, trial_ends: periodEnd };
+  });
+
+/** List recent admin audit log entries. */
+export const adminListAuditLog = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("admin_audit_log")
+      .select("id, actor_id, actor_email, target_user_id, target_email, action, details, created_at")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    if (error) throw new Error(error.message);
+    return data ?? [];
   });

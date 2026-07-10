@@ -478,6 +478,21 @@ function CreateDialog({
               maxLength={500}
             />
           </div>
+          {discountType !== "trial_days" && (
+            <div className="grid gap-1.5">
+              <Label>Razorpay offer ID (optional)</Label>
+              <Input
+                value={manualOfferId}
+                onChange={(e) => setManualOfferId(e.target.value)}
+                placeholder="offer_XXXXXXXXXXXX"
+              />
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Paste an <code className="font-mono">offer_id</code> you created in your Razorpay Dashboard.
+                If left blank we'll try to auto-create one for card payments; if that fails you can
+                link it later from the row menu.
+              </p>
+            </div>
+          )}
           <div className="flex items-center justify-between rounded-lg border border-border/70 bg-surface-2/40 px-3 py-2">
             <div>
               <div className="text-[13px] font-medium">Active</div>

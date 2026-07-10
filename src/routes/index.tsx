@@ -140,7 +140,7 @@ function Landing() {
         <div className="flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
             <span className="size-1.5 rounded-full bg-[#FF6B35]" />
-            How it Works
+            HOW IT WORKS
             <span className="size-1.5 rounded-full bg-[#FF6B35]" />
           </div>
           <h2
@@ -190,7 +190,7 @@ function Landing() {
           <div className="relative grid md:grid-cols-2 gap-10 items-start">
             <div>
               <div className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-[#0B0B10]/5 text-[#0B0B10] text-[11px] font-semibold tracking-[0.16em] uppercase">
-                Blue Pill · ₹499/month
+                BLUE PILL · ₹499/MONTH
               </div>
               <h3
                 style={{ ...clash, letterSpacing: "-0.005em" }}
@@ -375,7 +375,7 @@ function LiveSessionCard() {
       </div>
       <div className="mt-3 px-1 pb-1">
         <p style={clash} className="text-[14px] font-bold leading-tight">
-          NY Session · Wed Live Call
+          The IFVG Model : Full Class
         </p>
         <p className="text-[11px] text-[#6B6B72] mt-0.5">
           IFVG bias · 09:30 EST · 247 members
@@ -396,7 +396,7 @@ function DiscordRolesCard() {
     >
       <div className="flex items-center justify-between mb-3">
         <span className="text-[10px] font-bold tracking-[0.16em] text-[#6B6B72] uppercase">
-          Discord Roles
+          DISCORD ROLES
         </span>
         <DiscordGlyph small />
       </div>

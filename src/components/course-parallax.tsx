@@ -15,7 +15,7 @@ const MODULES: Module[] = [
   { n: "06", title: "Importance of Time & Price", phase: "Core Model", accent: "#AB47BC" },
   { n: "07", title: "The IFVG Model — Explained with Examples", phase: "Core Model", accent: "#AB47BC" },
   { n: "08", title: "How to use SMT Divergences", phase: "Core Model", accent: "#AB47BC" },
-  { n: "09", title: "Futures & Forex Prop Firm Rules", phase: "Advanced", accent: "#FFC107" },
+  { n: "09", title: "Futures & Forex Prop Firm Rules", phase: "ADVANCED", accent: "#FFC107" },
 ];
 
 export function CourseParallax() {

@@ -34,7 +34,7 @@ async function logAudit(
       target_user_id: entry.target_user_id ?? null,
       target_email: entry.target_email ?? null,
       action: entry.action,
-      details: entry.details ?? {},
+      details: (entry.details ?? {}) as any,
     });
   } catch (e) {
     console.error("admin audit log failed", e);

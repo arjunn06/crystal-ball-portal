@@ -26,6 +26,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminSubscriptionsRouteImport } from './routes/_authenticated/admin/subscriptions'
 import { Route as AuthenticatedAdminDiscordRouteImport } from './routes/_authenticated/admin/discord'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
+import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin/audit'
 import { Route as AuthenticatedAppCoursesIndexRouteImport } from './routes/_authenticated/app/courses.index'
 import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin/courses.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
@@ -125,6 +126,11 @@ const AuthenticatedAdminCoursesRoute =
     path: '/courses',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthenticatedAdminRouteRoute,
+} as any)
 const AuthenticatedAppCoursesIndexRoute =
   AuthenticatedAppCoursesIndexRouteImport.update({
     id: '/',
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
@@ -218,6 +225,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
@@ -246,6 +254,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/_authenticated/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
@@ -276,6 +285,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/subscribe'
     | '/auth/callback'
+    | '/admin/audit'
     | '/admin/courses'
     | '/admin/discord'
     | '/admin/subscriptions'
@@ -302,6 +312,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/subscribe'
     | '/auth/callback'
+    | '/admin/audit'
     | '/admin/discord'
     | '/admin/subscriptions'
     | '/admin/users'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/subscribe'
     | '/auth/callback'
+    | '/_authenticated/admin/audit'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/discord'
     | '/_authenticated/admin/subscriptions'
@@ -483,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/admin/audit': {
+      id: '/_authenticated/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AuthenticatedAdminAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
     '/_authenticated/app/courses/': {
       id: '/_authenticated/app/courses/'
       path: '/'
@@ -573,6 +592,7 @@ const AuthenticatedAdminCoursesRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
   AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRouteWithChildren
   AuthenticatedAdminDiscordRoute: typeof AuthenticatedAdminDiscordRoute
   AuthenticatedAdminSubscriptionsRoute: typeof AuthenticatedAdminSubscriptionsRoute
@@ -582,6 +602,7 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
     AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRouteWithChildren,
     AuthenticatedAdminDiscordRoute: AuthenticatedAdminDiscordRoute,
     AuthenticatedAdminSubscriptionsRoute: AuthenticatedAdminSubscriptionsRoute,

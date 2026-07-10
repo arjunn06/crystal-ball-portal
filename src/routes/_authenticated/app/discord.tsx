@@ -1,50 +1,74 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { createFileRoute, useSearch } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { claimDiscordRole, getMyClaim } from "@/lib/discord.functions";
-import { useState } from "react";
+import { getMyClaim, startMemberDiscordConnect } from "@/lib/discord.functions";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Card } from "@/components/app/sidebar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { CheckCircle2, Clock, XCircle } from "lucide-react";
+import { CheckCircle2, Clock, XCircle, Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  discord: z.enum(["connected", "error"]).optional(),
+  reason: z.string().optional(),
+  username: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_authenticated/app/discord")({
+  validateSearch: (s) => searchSchema.parse(s),
   component: DiscordClaim,
 });
 
 function DiscordClaim() {
   const qc = useQueryClient();
-  const claimFn = useServerFn(claimDiscordRole);
+  const search = useSearch({ from: "/_authenticated/app/discord" });
   const getFn = useServerFn(getMyClaim);
+  const startFn = useServerFn(startMemberDiscordConnect);
+  const [connecting, setConnecting] = useState(false);
+
   const { data: existing } = useQuery({
     queryKey: ["discord", "claim"],
     queryFn: () => getFn(),
   });
-  const [id, setId] = useState("");
 
-  const mut = useMutation({
-    mutationFn: (v: { discord_user_id: string }) => claimFn({ data: v }),
-    onSuccess: (r) => {
-      if (r.ok) toast.success("Role assigned in Discord.");
-      else toast.error("Submitted — Arjun will assign manually.");
+  useEffect(() => {
+    if (search.discord === "connected") {
+      toast.success(
+        search.username ? `Connected as @${search.username}. Role granted.` : "Discord connected. Role granted.",
+      );
       qc.invalidateQueries({ queryKey: ["discord", "claim"] });
-    },
-    onError: (e: any) => toast.error(e.message),
-  });
+      window.history.replaceState({}, "", "/app/discord");
+    } else if (search.discord === "error") {
+      toast.error(search.reason ?? "Could not connect Discord.");
+      window.history.replaceState({}, "", "/app/discord");
+    }
+  }, [search.discord, search.reason, search.username, qc]);
+
+  async function handleConnect() {
+    setConnecting(true);
+    try {
+      const { url } = await startFn({ data: { origin: window.location.origin } });
+      window.location.href = url;
+    } catch (e: any) {
+      toast.error(e?.message ?? "Failed to start Discord connection.");
+      setConnecting(false);
+    }
+  }
+
+  const isConnected = existing?.status === "assigned";
 
   return (
     <>
       <PageHeader
         title="Discord role"
-        description="Get the members-only role and unlock the private server."
+        description="Connect your Discord account to join the private server and get your members role automatically."
       />
 
       {existing && (
         <Card className="p-5 mb-6 flex items-start gap-3">
           <StatusIcon status={existing.status} />
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-sm font-medium capitalize">{existing.status}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               Discord ID <span className="font-mono">{existing.discord_user_id}</span>
@@ -57,37 +81,30 @@ function DiscordClaim() {
       )}
 
       <Card className="p-6 max-w-lg">
-        <h2 className="font-semibold tracking-tight">Submit your Discord user ID</h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          In Discord: enable Developer Mode, right-click your name → Copy User ID. It's a long number.
+        <h2 className="font-semibold tracking-tight">
+          {isConnected ? "You're in" : "Connect your Discord"}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {isConnected
+            ? "Your Discord account is linked. Re-connect anytime if you leave the server."
+            : "We'll add you to the private server and grant your members role in one click."}
         </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!/^\d{15,25}$/.test(id)) {
-              toast.error("Enter your numeric Discord ID.");
-              return;
-            }
-            mut.mutate({ discord_user_id: id });
-          }}
-          className="mt-5 space-y-3"
+        <Button
+          onClick={handleConnect}
+          disabled={connecting}
+          className="mt-5 rounded-lg h-10 bg-[#5865F2] hover:bg-[#4752C4] text-white"
         >
-          <div>
-            <Label htmlFor="did" className="text-xs text-muted-foreground">
-              Discord User ID
-            </Label>
-            <Input
-              id="did"
-              value={id}
-              onChange={(e) => setId(e.target.value)}
-              placeholder="e.g. 123456789012345678"
-              className="mt-1.5 bg-surface border-border h-10 rounded-lg font-mono"
-            />
-          </div>
-          <Button type="submit" disabled={mut.isPending} className="rounded-lg h-10">
-            {mut.isPending ? "Assigning…" : existing ? "Re-submit" : "Claim role"}
-          </Button>
-        </form>
+          {connecting ? (
+            <>
+              <Loader2 className="mr-2 size-4 animate-spin" />
+              Redirecting…
+            </>
+          ) : isConnected ? (
+            "Re-connect Discord"
+          ) : (
+            "Connect Discord"
+          )}
+        </Button>
       </Card>
     </>
   );

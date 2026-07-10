@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { randomBytes } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 async function assertAdmin(ctx: { supabase: any; userId: string }) {
@@ -44,7 +45,64 @@ async function assignDiscordRole(discordUserId: string) {
   }
 }
 
+function b64urlEncode(s: string) {
+  return Buffer.from(s, "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+}
+
 /* ---------------- MEMBER ---------------- */
+
+export const startMemberDiscordConnect = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ origin: z.string().url() }).parse(d))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const clientId = process.env.DISCORD_CLIENT_ID;
+    if (!clientId || !process.env.DISCORD_CLIENT_SECRET) {
+      throw new Error("Discord is not configured yet. Please try again later.");
+    }
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("status")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (sub?.status !== "active") {
+      throw new Error("You need an active membership to connect Discord.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: cfg } = await supabaseAdmin
+      .from("discord_config")
+      .select("guild_id, role_ids")
+      .eq("id", 1)
+      .maybeSingle();
+    if (!cfg?.guild_id || !(cfg.role_ids as string[] | null)?.length) {
+      throw new Error("Discord isn't set up yet. Please check back soon.");
+    }
+
+    const redirectUri = `${data.origin}/api/public/discord/user-callback`;
+    const nonce = randomBytes(16).toString("hex");
+    const state = `u.${nonce}.${b64urlEncode(redirectUri)}`;
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        discord_oauth_state: state,
+        discord_oauth_state_expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(),
+      })
+      .eq("id", userId);
+
+    const params = new URLSearchParams({
+      client_id: clientId,
+      response_type: "code",
+      redirect_uri: redirectUri,
+      scope: "identify guilds.join",
+      state,
+      prompt: "consent",
+    });
+    return { url: `https://discord.com/api/oauth2/authorize?${params.toString()}` };
+  });
 
 export const claimDiscordRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

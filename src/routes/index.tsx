@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Play, Check, TrendingUp } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
+import { CourseParallax } from "@/components/course-parallax";
 
 export const Route = createFileRoute("/")({
   head: () => ({

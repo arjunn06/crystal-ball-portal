@@ -247,6 +247,76 @@ export const adminBanUser = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+/** Permanently delete a user. Removes auth user; DB cascades handle profile/roles/subs. */
+export const adminDeleteUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    if (data.user_id === context.userId) {
+      throw new Error("You can't delete your own account.");
+    }
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Best-effort: cancel any live Razorpay subscription first.
+    const { data: sub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("razorpay_subscription_id, status")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (sub?.razorpay_subscription_id && sub.status !== "cancelled") {
+      await razorpay(`/subscriptions/${sub.razorpay_subscription_id}/cancel`, {
+        method: "POST",
+        body: JSON.stringify({ cancel_at_cycle_end: 0 }),
+      }).catch(() => null);
+    }
+
+    // Explicitly clear app rows in case FKs aren't ON DELETE CASCADE.
+    await supabaseAdmin.from("subscriptions").delete().eq("user_id", data.user_id);
+    await supabaseAdmin.from("user_roles").delete().eq("user_id", data.user_id);
+    await supabaseAdmin.from("profiles").delete().eq("id", data.user_id);
+
+    const { error } = await supabaseAdmin.auth.admin.deleteUser(data.user_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Grant or revoke the admin role for a user. */
+export const adminSetUserRole = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        user_id: z.string().uuid(),
+        role: z.enum(["admin", "member"]),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.role === "admin") {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .upsert(
+          { user_id: data.user_id, role: "admin" },
+          { onConflict: "user_id,role" },
+        );
+      if (error) throw new Error(error.message);
+    } else {
+      if (data.user_id === context.userId) {
+        throw new Error("You can't remove your own admin role.");
+      }
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", data.user_id)
+        .eq("role", "admin");
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
 /**
  * Invite a user by email and grant them a manual trial subscription that lasts
  * `trial_days` from now. Used to port members from the previous platform: their

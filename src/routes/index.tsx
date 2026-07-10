@@ -180,7 +180,7 @@ function Landing() {
       <CourseParallax />
 
       {/* PRICING */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-28">
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pt-20 md:pt-28 pb-28">
         <div
           id="pricing"
           className="relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-8 md:p-12 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]"

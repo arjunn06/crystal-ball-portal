@@ -271,19 +271,26 @@ function SiteNav() {
           <a href="#pricing" onClick={(e) => handleAnchor(e, "pricing")} className="hover:opacity-70 transition-opacity">
             Pricing
           </a>
-          <Link to="/auth" className="hover:opacity-70 transition-opacity">
+        </nav>
+        <div className="hidden md:flex items-center gap-3">
+          <Link
+            to="/auth"
+            className={`inline-flex items-center rounded-full border border-black/10 bg-white text-[#0B0B10] font-semibold hover:bg-[#FAFAFA] transition-all ${
+              scrolled ? "h-10 px-4 text-[12.5px]" : "h-11 px-5 text-[13.5px]"
+            }`}
+          >
             Sign in
           </Link>
-        </nav>
-        <Link
-          to="/auth"
-          className={`inline-flex items-center gap-2 rounded-full bg-[#0B0B10] text-white font-semibold hover:bg-black transition-all shadow-[0_4px_16px_-4px_rgba(0,0,0,0.35)] ${
-            scrolled ? "h-10 px-4 text-[12.5px]" : "h-11 px-5 text-[13.5px]"
-          }`}
-        >
-          Join Blueprint
-          <ArrowRight className="size-4" />
-        </Link>
+          <Link
+            to="/auth"
+            className={`inline-flex items-center gap-2 rounded-full bg-[#0B0B10] text-white font-semibold hover:bg-black transition-all shadow-[0_4px_16px_-4px_rgba(0,0,0,0.35)] ${
+              scrolled ? "h-10 px-4 text-[12.5px]" : "h-11 px-5 text-[13.5px]"
+            }`}
+          >
+            Join Blueprint
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
       </div>
     </header>
   );

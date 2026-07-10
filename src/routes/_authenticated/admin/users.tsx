@@ -6,10 +6,11 @@ import {
   adminBanUser,
   adminTerminateSubscription,
   adminReinitiatePayment,
+  adminInviteTrialUser,
 } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw } from "lucide-react";
+import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw, UserPlus, Loader2, CalendarDays } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 import {
   DropdownMenu,
@@ -18,6 +19,16 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/app/confirm";
 import { toast } from "sonner";
 
@@ -54,6 +65,7 @@ function UsersPage() {
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [joinedFilter, setJoinedFilter] = useState<JoinedOpt | null>("Recently joined");
+  const [inviteOpen, setInviteOpen] = useState(false);
 
   const rows: Row[] = useMemo(() => {
     let list = (data ?? []) as Row[];
@@ -139,6 +151,14 @@ function UsersPage() {
             onChange={(e) => setQ(e.target.value)}
             className="h-8 w-48 text-xs bg-surface border-border rounded-lg"
           />
+          <Button
+            size="sm"
+            className="h-8 rounded-lg text-xs gap-1.5"
+            onClick={() => setInviteOpen(true)}
+          >
+            <UserPlus className="size-3.5" />
+            Invite user
+          </Button>
         </div>
       </div>
 
@@ -236,7 +256,179 @@ function UsersPage() {
           <span>Showing {rows.length} of {(data ?? []).length}</span>
         </div>
       </div>
+
+      <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </>
+  );
+}
+
+function InviteUserDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const qc = useQueryClient();
+  const inviteFn = useServerFn(adminInviteTrialUser);
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [renewalDate, setRenewalDate] = useState("");
+  const [trialDays, setTrialDays] = useState<number>(30);
+
+  // Keep trial_days in sync when a renewal date is picked.
+  function onRenewalChange(v: string) {
+    setRenewalDate(v);
+    if (!v) return;
+    const target = new Date(v + "T23:59:59");
+    const days = Math.max(1, Math.ceil((target.getTime() - Date.now()) / 86_400_000));
+    setTrialDays(days);
+  }
+
+  function onTrialDaysChange(n: number) {
+    setTrialDays(n);
+    if (Number.isFinite(n) && n > 0) {
+      const d = new Date(Date.now() + n * 86_400_000);
+      setRenewalDate(d.toISOString().slice(0, 10));
+    }
+  }
+
+  const invite = useMutation({
+    mutationFn: () =>
+      inviteFn({
+        data: {
+          email: email.trim(),
+          trial_days: trialDays,
+          full_name: fullName.trim() || undefined,
+          redirect_to: window.location.origin + "/auth/callback",
+        },
+      }),
+    onSuccess: (r: any) => {
+      toast.success(
+        r?.invited
+          ? `Invite sent. Trial ends ${new Date(r.trial_ends).toLocaleDateString()}.`
+          : `Trial granted through ${new Date(r.trial_ends).toLocaleDateString()}.`,
+      );
+      qc.invalidateQueries({ queryKey: ["admin", "users"] });
+      setEmail("");
+      setFullName("");
+      setRenewalDate("");
+      setTrialDays(30);
+      onOpenChange(false);
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Could not invite user."),
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = new Date(today.getTime() + 86_400_000).toISOString().slice(0, 10);
+
+  const canSubmit =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
+    trialDays >= 1 &&
+    trialDays <= 365 &&
+    !invite.isPending;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Invite user with trial</DialogTitle>
+          <DialogDescription>
+            Send an invite email and grant a manual trial matching their existing renewal
+            date. They'll get full access until the trial ends.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (canSubmit) invite.mutate();
+          }}
+          className="space-y-4 pt-2"
+        >
+          <div>
+            <Label htmlFor="invite-email" className="text-xs">Email</Label>
+            <Input
+              id="invite-email"
+              type="email"
+              autoFocus
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="user@example.com"
+              className="mt-1.5 h-9 text-sm"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="invite-name" className="text-xs">
+              Full name <span className="text-muted-foreground">(optional)</span>
+            </Label>
+            <Input
+              id="invite-name"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Jane Doe"
+              className="mt-1.5 h-9 text-sm"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="invite-renewal" className="text-xs flex items-center gap-1">
+                <CalendarDays className="size-3" /> Next renewal
+              </Label>
+              <Input
+                id="invite-renewal"
+                type="date"
+                min={minDate}
+                value={renewalDate}
+                onChange={(e) => onRenewalChange(e.target.value)}
+                className="mt-1.5 h-9 text-sm"
+              />
+            </div>
+            <div>
+              <Label htmlFor="invite-days" className="text-xs">Trial days</Label>
+              <Input
+                id="invite-days"
+                type="number"
+                min={1}
+                max={365}
+                value={trialDays}
+                onChange={(e) => onTrialDaysChange(parseInt(e.target.value || "0", 10))}
+                className="mt-1.5 h-9 text-sm"
+              />
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground -mt-2">
+            Access ends automatically. Pick a date to set days, or set days to compute the date.
+          </p>
+
+          <DialogFooter className="pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={invite.isPending}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={!canSubmit}>
+              {invite.isPending ? (
+                <>
+                  <Loader2 className="size-3.5 mr-1.5 animate-spin" />
+                  Sending…
+                </>
+              ) : (
+                "Send invite"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

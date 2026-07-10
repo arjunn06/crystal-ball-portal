@@ -26,6 +26,7 @@ import { Route as AuthenticatedAdminDiscordRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
 import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin/courses.index'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
+import { Route as ApiPublicDiscordCallbackRouteImport } from './routes/api/public/discord/callback'
 import { Route as AuthenticatedAppCoursesSlugRouteImport } from './routes/_authenticated/app/courses.$slug'
 import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
 
@@ -119,6 +120,12 @@ const ApiPublicWebhooksRazorpayRoute =
     path: '/api/public/webhooks/razorpay',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicDiscordCallbackRoute =
+  ApiPublicDiscordCallbackRouteImport.update({
+    id: '/api/public/discord/callback',
+    path: '/api/public/discord/callback',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppCoursesSlugRoute =
   AuthenticatedAppCoursesSlugRouteImport.update({
     id: '/$slug',
@@ -149,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
+  '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
   '/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
 }
@@ -166,6 +174,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
+  '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesIndexRoute
 }
@@ -188,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/_authenticated/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
+  '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
   '/_authenticated/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
 }
@@ -210,6 +220,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/courses/$id'
     | '/app/courses/$slug'
+    | '/api/public/discord/callback'
     | '/api/public/webhooks/razorpay'
     | '/admin/courses/'
   fileRoutesByTo: FileRoutesByTo
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/courses/$id'
     | '/app/courses/$slug'
+    | '/api/public/discord/callback'
     | '/api/public/webhooks/razorpay'
     | '/admin/courses'
   id:
@@ -248,6 +260,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/_authenticated/admin/courses/$id'
     | '/_authenticated/app/courses/$slug'
+    | '/api/public/discord/callback'
     | '/api/public/webhooks/razorpay'
     | '/_authenticated/admin/courses/'
   fileRoutesById: FileRoutesById
@@ -256,6 +269,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
   ApiPublicWebhooksRazorpayRoute: typeof ApiPublicWebhooksRazorpayRoute
 }
 
@@ -380,6 +394,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWebhooksRazorpayRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/discord/callback': {
+      id: '/api/public/discord/callback'
+      path: '/api/public/discord/callback'
+      fullPath: '/api/public/discord/callback'
+      preLoaderRoute: typeof ApiPublicDiscordCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/courses/$slug': {
       id: '/_authenticated/app/courses/$slug'
       path: '/$slug'
@@ -487,6 +508,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,
   ApiPublicWebhooksRazorpayRoute: ApiPublicWebhooksRazorpayRoute,
 }
 export const routeTree = rootRouteImport

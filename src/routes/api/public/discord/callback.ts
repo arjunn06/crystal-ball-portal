@@ -73,7 +73,14 @@ export const Route = createFileRoute("/api/public/discord/callback")({
           guild?: { id: string; name: string; icon: string | null };
         };
 
-        const patch: Record<string, unknown> = {
+        const patch: {
+          oauth_state: null;
+          oauth_state_expires_at: null;
+          bot_installed_at: string;
+          guild_id?: string;
+          guild_name?: string;
+          guild_icon?: string | null;
+        } = {
           oauth_state: null,
           oauth_state_expires_at: null,
           bot_installed_at: new Date().toISOString(),

@@ -195,7 +195,14 @@ export function AppShell({ children, topOffset = false }: { children: ReactNode;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <main className={cn("md:pl-60 min-h-screen", topOffset && "pt-14")}>
-        <div className="mx-auto max-w-6xl px-6 md:px-10 py-8 md:py-10">{children}</div>
+        <div
+          className={cn(
+            "mx-auto max-w-6xl px-6 md:px-10 md:py-10",
+            topOffset ? "py-8" : "pt-16 pb-8",
+          )}
+        >
+          {children}
+        </div>
       </main>
     </div>
   );
@@ -210,7 +217,7 @@ export function TopBar({
 }) {
   return (
     <header className="fixed top-0 inset-x-0 h-14 z-40 border-b border-border/70 bg-background/95 backdrop-blur flex items-center justify-between px-5 md:px-6">
-      <Link to="/" className="flex items-center gap-2.5">
+      <Link to="/" className="flex items-center gap-2.5 pl-12 md:pl-0">
         <LogoIcon className="size-8 text-foreground" />
         <div className="min-w-0 leading-tight">
           <p className="text-[14px] font-semibold tracking-tight">

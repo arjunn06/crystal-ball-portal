@@ -1,6 +1,6 @@
 "use client";
-import { useLayoutEffect, useRef, useState } from "react";
-import { motion, useScroll, useTransform, useSpring, type MotionValue } from "motion/react";
+import { useRef } from "react";
+import { motion, useScroll, useTransform, useSpring, useInView } from "motion/react";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 
@@ -20,206 +20,159 @@ const MODULES: Module[] = [
 
 export function CourseParallax() {
   const ref = useRef<HTMLDivElement>(null);
-  const railRef = useRef<HTMLDivElement>(null);
-  const [distance, setDistance] = useState(0); // px the rail must translate
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
 
-  useLayoutEffect(() => {
-    const measure = () => {
-      const rail = railRef.current;
-      if (!rail) return;
-      const vw = window.innerWidth;
-      // rail scroll width minus what fits in the viewport, + a little breathing room
-      const d = Math.max(0, rail.scrollWidth - vw + 48);
-      setDistance(d);
-    };
-    measure();
-    window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
-  }, []);
+  const bgY = useTransform(smooth, [0, 1], ["-8%", "8%"]);
+  const glowY = useTransform(smooth, [0, 1], ["-15%", "15%"]);
 
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const smooth = useSpring(scrollYProgress, { stiffness: 140, damping: 32, mass: 0.35 });
-
-  // Translate the rail exactly by the measured distance over the full pinned scroll.
-  const x = useTransform(smooth, [0, 1], [0, -distance]);
-
-  // Layered parallax on the sticky header/background.
-  const bgY = useTransform(smooth, [0, 1], ["-4%", "4%"]);
-  const titleY = useTransform(smooth, [0, 1], [30, -30]);
-  const glowX = useTransform(smooth, [0, 1], ["-8%", "8%"]);
-
-  // Section height = 1 viewport (for the pin) + horizontal distance to scroll.
-  const sectionHeight =
-    distance > 0 ? `calc(100vh + ${distance}px)` : `${MODULES.length * 45}vh`;
+  // Rail fill progress tracks scroll through the timeline area
+  const { scrollYProgress: railProgress } = useScroll({
+    target: ref,
+    offset: ["start 60%", "end 80%"],
+  });
+  const railScale = useSpring(railProgress, { stiffness: 100, damping: 30 });
 
   return (
     <section
       id="inside"
       ref={ref}
-      className="relative z-10 bg-[#0A0A0F]"
-      style={{ height: sectionHeight }}
+      className="relative z-10 bg-[#0A0A0F] overflow-hidden py-24 md:py-32"
     >
-      <div className="sticky top-0 h-screen overflow-hidden flex flex-col">
-        {/* Parallax background layers */}
-        <motion.div
-          aria-hidden
-          style={{ y: bgY }}
-          className="absolute inset-0"
-        >
-          <div className="absolute inset-0 bg-[radial-gradient(1200px_600px_at_50%_-20%,rgba(171,71,188,0.18),transparent_60%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(900px_500px_at_100%_120%,rgba(229,57,53,0.12),transparent_60%)]" />
-          <div
-            className="absolute inset-0 opacity-[0.06]"
-            style={{
-              backgroundImage:
-                "linear-gradient(#FAFAFA 1px, transparent 1px), linear-gradient(90deg, #FAFAFA 1px, transparent 1px)",
-              backgroundSize: "64px 64px",
-            }}
-          />
-        </motion.div>
+      {/* Parallax backdrop */}
+      <motion.div aria-hidden style={{ y: bgY }} className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-[radial-gradient(1000px_500px_at_50%_0%,rgba(171,71,188,0.14),transparent_60%)]" />
+        <div
+          className="absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage:
+              "linear-gradient(#FAFAFA 1px, transparent 1px), linear-gradient(90deg, #FAFAFA 1px, transparent 1px)",
+            backgroundSize: "72px 72px",
+          }}
+        />
+      </motion.div>
+      <motion.div
+        aria-hidden
+        style={{ y: glowY }}
+        className="absolute left-1/2 top-1/3 -translate-x-1/2 size-[70vmin] rounded-full bg-[radial-gradient(circle,rgba(229,57,53,0.12),transparent_70%)] blur-3xl pointer-events-none"
+      />
 
+      {/* Header */}
+      <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
+        <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full border border-[#1B1B21] bg-[#101014]/60 backdrop-blur text-[#8B8B96] text-[11px] font-semibold tracking-[0.16em] uppercase">
+          <span className="size-1.5 rounded-full bg-[#E53935]" />
+          The Curriculum
+          <span className="size-1.5 rounded-full bg-[#AB47BC]" />
+        </div>
+        <h2
+          style={{ ...clash, letterSpacing: "-0.01em" }}
+          className="mt-6 text-[40px] md:text-[60px] font-bold leading-[1.02] text-[#FAFAFA]"
+        >
+          Nine modules. <span className="text-[#8B8B96]">One Blueprint.</span>
+        </h2>
+        <p className="mt-4 text-[15px] md:text-[16px] text-[#8B8B96] max-w-xl mx-auto">
+          A guided path from your first candle to prop-firm-ready execution.
+        </p>
+      </div>
+
+      {/* Timeline */}
+      <div className="relative z-10 mx-auto max-w-5xl px-6 mt-16 md:mt-24">
+        {/* Center rail (desktop) */}
+        <div className="pointer-events-none absolute left-6 md:left-1/2 top-0 bottom-0 md:-translate-x-1/2 w-px bg-[#1B1B21]" />
         <motion.div
-          aria-hidden
-          style={{ x: glowX }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[55vmin] rounded-full bg-[radial-gradient(circle,rgba(171,71,188,0.22),transparent_70%)] blur-3xl"
+          style={{ scaleY: railScale, transformOrigin: "top" }}
+          className="pointer-events-none absolute left-6 md:left-1/2 top-0 bottom-0 md:-translate-x-1/2 w-px bg-gradient-to-b from-[#E53935] via-[#AB47BC] to-[#FFC107]"
         />
 
-        {/* Header */}
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pt-14 md:pt-16 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full border border-[#1B1B21] bg-[#101014]/60 backdrop-blur text-[#8B8B96] text-[11px] font-semibold tracking-[0.16em] uppercase">
-              <span className="size-1.5 rounded-full bg-[#E53935]" />
-              The Curriculum
-              <span className="size-1.5 rounded-full bg-[#AB47BC]" />
-            </div>
-            <span className="ml-auto hidden md:inline text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B8B96]">
-              <ProgressCounter progress={smooth} total={MODULES.length} />
-            </span>
-          </div>
-          <motion.h2
-            style={{ y: titleY, ...clash, letterSpacing: "-0.01em" }}
-            className="mt-4 text-[36px] md:text-[54px] font-bold leading-[1.02] text-[#FAFAFA] max-w-3xl"
-          >
-            Nine modules. <span className="text-[#8B8B96]">One Blueprint.</span>
-          </motion.h2>
-        </div>
+        <ol className="relative space-y-10 md:space-y-16">
+          {MODULES.map((m, i) => (
+            <TimelineItem key={m.n} m={m} index={i} />
+          ))}
+        </ol>
+      </div>
 
-        {/* Horizontal rail — fills remaining vertical space */}
-        <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center">
-          <motion.div
-            ref={railRef}
-            style={{ x }}
-            className="flex gap-6 will-change-transform px-6"
-          >
-            {MODULES.map((m, i) => (
-              <ModuleCard key={m.n} m={m} index={i} progress={smooth} total={MODULES.length} />
-            ))}
-          </motion.div>
-        </div>
-
-        {/* Progress bar */}
-        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-8 shrink-0">
-          <div className="relative h-px bg-[#1B1B21] overflow-hidden">
-            <motion.div
-              style={{ scaleX: smooth, transformOrigin: "left" }}
-              className="absolute inset-0 bg-gradient-to-r from-[#E53935] via-[#AB47BC] to-[#FFC107]"
-            />
-          </div>
-          <div className="mt-3 flex items-center justify-between text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B6B72]">
-            <span>Scroll to explore</span>
-            <span>{MODULES.length} modules · self-paced</span>
-          </div>
-        </div>
+      {/* Footer meta */}
+      <div className="relative z-10 mx-auto max-w-5xl px-6 mt-16 flex items-center justify-between text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B6B72]">
+        <span>{MODULES.length} modules · self-paced</span>
+        <span>Included in Blue Pill</span>
       </div>
     </section>
   );
 }
 
-function ModuleCard({
-  m,
-  index,
-  progress,
-  total,
-}: {
-  m: Module;
-  index: number;
-  progress: MotionValue<number>;
-  total: number;
-}) {
-  // Each card gets its own parallax offset for depth
-  const y = useTransform(progress, [0, 1], [index % 2 === 0 ? 30 : -30, index % 2 === 0 ? -30 : 30]);
-  const start = Math.max(0, (index - 0.5) / total);
-  const peak = index / total + 0.05;
-  const end = Math.min(1, (index + 1.2) / total);
-  const scale = useTransform(progress, [start, peak, end], [0.94, 1, 0.96]);
-  const opacity = useTransform(progress, [start, peak, end], [0.55, 1, 0.65]);
+function TimelineItem({ m, index }: { m: Module; index: number }) {
+  const ref = useRef<HTMLLIElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  const isRight = index % 2 === 1;
 
   return (
-    <motion.article
-      style={{ y, scale, opacity }}
-      className="relative shrink-0 w-[78vw] sm:w-[380px] md:w-[420px] h-[58vh] max-h-[520px] min-h-[380px] rounded-3xl border border-[#1B1B21] bg-[#101014] overflow-hidden"
-    >
-      {/* Accent glow */}
-      <div
+    <li ref={ref} className="relative md:grid md:grid-cols-2 md:gap-12">
+      {/* Node dot */}
+      <motion.span
         aria-hidden
-        className="absolute -top-24 -right-16 size-64 rounded-full blur-3xl opacity-30"
-        style={{ background: m.accent }}
-      />
-      <div
-        aria-hidden
-        className="absolute left-0 top-0 bottom-0 w-[3px]"
-        style={{ background: `linear-gradient(180deg, ${m.accent}, transparent)` }}
-      />
+        initial={{ scale: 0, opacity: 0 }}
+        animate={inView ? { scale: 1, opacity: 1 } : {}}
+        transition={{ duration: 0.4, delay: 0.1 }}
+        className="absolute left-6 md:left-1/2 top-6 md:top-1/2 -translate-x-1/2 md:-translate-y-1/2 z-10"
+      >
+        <span
+          className="block size-3 rounded-full ring-4 ring-[#0A0A0F]"
+          style={{ background: m.accent, boxShadow: `0 0 20px ${m.accent}80` }}
+        />
+      </motion.span>
 
-      <div className="relative h-full p-7 flex flex-col">
-        <div className="flex items-center justify-between">
-          <span
-            className="text-[11px] font-semibold tracking-[0.18em] uppercase"
-            style={{ color: m.accent }}
+      {/* Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={inView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className={`pl-14 md:pl-0 ${isRight ? "md:col-start-2" : "md:col-start-1 md:text-right"}`}
+      >
+        <article
+          className="group relative overflow-hidden rounded-2xl border border-[#1B1B21] bg-[#101014] p-6 md:p-7 transition-all duration-300 hover:border-white/10"
+          style={{
+            boxShadow: `0 0 0 1px transparent`,
+          }}
+        >
+          <div
+            aria-hidden
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+            style={{
+              background: `radial-gradient(400px 180px at ${isRight ? "0% 50%" : "100% 50%"}, ${m.accent}22, transparent 70%)`,
+            }}
+          />
+          <div className={`relative flex items-center gap-2 ${isRight ? "" : "md:justify-end"}`}>
+            <span
+              className="text-[10px] font-semibold tracking-[0.2em] uppercase"
+              style={{ color: m.accent }}
+            >
+              {m.phase}
+            </span>
+            <span className="text-[10px] font-semibold tracking-[0.16em] uppercase text-[#6B6B72]">
+              · Module {m.n}
+            </span>
+          </div>
+          <h3
+            style={{ ...clash, letterSpacing: "-0.005em" }}
+            className="relative mt-3 text-[22px] md:text-[26px] font-semibold text-[#FAFAFA] leading-[1.2]"
           >
-            Phase · {m.phase}
-          </span>
-          <span className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B6B72]">
-            Module {m.n}
-          </span>
-        </div>
-
-        <div
-          className="mt-auto text-[120px] leading-none font-bold text-transparent select-none"
-          style={{ ...clash, WebkitTextStroke: `1px ${m.accent}55` }}
-        >
-          {m.n}
-        </div>
-
-        <h3
-          style={{ ...clash, letterSpacing: "-0.005em" }}
-          className="mt-4 text-[22px] md:text-[26px] font-semibold text-[#FAFAFA] leading-[1.15]"
-        >
-          {m.title}
-        </h3>
-
-        <div className="mt-5 flex items-center gap-2 text-[12px] text-[#8B8B96]">
-          <span className="size-1.5 rounded-full" style={{ background: m.accent }} />
-          Included in Blue Pill subscription
-        </div>
-      </div>
-    </motion.article>
-  );
-}
-
-function ProgressCounter({
-  progress,
-  total,
-}: {
-  progress: MotionValue<number>;
-  total: number;
-}) {
-  const current = useTransform(progress, (v) =>
-    String(Math.min(total, Math.max(1, Math.ceil(v * total)))).padStart(2, "0"),
-  );
-  return (
-    <span className="tabular-nums">
-      <motion.span>{current}</motion.span> / {String(total).padStart(2, "0")}
-    </span>
+            {m.title}
+          </h3>
+          <div
+            className={`relative mt-4 flex items-center gap-2 text-[12px] text-[#8B8B96] ${isRight ? "" : "md:justify-end"}`}
+          >
+            <span className="size-1.5 rounded-full" style={{ background: m.accent }} />
+            Included in Blue Pill subscription
+          </div>
+          <div
+            aria-hidden
+            className={`pointer-events-none absolute ${isRight ? "-left-6" : "-right-6"} top-1/2 -translate-y-1/2 text-[100px] md:text-[140px] font-bold leading-none text-transparent select-none opacity-60`}
+            style={{ ...clash, WebkitTextStroke: `1px ${m.accent}30` }}
+          >
+            {m.n}
+          </div>
+        </article>
+      </motion.div>
+    </li>
   );
 }

@@ -81,15 +81,8 @@ function Subscribe() {
         }}
       />
 
-      {/* NAV */}
-      <header className="relative z-10 mx-auto w-full max-w-7xl px-6 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <LogoIcon className="text-black size-10" />
-        </Link>
-        <span className="text-[12px] text-[#6B6B72] truncate max-w-[50%]">
-          {data?.profile?.email}
-        </span>
-      </header>
+import { LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
       <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">
         <div className="w-full max-w-xl">

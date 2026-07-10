@@ -1,13 +1,15 @@
 export function LogoIcon({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 83 83"
+      width="46"
+      height="46"
+      viewBox="0 0 46 46"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
       <path
-        d="M20.647 82.5883H0L20.647 61.9413L41.294 41.294L61.9413 20.647H82.5883V82.5883H61.9413V51.6178L30.9705 82.5883H20.647ZM82.5883 20.647H61.9413L82.5883 0V20.647Z"
+        d="M17 32H12L17 27H22H17L22 22H27H22L27 17H32V32H27V24.5L19.5 32H17ZM32 17H27L32 12V17Z"
         fill="currentColor"
       />
     </svg>

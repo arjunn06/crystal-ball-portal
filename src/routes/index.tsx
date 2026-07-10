@@ -407,7 +407,7 @@ function DiscordRolesCard() {
             <span className="text-[12px] font-semibold text-[#0B0B10]">Blue Pill</span>
           </div>
           <span className="text-[9px] font-bold text-[#AB47BC] bg-white px-1.5 py-0.5 rounded">
-            CLAIMED
+            Premium Member
           </span>
         </div>
         <div className="flex items-center justify-between rounded-xl bg-[#E53935]/10 border border-[#E53935]/25 px-3 py-2">

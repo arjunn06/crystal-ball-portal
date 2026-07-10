@@ -175,9 +175,57 @@ function Landing() {
           />
         </div>
       </section>
+      {/* COURSE CURRICULUM */}
+      <section id="inside" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
+        <div className="flex flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
+            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            What's Inside The Course
+            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+          </div>
+          <h2
+            style={{ ...clash, letterSpacing: "-0.005em" }}
+            className="mt-6 text-[40px] md:text-[54px] font-bold leading-[1.05] text-[#0B0B10] max-w-2xl"
+          >
+            Your Blueprint to Trading Consistency
+          </h2>
+          <p className="mt-4 text-[16px] text-[#5A5A62] max-w-xl">
+            A complete curriculum built from real mentorship sessions.
+          </p>
+        </div>
 
-      {/* WHAT'S INSIDE / PRICING */}
-      <section id="inside" className="relative z-10 mx-auto max-w-7xl px-6 pb-28">
+        <div className="mt-14 grid md:grid-cols-2 gap-4">
+          {[
+            "Introduction to Trading",
+            "Introduction to Market Profiles",
+            "How to navigate TradingView interface for Beginners",
+            "What are PD Arrays",
+            "Optimal Trade Entries and Other ICT Fibonacci Concepts",
+            "Importance of Time & Price",
+            "The IFVG Model Explained with Examples",
+            "How to use SMT Divergences",
+            "Futures and Forex Prop firm rules & guide",
+          ].map((item, i) => (
+            <div
+              key={item}
+              className="flex items-start gap-4 rounded-2xl bg-white border border-black/5 px-5 py-4 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.1)]"
+            >
+              <span
+                className="mt-0.5 shrink-0 size-8 rounded-full bg-[#0B0B10] text-white text-[11px] font-bold grid place-items-center"
+                style={clash}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span className="text-[15px] text-[#1A1A1F] font-medium leading-snug pt-0.5">
+                {item}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section className="relative z-10 mx-auto max-w-7xl px-6 pb-28">
         <div
           id="pricing"
           className="relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-8 md:p-12 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]"

@@ -82,6 +82,28 @@ function Subscribe() {
         }}
       />
 
+      {/* NAV */}
+      <header className="relative z-10 mx-auto w-full max-w-7xl px-6 h-20 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-2.5">
+          <LogoIcon className="text-black size-10" />
+        </Link>
+        <div className="flex items-center gap-4">
+          <span className="text-[12px] text-[#6B6B72] truncate max-w-[180px] hidden sm:inline">
+            {data?.profile?.email}
+          </span>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            className="inline-flex items-center gap-1.5 text-[12px] text-[#6B6B72] hover:text-[#0B0B10] transition-colors"
+          >
+            <LogOut className="size-3.5" />
+            Sign out
+          </button>
+        </div>
+      </header>
+
       <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">
         <div className="w-full max-w-xl">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">

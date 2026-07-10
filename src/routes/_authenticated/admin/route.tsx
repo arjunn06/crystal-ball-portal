@@ -11,9 +11,9 @@ import {
   Users,
   BookOpen,
   CreditCard,
-  MessageCircle,
   ArrowLeft,
 } from "lucide-react";
+import { DiscordIcon } from "@/components/discord-icon";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Blueprint" }] }),
@@ -44,7 +44,7 @@ function AdminLayout() {
         { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
         { to: "/admin/subscriptions", label: "Payments", icon: <CreditCard className="size-4" /> },
         { to: "/admin/users", label: "Users", icon: <Users className="size-4" /> },
-        { to: "/admin/discord", label: "Discord", icon: <MessageCircle className="size-4" /> },
+        { to: "/admin/discord", label: "Discord", icon: <DiscordIcon className="size-4" /> },
       ],
     },
     {

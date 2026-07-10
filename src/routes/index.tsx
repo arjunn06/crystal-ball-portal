@@ -176,51 +176,126 @@ function Landing() {
         </div>
       </section>
       {/* COURSE CURRICULUM */}
-      <section id="inside" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
-        <div className="flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
-            What's Inside The Course
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
-          </div>
-          <h2
-            style={{ ...clash, letterSpacing: "-0.005em" }}
-            className="mt-6 text-[40px] md:text-[54px] font-bold leading-[1.05] text-[#0B0B10] max-w-2xl"
-          >
-            Your Blueprint to Trading Consistency
-          </h2>
-          <p className="mt-4 text-[16px] text-[#5A5A62] max-w-xl">
-            A complete curriculum built from real mentorship sessions.
-          </p>
-        </div>
-
-        <div className="mt-14 grid md:grid-cols-2 gap-4">
-          {[
-            "Introduction to Trading",
-            "Introduction to Market Profiles",
-            "How to navigate TradingView interface for Beginners",
-            "What are PD Arrays",
-            "Optimal Trade Entries and Other ICT Fibonacci Concepts",
-            "Importance of Time & Price",
-            "The IFVG Model Explained with Examples",
-            "How to use SMT Divergences",
-            "Futures and Forex Prop firm rules & guide",
-          ].map((item, i) => (
-            <div
-              key={item}
-              className="flex items-start gap-4 rounded-2xl bg-white border border-black/5 px-5 py-4 shadow-[0_4px_20px_-8px_rgba(0,0,0,0.1)]"
-            >
-              <span
-                className="mt-0.5 shrink-0 size-8 rounded-full bg-[#0B0B10] text-white text-[11px] font-bold grid place-items-center"
-                style={clash}
-              >
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <span className="text-[15px] text-[#1A1A1F] font-medium leading-snug pt-0.5">
-                {item}
-              </span>
+      <section id="inside" className="relative z-10 bg-[#0A0A0F] py-28">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="flex flex-col items-center text-center">
+            <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full border border-[#1B1B21] text-[#8B8B96] text-[11px] font-semibold tracking-[0.16em] uppercase">
+              <span className="size-1.5 rounded-full bg-[#E53935]" />
+              What's Inside The Course
+              <span className="size-1.5 rounded-full bg-[#AB47BC]" />
             </div>
-          ))}
+            <h2
+              style={{ ...clash, letterSpacing: "-0.005em" }}
+              className="mt-6 text-[40px] md:text-[54px] font-bold leading-[1.05] text-[#FAFAFA] max-w-2xl"
+            >
+              Your Blueprint to Trading Consistency
+            </h2>
+            <p className="mt-4 text-[16px] text-[#8B8B96] max-w-xl">
+              A complete curriculum built from real mentorship sessions.
+            </p>
+          </div>
+
+          <div className="mt-16 space-y-10">
+            {/* Phase 1 */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px flex-1 bg-[#1B1B21]" />
+                <span className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B8B96]">
+                  Phase 01 — Foundation
+                </span>
+                <span className="h-px flex-1 bg-[#1B1B21]" />
+              </div>
+              <div className="grid md:grid-cols-3 gap-3">
+                {[
+                  { n: "01", title: "Introduction to Trading" },
+                  { n: "02", title: "Introduction to Market Profiles" },
+                  { n: "03", title: "How to navigate TradingView interface for Beginners" },
+                ].map((item) => (
+                  <div
+                    key={item.n}
+                    className="group relative overflow-hidden rounded-xl border border-[#1B1B21] bg-[#101014] p-5 transition-all duration-300 hover:border-[#E53935]/40 hover:shadow-[0_0_24px_-8px_rgba(229,57,53,0.25)]"
+                  >
+                    <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#E53935]/60" />
+                    <span
+                      className="text-[28px] font-bold leading-none text-transparent"
+                      style={{ ...clash, WebkitTextStroke: "1px #2A2A30" }}
+                    >
+                      {item.n}
+                    </span>
+                    <p className="mt-3 text-[14px] font-medium text-[#FAFAFA]/90 leading-snug">
+                      {item.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Phase 2 */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px flex-1 bg-[#1B1B21]" />
+                <span className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B8B96]">
+                  Phase 02 — Core Model
+                </span>
+                <span className="h-px flex-1 bg-[#1B1B21]" />
+              </div>
+              <div className="grid md:grid-cols-3 gap-3">
+                {[
+                  { n: "04", title: "What are PD Arrays" },
+                  { n: "05", title: "Optimal Trade Entries and Other ICT Fibonacci Concepts" },
+                  { n: "06", title: "Importance of Time & Price" },
+                  { n: "07", title: "The IFVG Model Explained with Examples" },
+                  { n: "08", title: "How to use SMT Divergences" },
+                ].map((item) => (
+                  <div
+                    key={item.n}
+                    className="group relative overflow-hidden rounded-xl border border-[#1B1B21] bg-[#101014] p-5 transition-all duration-300 hover:border-[#AB47BC]/40 hover:shadow-[0_0_24px_-8px_rgba(171,71,188,0.25)]"
+                  >
+                    <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#AB47BC]/60" />
+                    <span
+                      className="text-[28px] font-bold leading-none text-transparent"
+                      style={{ ...clash, WebkitTextStroke: "1px #2A2A30" }}
+                    >
+                      {item.n}
+                    </span>
+                    <p className="mt-3 text-[14px] font-medium text-[#FAFAFA]/90 leading-snug">
+                      {item.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Phase 3 */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <span className="h-px flex-1 bg-[#1B1B21]" />
+                <span className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B8B96]">
+                  Phase 03 — Advanced
+                </span>
+                <span className="h-px flex-1 bg-[#1B1B21]" />
+              </div>
+              <div className="grid md:grid-cols-3 gap-3">
+                {[{ n: "09", title: "Futures and Forex Prop firm rules & guide" }].map((item) => (
+                  <div
+                    key={item.n}
+                    className="group relative overflow-hidden rounded-xl border border-[#1B1B21] bg-[#101014] p-5 transition-all duration-300 hover:border-[#FFC107]/40 hover:shadow-[0_0_24px_-8px_rgba(255,193,7,0.25)]"
+                  >
+                    <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-[#FFC107]/60" />
+                    <span
+                      className="text-[28px] font-bold leading-none text-transparent"
+                      style={{ ...clash, WebkitTextStroke: "1px #2A2A30" }}
+                    >
+                      {item.n}
+                    </span>
+                    <p className="mt-3 text-[14px] font-medium text-[#FAFAFA]/90 leading-snug">
+                      {item.title}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

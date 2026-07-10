@@ -214,11 +214,73 @@ function Subscribe() {
                   "Opening checkout…"
                 ) : (
                   <>
-                    Subscribe · ₹499/mo
+                    {applied?.discount_type === "trial_days"
+                      ? `Start ${applied.discount_value}-day free trial`
+                      : applied?.discount_type === "percent_off_first"
+                        ? `Subscribe · ${applied.discount_value}% off first month`
+                        : applied?.discount_type === "amount_off_first"
+                          ? `Subscribe · ₹${applied.discount_value} off first month`
+                          : "Subscribe · ₹499/mo"}
                     <ArrowRight className="size-4 ml-1" />
                   </>
                 )}
               </Button>
+
+              {/* Promo code */}
+              <div className="mt-4">
+                {applied ? (
+                  <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#E53935]/20 bg-[#FFF3EE] px-3.5 py-2.5">
+                    <div className="flex items-center gap-2 text-[13px] text-[#0B0B10]">
+                      <Tag className="size-3.5 text-[#E53935]" />
+                      <span className="font-semibold">{applied.code}</span>
+                      <span className="text-[#6B6B72]">
+                        ·{" "}
+                        {applied.discount_type === "trial_days"
+                          ? `${applied.discount_value} free trial days`
+                          : applied.discount_type === "percent_off_first"
+                            ? `${applied.discount_value}% off first month`
+                            : `₹${applied.discount_value} off first month`}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setApplied(null);
+                        setCodeInput("");
+                      }}
+                      className="text-[#6B6B72] hover:text-[#0B0B10] transition-colors"
+                      aria-label="Remove code"
+                    >
+                      <XIcon className="size-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 relative">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-[#6B6B72]" />
+                      <input
+                        value={codeInput}
+                        onChange={(e) => setCodeInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && codeInput.trim()) {
+                            e.preventDefault();
+                            apply.mutate();
+                          }
+                        }}
+                        placeholder="Promo code"
+                        className="w-full h-10 rounded-full bg-[#F7F1E8] border border-black/5 pl-9 pr-3 text-[13px] text-[#0B0B10] placeholder:text-[#6B6B72] focus:outline-none focus:border-[#0B0B10]/20"
+                      />
+                    </div>
+                    <button
+                      onClick={() => codeInput.trim() && apply.mutate()}
+                      disabled={!codeInput.trim() || apply.isPending}
+                      className="h-10 px-4 rounded-full border border-black/10 bg-white text-[13px] font-semibold text-[#0B0B10] hover:bg-[#FAFAFA] disabled:opacity-50 inline-flex items-center gap-1.5"
+                    >
+                      {apply.isPending ? <Loader2 className="size-3.5 animate-spin" /> : "Apply"}
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
                 Secure checkout by Razorpay. Cancel anytime from Settings.
               </p>

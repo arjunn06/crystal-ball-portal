@@ -378,6 +378,8 @@ function CreateDialog({
   });
 
   const validPercent = discountType !== "percent_off_first" || (discountValue >= 1 && discountValue <= 100);
+  const needsOfferId = discountType !== "trial_days";
+  const hasOfferId = manualOfferId.trim().length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -430,6 +432,25 @@ function CreateDialog({
               />
             </div>
           </div>
+          {needsOfferId && (
+            <div className="grid gap-1.5 rounded-lg border border-border/70 bg-surface-2/40 p-3">
+              <Label className="flex items-center gap-1.5">
+                Razorpay offer ID <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                value={manualOfferId}
+                onChange={(e) => setManualOfferId(e.target.value)}
+                placeholder="offer_XXXXXXXXXXXX"
+                className="font-mono"
+              />
+              <p className="text-[11px] text-muted-foreground leading-snug">
+                Create the offer in your Razorpay Dashboard (Offers → New offer,
+                applicable on subscription, tied to your plan), then paste the{" "}
+                <code className="font-mono">offer_id</code> here. Required so the
+                discount actually applies at checkout.
+              </p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label>Max total redemptions</Label>
@@ -478,21 +499,6 @@ function CreateDialog({
               maxLength={500}
             />
           </div>
-          {discountType !== "trial_days" && (
-            <div className="grid gap-1.5">
-              <Label>Razorpay offer ID (optional)</Label>
-              <Input
-                value={manualOfferId}
-                onChange={(e) => setManualOfferId(e.target.value)}
-                placeholder="offer_XXXXXXXXXXXX"
-              />
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                Paste an <code className="font-mono">offer_id</code> you created in your Razorpay Dashboard.
-                If left blank we'll try to auto-create one for card payments; if that fails you can
-                link it later from the row menu.
-              </p>
-            </div>
-          )}
           <div className="flex items-center justify-between rounded-lg border border-border/70 bg-surface-2/40 px-3 py-2">
             <div>
               <div className="text-[13px] font-medium">Active</div>
@@ -514,7 +520,8 @@ function CreateDialog({
               !code.trim() ||
               !discountValue ||
               discountValue < 1 ||
-              !validPercent
+              !validPercent ||
+              (needsOfferId && !hasOfferId)
             }
           >
             {mut.isPending && <Loader2 className="size-3.5 mr-1.5 animate-spin" />}

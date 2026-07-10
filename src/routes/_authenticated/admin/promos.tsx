@@ -36,7 +36,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useConfirm } from "@/components/app/confirm";
-import { Plus, MoreHorizontal, Ticket, Copy, Loader2, Trash2 } from "lucide-react";
+import { Plus, MoreHorizontal, Ticket, Copy, Loader2, Trash2, Link2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/promos")({
   head: () => ({ meta: [{ title: "Promo codes — Admin" }] }),
@@ -159,7 +159,7 @@ function PromosPage() {
 function PromoRow({ promo, onChanged }: { promo: Promo; onChanged: () => void }) {
   const updateFn = useServerFn(adminUpdatePromoCode);
   const deleteFn = useServerFn(adminDeletePromoCode);
-  const { confirm } = useConfirm();
+  const { confirm, prompt } = useConfirm();
 
   const toggle = useMutation({
     mutationFn: (active: boolean) => updateFn({ data: { id: promo.id, active } }),
@@ -174,6 +174,16 @@ function PromoRow({ promo, onChanged }: { promo: Promo; onChanged: () => void })
     mutationFn: () => deleteFn({ data: { id: promo.id } }),
     onSuccess: () => {
       toast.success("Deleted");
+      onChanged();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const setOffer = useMutation({
+    mutationFn: (id: string | null) =>
+      updateFn({ data: { id: promo.id, razorpay_offer_id: id } }),
+    onSuccess: () => {
+      toast.success("Razorpay offer linked");
       onChanged();
     },
     onError: (e: any) => toast.error(e.message),
@@ -205,6 +215,19 @@ function PromoRow({ promo, onChanged }: { promo: Promo; onChanged: () => void })
         )}
       </td>
       <td className="py-2.5 px-4 text-foreground">{formatDiscount(promo)}</td>
+      <td className="py-2.5 px-4">
+        {promo.discount_type === "trial_days" ? (
+          <span className="text-[11px] text-muted-foreground">n/a</span>
+        ) : promo.razorpay_offer_id ? (
+          <code className="text-[11px] text-muted-foreground font-mono truncate max-w-[140px] inline-block align-middle">
+            {promo.razorpay_offer_id}
+          </code>
+        ) : (
+          <span className="inline-flex items-center rounded-full px-1.5 py-0.5 text-[11px] font-medium border bg-yellow-500/10 text-yellow-600 border-yellow-500/20">
+            Not linked
+          </span>
+        )}
+      </td>
       <td className="py-2.5 px-4 text-muted-foreground">
         {promo.redemptions_count}
         {promo.max_redemptions !== null ? ` / ${promo.max_redemptions}` : ""}
@@ -237,6 +260,24 @@ function PromoRow({ promo, onChanged }: { promo: Promo; onChanged: () => void })
             <DropdownMenuItem onClick={() => toggle.mutate(!promo.active)}>
               {promo.active ? "Deactivate" : "Activate"}
             </DropdownMenuItem>
+            {promo.discount_type !== "trial_days" && (
+              <DropdownMenuItem
+                onSelect={async (e) => {
+                  e.preventDefault();
+                  const v = await prompt({
+                    title: "Razorpay offer ID",
+                    description:
+                      "Paste the offer_id from your Razorpay Dashboard (Offers). Leave blank to unlink.",
+                    placeholder: "offer_XXXXXXXXXXXX",
+                    defaultValue: promo.razorpay_offer_id ?? "",
+                  });
+                  if (v === null) return;
+                  setOffer.mutate(v.trim() || null);
+                }}
+              >
+                <Link2 className="size-3.5 mr-2" /> Razorpay offer ID
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-red-600 focus:text-red-600"

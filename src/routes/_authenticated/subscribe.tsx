@@ -7,8 +7,9 @@ import { useEffect } from "react";
 import { openRazorpay } from "@/lib/razorpay-checkout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, LogOut } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
+import { supabase } from "@/integrations/supabase/client";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };

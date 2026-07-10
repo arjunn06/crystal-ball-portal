@@ -7,10 +7,12 @@ import {
   adminTerminateSubscription,
   adminReinitiatePayment,
   adminInviteTrialUser,
+  adminDeleteUser,
+  adminSetUserRole,
 } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
-import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw, UserPlus, Loader2, CalendarDays } from "lucide-react";
+import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw, UserPlus, Loader2, CalendarDays, Trash2, Shield, ShieldOff } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 import {
   DropdownMenu,
@@ -450,6 +452,8 @@ function RowMenu({ user, status }: { user: Row; status: string }) {
   const banFn = useServerFn(adminBanUser);
   const termFn = useServerFn(adminTerminateSubscription);
   const reinitFn = useServerFn(adminReinitiatePayment);
+  const delFn = useServerFn(adminDeleteUser);
+  const roleFn = useServerFn(adminSetUserRole);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["admin", "users"] });
 
@@ -468,10 +472,25 @@ function RowMenu({ user, status }: { user: Row; status: string }) {
     onSuccess: (r: any) => { if (r?.url) window.open(r.url, "_blank"); },
     onError: (e: any) => toast.error(e?.message ?? "Failed to reinitiate."),
   });
+  const del = useMutation({
+    mutationFn: () => delFn({ data: { user_id: user.id } }),
+    onSuccess: () => { toast.success("User deleted."); invalidate(); },
+    onError: (e: any) => toast.error(e?.message ?? "Failed to delete."),
+  });
+  const setRole = useMutation({
+    mutationFn: (role: "admin" | "member") =>
+      roleFn({ data: { user_id: user.id, role } }),
+    onSuccess: (_r, role) => {
+      toast.success(role === "admin" ? "Promoted to admin." : "Admin role removed.");
+      invalidate();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "Failed to update role."),
+  });
 
   const hasSub = !!user.subscription;
   const canTerminate = hasSub && user.subscription!.status !== "cancelled";
   const canReinit = status === "Due date missed" || status === "Payment pending";
+  const isAdmin = user.roles.includes("admin");
 
   return (
     <DropdownMenu>
@@ -506,6 +525,36 @@ function RowMenu({ user, status }: { user: Row; status: string }) {
           </DropdownMenuItem>
         )}
         {(canReinit || canTerminate) && <DropdownMenuSeparator />}
+        {isAdmin ? (
+          <DropdownMenuItem
+            className="text-xs"
+            onClick={async () => {
+              const ok = await confirm({
+                title: "Remove admin role?",
+                description: `${user.email ?? "This user"} will become a regular member.`,
+                confirmLabel: "Remove admin",
+              });
+              if (ok) setRole.mutate("member");
+            }}
+          >
+            <ShieldOff className="size-3.5 mr-2" /> Change to member
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            className="text-xs"
+            onClick={async () => {
+              const ok = await confirm({
+                title: "Make admin?",
+                description: `Grant ${user.email ?? "this user"} full admin access.`,
+                confirmLabel: "Make admin",
+              });
+              if (ok) setRole.mutate("admin");
+            }}
+          >
+            <Shield className="size-3.5 mr-2" /> Make admin
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-xs text-destructive focus:text-destructive"
           onClick={async () => {
@@ -519,6 +568,20 @@ function RowMenu({ user, status }: { user: Row; status: string }) {
           }}
         >
           <Ban className="size-3.5 mr-2" /> Ban user
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          className="text-xs text-destructive focus:text-destructive"
+          onClick={async () => {
+            const ok = await confirm({
+              title: "Delete user?",
+              description: `Permanently delete ${user.email ?? "this user"} and all their data. This cannot be undone.`,
+              confirmLabel: "Delete user",
+              destructive: true,
+            });
+            if (ok) del.mutate();
+          }}
+        >
+          <Trash2 className="size-3.5 mr-2" /> Delete user
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

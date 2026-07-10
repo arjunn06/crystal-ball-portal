@@ -121,6 +121,7 @@ function PromosPage() {
               <tr>
                 <th className="py-2.5 px-4 font-medium">Code</th>
                 <th className="py-2.5 px-4 font-medium">Discount</th>
+                <th className="py-2.5 px-4 font-medium">Razorpay offer</th>
                 <th className="py-2.5 px-4 font-medium">Usage</th>
                 <th className="py-2.5 px-4 font-medium">Per user</th>
                 <th className="py-2.5 px-4 font-medium">Expires</th>
@@ -131,7 +132,7 @@ function PromosPage() {
             <tbody className="divide-y divide-border/40">
               {isLoading && (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-xs text-muted-foreground">
+                  <td colSpan={8} className="py-10 text-center text-xs text-muted-foreground">
                     Loading…
                   </td>
                 </tr>
@@ -141,7 +142,7 @@ function PromosPage() {
               ))}
               {!isLoading && rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-xs text-muted-foreground">
+                  <td colSpan={8} className="py-10 text-center text-xs text-muted-foreground">
                     No promo codes yet.
                   </td>
                 </tr>

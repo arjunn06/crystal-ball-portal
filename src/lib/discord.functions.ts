@@ -13,23 +13,34 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 
 async function assignDiscordRole(discordUserId: string) {
   const token = process.env.DISCORD_BOT_TOKEN;
-  const guildId = process.env.DISCORD_GUILD_ID;
-  const roleId = process.env.DISCORD_MEMBER_ROLE_ID ?? process.env.DISCORD_BLUE_PILL_ROLE_ID;
-  if (!token || !guildId || !roleId) throw new Error("Discord is not configured yet.");
-  const res = await fetch(
-    `https://discord.com/api/v10/guilds/${guildId}/members/${discordUserId}/roles/${roleId}`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bot ${token}`,
-        "Content-Type": "application/json",
-        "Content-Length": "0",
+  if (!token) throw new Error("Discord bot is not configured.");
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: cfg } = await supabaseAdmin
+    .from("discord_config")
+    .select("guild_id, role_ids")
+    .eq("id", 1)
+    .maybeSingle();
+  const guildId = cfg?.guild_id;
+  const roleIds = (cfg?.role_ids ?? []) as string[];
+  if (!guildId || roleIds.length === 0) {
+    throw new Error("Discord roles are not configured yet. Ask an admin to finish setup.");
+  }
+  for (const roleId of roleIds) {
+    const res = await fetch(
+      `https://discord.com/api/v10/guilds/${guildId}/members/${discordUserId}/roles/${roleId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bot ${token}`,
+          "Content-Type": "application/json",
+          "Content-Length": "0",
+        },
       },
-    },
-  );
-  if (!res.ok && res.status !== 204) {
-    const body = await res.text();
-    throw new Error(`Discord API ${res.status}: ${body}`);
+    );
+    if (!res.ok && res.status !== 204) {
+      const body = await res.text();
+      throw new Error(`Discord API ${res.status}: ${body}`);
+    }
   }
 }
 

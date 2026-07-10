@@ -378,7 +378,7 @@ function LiveSessionCard() {
           The IFVG Model : Full Class
         </p>
         <p className="text-[11px] text-[#6B6B72] mt-0.5">
-          IFVG bias · 09:30 EST · 247 members
+          Part 1 - 14:20 mins
         </p>
         <div className="mt-2 h-1 w-full bg-black/5 rounded-full overflow-hidden">
           <div className="h-full w-[62%] bg-[#E53935] rounded-full" />

@@ -44,7 +44,7 @@ function AdminLayout() {
         { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
         { to: "/admin/subscriptions", label: "Payments", icon: <CreditCard className="size-4" /> },
         { to: "/admin/users", label: "Users", icon: <Users className="size-4" /> },
-        { to: "/admin/discord", label: "Support Chats", icon: <MessageCircle className="size-4" /> },
+        { to: "/admin/discord", label: "Discord", icon: <MessageCircle className="size-4" /> },
       ],
     },
     {

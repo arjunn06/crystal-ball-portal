@@ -46,14 +46,6 @@ function Landing() {
         <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <LogoIcon className="size-9 text-black" />
-            <div>
-              <div style={clash} className="text-[17px] font-bold tracking-tight leading-none">
-                BLUEPRINT
-              </div>
-              <div className="text-[9px] font-semibold tracking-[0.22em] text-[#6B6B72] mt-0.5">
-                IFVG TRADERS
-              </div>
-            </div>
           </Link>
           <nav className="hidden md:flex items-center gap-8 text-[14px] font-medium text-[#1A1A1F]">
             <a href="#inside" className="hover:opacity-70 transition-opacity">

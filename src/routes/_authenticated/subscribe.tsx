@@ -7,8 +7,9 @@ import { useEffect } from "react";
 import { openRazorpay } from "@/lib/razorpay-checkout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight } from "lucide-react";
+import { Check, ArrowRight, LogOut } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
+import { supabase } from "@/integrations/supabase/client";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
@@ -86,9 +87,21 @@ function Subscribe() {
         <Link to="/" className="flex items-center gap-2.5">
           <LogoIcon className="text-black size-10" />
         </Link>
-        <span className="text-[12px] text-[#6B6B72] truncate max-w-[50%]">
-          {data?.profile?.email}
-        </span>
+        <div className="flex items-center gap-4">
+          <span className="text-[12px] text-[#6B6B72] truncate max-w-[180px] hidden sm:inline">
+            {data?.profile?.email}
+          </span>
+          <button
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/";
+            }}
+            className="inline-flex items-center gap-1.5 text-[12px] text-[#6B6B72] hover:text-[#0B0B10] transition-colors"
+          >
+            <LogOut className="size-3.5" />
+            Sign out
+          </button>
+        </div>
       </header>
 
       <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">

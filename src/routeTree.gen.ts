@@ -26,6 +26,7 @@ import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminSubscriptionsRouteImport } from './routes/_authenticated/admin/subscriptions'
 import { Route as AuthenticatedAdminDiscordRouteImport } from './routes/_authenticated/admin/discord'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
+import { Route as AuthenticatedAppCoursesIndexRouteImport } from './routes/_authenticated/app/courses.index'
 import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin/courses.index'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -124,6 +125,12 @@ const AuthenticatedAdminCoursesRoute =
     path: '/courses',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedAppCoursesIndexRoute =
+  AuthenticatedAppCoursesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppCoursesRoute,
+  } as any)
 const AuthenticatedAdminCoursesIndexRoute =
   AuthenticatedAdminCoursesIndexRouteImport.update({
     id: '/',
@@ -203,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
+  '/app/courses/': typeof AuthenticatedAppCoursesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -213,7 +221,6 @@ export interface FileRoutesByTo {
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/subscriptions': typeof AuthenticatedAdminSubscriptionsRoute
   '/admin/users': typeof AuthenticatedAdminUsersRoute
-  '/app/courses': typeof AuthenticatedAppCoursesRouteWithChildren
   '/app/discord': typeof AuthenticatedAppDiscordRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesIndexRoute
+  '/app/courses': typeof AuthenticatedAppCoursesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/_authenticated/admin/courses/': typeof AuthenticatedAdminCoursesIndexRoute
+  '/_authenticated/app/courses/': typeof AuthenticatedAppCoursesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -285,6 +294,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/courses/'
+    | '/app/courses/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -295,7 +305,6 @@ export interface FileRouteTypes {
     | '/admin/discord'
     | '/admin/subscriptions'
     | '/admin/users'
-    | '/app/courses'
     | '/app/discord'
     | '/app/settings'
     | '/admin'
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/admin/courses'
+    | '/app/courses'
   id:
     | '__root__'
     | '/'
@@ -337,6 +347,7 @@ export interface FileRouteTypes {
     | '/lovable/email/auth/webhook'
     | '/lovable/email/queue/process'
     | '/_authenticated/admin/courses/'
+    | '/_authenticated/app/courses/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -472,6 +483,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/app/courses/': {
+      id: '/_authenticated/app/courses/'
+      path: '/'
+      fullPath: '/app/courses/'
+      preLoaderRoute: typeof AuthenticatedAppCoursesIndexRouteImport
+      parentRoute: typeof AuthenticatedAppCoursesRoute
+    }
     '/_authenticated/admin/courses/': {
       id: '/_authenticated/admin/courses/'
       path: '/'
@@ -578,11 +596,13 @@ const AuthenticatedAdminRouteRouteWithChildren =
 
 interface AuthenticatedAppCoursesRouteChildren {
   AuthenticatedAppCoursesSlugRoute: typeof AuthenticatedAppCoursesSlugRoute
+  AuthenticatedAppCoursesIndexRoute: typeof AuthenticatedAppCoursesIndexRoute
 }
 
 const AuthenticatedAppCoursesRouteChildren: AuthenticatedAppCoursesRouteChildren =
   {
     AuthenticatedAppCoursesSlugRoute: AuthenticatedAppCoursesSlugRoute,
+    AuthenticatedAppCoursesIndexRoute: AuthenticatedAppCoursesIndexRoute,
   }
 
 const AuthenticatedAppCoursesRouteWithChildren =

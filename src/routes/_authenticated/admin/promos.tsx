@@ -159,7 +159,7 @@ function PromosPage() {
 function PromoRow({ promo, onChanged }: { promo: Promo; onChanged: () => void }) {
   const updateFn = useServerFn(adminUpdatePromoCode);
   const deleteFn = useServerFn(adminDeletePromoCode);
-  const confirm = useConfirm();
+  const { confirm } = useConfirm();
 
   const toggle = useMutation({
     mutationFn: (active: boolean) => updateFn({ data: { id: promo.id, active } }),
@@ -245,7 +245,7 @@ function PromoRow({ promo, onChanged }: { promo: Promo; onChanged: () => void })
                 const ok = await confirm({
                   title: `Delete ${promo.code}?`,
                   description: "This cannot be undone. Redemption history will be removed.",
-                  confirmText: "Delete",
+                  confirmLabel: "Delete",
                   destructive: true,
                 });
                 if (ok) del.mutate();

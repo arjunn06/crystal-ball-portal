@@ -5,7 +5,7 @@ import { listCourses } from "@/lib/courses.functions";
 import { PageHeader, Card, formatDuration } from "@/components/app/sidebar";
 import { Play } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/app/courses")({
+export const Route = createFileRoute("/_authenticated/app/courses/")({
   component: CoursesList,
 });
 

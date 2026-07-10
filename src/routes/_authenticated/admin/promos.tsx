@@ -322,6 +322,7 @@ function CreateDialog({
   const [expiresAt, setExpiresAt] = useState<string>("");
   const [active, setActive] = useState(true);
   const [notes, setNotes] = useState("");
+  const [manualOfferId, setManualOfferId] = useState("");
 
   const reset = () => {
     setCode("");
@@ -333,6 +334,7 @@ function CreateDialog({
     setExpiresAt("");
     setActive(true);
     setNotes("");
+    setManualOfferId("");
   };
 
   const mut = useMutation({
@@ -348,16 +350,26 @@ function CreateDialog({
           expires_at: expiresAt ? new Date(expiresAt).toISOString() : null,
           active,
           notes: notes.trim() || null,
+          razorpay_offer_id: manualOfferId.trim() || null,
         },
       }),
     onSuccess: (r) => {
-      toast.success(
-        r.razorpay_linked
-          ? "Code created and linked to Razorpay"
-          : discountType === "trial_days"
-            ? "Trial code created"
-            : "Code saved (Razorpay offer not linked — you may need to configure the plan)",
-      );
+      if (r.razorpay_linked) {
+        toast.success("Code created and linked to Razorpay");
+      } else if (discountType === "trial_days") {
+        toast.success("Trial code created");
+      } else {
+        toast.warning(
+          r.razorpay_error
+            ? `Code saved, but Razorpay offer wasn't linked: ${r.razorpay_error}`
+            : "Code saved, but no Razorpay offer was linked",
+          {
+            description:
+              "Create the offer in your Razorpay Dashboard and paste the offer_id from the row menu.",
+            duration: 8000,
+          },
+        );
+      }
       reset();
       onOpenChange(false);
       onCreated();

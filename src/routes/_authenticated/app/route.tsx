@@ -3,10 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { getAccountOverview } from "@/lib/account.functions";
-import { AppShell, AppSidebar, type NavItem } from "@/components/app/sidebar";
+import { AppShell, AppSidebar, UserAvatar, type NavItem } from "@/components/app/sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { SignOutButton } from "@/components/app/sign-out-button";
-import { LayoutDashboard, BookOpen, MessageCircle, Settings, Shield } from "lucide-react";
+import { LayoutDashboard, BookOpen, Settings, Shield } from "lucide-react";
+import { DiscordIcon } from "@/components/discord-icon";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Blueprint" }] }),
@@ -30,29 +31,29 @@ function AppLayout() {
   const items: NavItem[] = [
     { to: "/app", label: "Home", icon: <LayoutDashboard className="size-4" /> },
     { to: "/app/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
-    { to: "/app/discord", label: "Discord role", icon: <MessageCircle className="size-4" /> },
+    { to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> },
     { to: "/app/settings", label: "Settings", icon: <Settings className="size-4" /> },
   ];
   if (data?.isAdmin) {
     items.push({ to: "/admin", label: "Admin", icon: <Shield className="size-4" /> });
   }
 
-  const initials =
-    data?.profile?.full_name?.slice(0, 2).toUpperCase() ??
-    data?.profile?.email?.slice(0, 2).toUpperCase() ??
-    "··";
+  const user = {
+    name: data?.profile?.full_name ?? null,
+    email: data?.profile?.email ?? null,
+    avatarUrl: data?.profile?.avatar_url ?? null,
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <AppSidebar
         items={items}
         brand={{ label: "Blueprint", sub: "Member area" }}
+        user={user}
         footer={
           <div className="space-y-2">
             <div className="flex items-center gap-2.5 px-2 py-1.5">
-              <div className="size-8 rounded-full bg-surface-2 border border-border grid place-items-center text-[11px] font-medium">
-                {initials}
-              </div>
+              <UserAvatar user={user} size={32} />
               <div className="min-w-0">
                 <p className="text-xs font-medium truncate">
                   {data?.profile?.full_name ?? "Member"}

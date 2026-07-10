@@ -2,12 +2,13 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { createSubscription, verifySubscriptionPayment } from "@/lib/billing.functions";
+import { validatePromoCode } from "@/lib/promos.functions";
 import { getAccountOverview } from "@/lib/account.functions";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { openRazorpay } from "@/lib/razorpay-checkout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Check, ArrowRight, LogOut } from "lucide-react";
+import { Check, ArrowRight, LogOut, Tag, X as XIcon, Loader2 } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -24,16 +25,43 @@ function Subscribe() {
   const acct = useServerFn(getAccountOverview);
   const create = useServerFn(createSubscription);
   const verify = useServerFn(verifySubscriptionPayment);
+  const validate = useServerFn(validatePromoCode);
   const { data } = useQuery({ queryKey: ["account", "overview"], queryFn: () => acct() });
+  const [codeInput, setCodeInput] = useState("");
+  const [applied, setApplied] = useState<{
+    code: string;
+    discount_type: "percent_off_first" | "amount_off_first" | "trial_days";
+    discount_value: number;
+    description: string | null;
+  } | null>(null);
+
+  const apply = useMutation({
+    mutationFn: () => validate({ data: { code: codeInput.trim() } }),
+    onError: (e: any) => toast.error(e.message ?? "Invalid code"),
+    onSuccess: (p) => {
+      setApplied({
+        code: p.code,
+        discount_type: p.discount_type,
+        discount_value: p.discount_value,
+        description: p.description,
+      });
+      toast.success(`Code ${p.code} applied`);
+    },
+  });
 
   useEffect(() => {
     if (data?.isSubscribed) navigate({ to: "/app" });
   }, [data?.isSubscribed, navigate]);
 
   const mut = useMutation({
-    mutationFn: () => create(),
+    mutationFn: () => create({ data: { promo_code: applied?.code ?? null } }),
     onError: (e: any) => toast.error(e.message),
-    onSuccess: async ({ subscriptionId, keyId }) => {
+    onSuccess: async ({ subscriptionId, keyId, trialEndsAt }) => {
+      if (trialEndsAt) {
+        toast.success(`Trial started — first charge on ${new Date(trialEndsAt).toLocaleDateString()}`);
+        navigate({ to: "/app" });
+        return;
+      }
       try {
         await openRazorpay({
           key: keyId,

@@ -77,8 +77,8 @@ function AuthPage() {
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
-    if (!/^\d{6}$/.test(code)) {
-      toast.error("Enter the 6-digit code");
+    if (!/^\d{6,8}$/.test(code)) {
+      toast.error("Enter the code from your email");
       return;
     }
     setVerifying(true);
@@ -199,7 +199,7 @@ function AuthPage() {
               </button>
               <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
               <p className="mt-1.5 text-sm text-muted-foreground">
-                We sent a 6-digit code to <span className="text-foreground font-medium">{email}</span>.
+                We sent a verification code to <span className="text-foreground font-medium">{email}</span>.
               </p>
 
               <form onSubmit={handleVerify} className="mt-6 space-y-3">
@@ -209,14 +209,14 @@ function AuthPage() {
                     id="code"
                     type="text"
                     inputMode="numeric"
-                    pattern="[0-9]{6}"
-                    maxLength={6}
+                    pattern="[0-9]{6,8}"
+                    maxLength={8}
                     required
                     autoFocus
                     autoComplete="one-time-code"
                     value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder="123456"
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+                    placeholder="12345678"
                     className="mt-1.5 bg-surface border-border h-12 rounded-lg text-center text-xl font-mono tracking-[0.4em]"
                   />
                 </div>

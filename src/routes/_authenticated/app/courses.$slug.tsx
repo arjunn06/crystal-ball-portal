@@ -109,7 +109,7 @@ function CoursePlayer() {
           )}
         </div>
 
-        <aside className="space-y-4">
+        <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:flex lg:flex-col">
           <Card className="p-5">
             <p className="text-xs text-muted-foreground">Course</p>
             <h2 className="mt-1 font-semibold tracking-tight">{course.title}</h2>
@@ -127,7 +127,7 @@ function CoursePlayer() {
             </div>
           </Card>
 
-          <Card className="overflow-hidden max-h-[70vh] flex flex-col">
+          <Card className="overflow-hidden flex flex-col min-h-0 lg:flex-1 max-h-[70vh] lg:max-h-none">
             <div className="p-4 border-b border-border/70">
               <p className="text-xs font-medium">Curriculum</p>
             </div>

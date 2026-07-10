@@ -49,41 +49,55 @@ const createSchema = z.object({
   expires_at: z.string().datetime().nullable().optional(),
   active: z.boolean().default(true),
   notes: z.string().trim().max(500).optional().nullable(),
+  razorpay_offer_id: z.string().trim().max(60).nullable().optional(),
 });
 
-/** Create a Razorpay offer where applicable so the discount actually reduces the invoice. */
+/**
+ * Best-effort attempt to auto-create a Razorpay Offer. Razorpay Offers
+ * require a payment_method + terms + a few other fields per offer, and one
+ * offer only covers one payment method. Because of that, most admins should
+ * create the offer in the Razorpay Dashboard and paste the offer_id — this
+ * helper returns { id?, error? } so the caller can surface a clear warning.
+ */
 async function tryCreateRazorpayOffer(input: {
   code: string;
   discount_type: (typeof PROMO_TYPES)[number];
   discount_value: number;
   max_redemptions: number | null | undefined;
   expires_at: string | null | undefined;
-}) {
-  if (input.discount_type === "trial_days") return null;
+}): Promise<{ id: string | null; error: string | null }> {
+  if (input.discount_type === "trial_days") return { id: null, error: null };
   const planId = process.env.RAZORPAY_PLAN_ID;
-  if (!planId) return null;
+  if (!planId) return { id: null, error: "RAZORPAY_PLAN_ID not configured." };
   try {
     const now = Math.floor(Date.now() / 1000);
+    // Razorpay requires ends_at — fall back to 1 year if none supplied.
+    const endsAt = input.expires_at
+      ? Math.floor(new Date(input.expires_at).getTime() / 1000)
+      : now + 365 * 86400;
     const body: Record<string, unknown> = {
-      name: `Blueprint · ${input.code}`,
+      name: `Blueprint ${input.code}`.slice(0, 55),
+      payment_method: "card",
       applicable_on: "subscription",
       redemption_type: input.max_redemptions === 1 ? "single" : "multiple",
-      offer_type: "deal",
       plan_ids: [planId],
       starts_at: now,
+      ends_at: endsAt,
+      terms: `Applicable on the first payment for the Blueprint subscription using code ${input.code}.`,
     };
     if (input.discount_type === "percent_off_first") {
       body.percent_rate = input.discount_value;
+      body.max_cashback = Math.round(499 * 100 * (input.discount_value / 100));
     } else {
-      body.amount = Math.round(input.discount_value * 100);
+      body.discount_amount = Math.round(input.discount_value * 100);
     }
     if (input.max_redemptions) body.max_offer_usage = input.max_redemptions;
-    if (input.expires_at) body.ends_at = Math.floor(new Date(input.expires_at).getTime() / 1000);
     const offer = await razorpay(`/offers`, { method: "POST", body: JSON.stringify(body) });
-    return (offer?.id as string) ?? null;
+    return { id: (offer?.id as string) ?? null, error: null };
   } catch (e) {
-    console.warn("Razorpay offer creation failed:", (e as Error).message);
-    return null;
+    const msg = (e as Error).message;
+    console.warn("Razorpay offer creation failed:", msg);
+    return { id: null, error: msg };
   }
 }
 
@@ -114,13 +128,21 @@ export const adminCreatePromoCode = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing) throw new Error("A promo code with that name already exists.");
 
-    const offerId = await tryCreateRazorpayOffer({
-      code,
-      discount_type: data.discount_type,
-      discount_value: data.discount_value,
-      max_redemptions: data.max_redemptions ?? null,
-      expires_at: data.expires_at ?? null,
-    });
+    // If admin pasted an offer_id, trust it. Otherwise attempt auto-creation
+    // for %/₹ codes and surface any Razorpay error back to the UI.
+    let offerId: string | null = data.razorpay_offer_id?.trim() || null;
+    let offerError: string | null = null;
+    if (!offerId && data.discount_type !== "trial_days") {
+      const result = await tryCreateRazorpayOffer({
+        code,
+        discount_type: data.discount_type,
+        discount_value: data.discount_value,
+        max_redemptions: data.max_redemptions ?? null,
+        expires_at: data.expires_at ?? null,
+      });
+      offerId = result.id;
+      offerError = result.error;
+    }
 
     const { data: inserted, error } = await supabaseAdmin
       .from("promo_codes")
@@ -140,7 +162,12 @@ export const adminCreatePromoCode = createServerFn({ method: "POST" })
       .select("*")
       .single();
     if (error) throw new Error(error.message);
-    return { ok: true, promo: inserted, razorpay_linked: !!offerId };
+    return {
+      ok: true,
+      promo: inserted,
+      razorpay_linked: !!offerId,
+      razorpay_error: offerError,
+    };
   });
 
 export const adminUpdatePromoCode = createServerFn({ method: "POST" })
@@ -155,6 +182,7 @@ export const adminUpdatePromoCode = createServerFn({ method: "POST" })
         expires_at: z.string().datetime().nullable().optional(),
         active: z.boolean().optional(),
         notes: z.string().trim().max(500).nullable().optional(),
+        razorpay_offer_id: z.string().trim().max(60).nullable().optional(),
       })
       .parse(d),
   )

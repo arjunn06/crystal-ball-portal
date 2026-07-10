@@ -78,10 +78,11 @@ function Landing() {
             style={{ ...clash, letterSpacing: "-0.01em" }}
             className="text-[52px] md:text-[72px] leading-[0.98] font-bold text-[#0B0B10]"
           >
-            Trade the NY Session
+            Premium education
             <br />
-            <span className="inline-flex items-center gap-3 md:gap-4 flex-wrap">
-              With the
+            <div className="inline-flex items-center gap-3 md:gap-4 flex-wrap">
+              doesn't mean
+              <br />
               <span
                 className="inline-flex items-center h-14 md:h-16 pl-2 pr-5 rounded-full text-white text-[22px] md:text-[26px] font-semibold shadow-[0_10px_30px_-10px_rgba(229,57,53,0.7)]"
                 style={{
@@ -92,16 +93,15 @@ function Landing() {
                 <span className="size-10 md:size-12 rounded-full bg-white mr-2 grid place-items-center">
                   <span className="size-2.5 rounded-full bg-[#E53935] animate-pulse" />
                 </span>
-                LIVE
+                Premium price.
               </span>
-            </span>
-            <br />
-            IFVG Blueprint
+            </div>
           </h1>
 
           <p className="mt-7 text-[17px] leading-[1.55] text-[#4A4A52] max-w-md">
-            Every recorded session, live New York calls, and the members-only
-            Discord — the private room where serious IFVG traders work.
+            Start your Blue Pill subscription now and get immediate access to
+            our exclusive premium class recordings - uncut directly from The Red
+            Pill Mentorship sessions!
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-3">
@@ -110,7 +110,7 @@ function Landing() {
               className="inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
               style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
             >
-              Start Membership · ₹499/mo
+              Get access now · ₹499/mo
               <ArrowRight className="size-4" />
             </Link>
             <a
@@ -123,7 +123,7 @@ function Landing() {
 
           <div className="mt-8 flex items-center gap-2 text-[12px] text-[#6B6B72]">
             <span className="size-1.5 rounded-full bg-[#E53935] animate-pulse" />
-            Now accepting members · Cancel anytime · No lock-in
+            Cancel anytime
           </div>
         </div>
 
@@ -148,31 +148,30 @@ function Landing() {
             style={{ ...clash, letterSpacing: "-0.005em" }}
             className="mt-6 text-[40px] md:text-[54px] font-bold leading-[1.05] text-[#0B0B10] max-w-2xl"
           >
-            Get in the room in 3 simple steps
+            Get in the room of winners in 3 simple steps
           </h2>
           <p className="mt-4 text-[16px] text-[#5A5A62] max-w-xl">
-            From signup to your first live NY call — transparent, fast, and
-            built for traders who don't waste time.
+            The path to your trading consistency begins here.
           </p>
         </div>
 
         <div className="mt-14 grid md:grid-cols-3 gap-5">
           <Step
             n="01"
-            title="Subscribe"
-            body="Start the ₹499/month Blue Pill membership. Billed monthly via Razorpay, cancel anytime from your account."
+            title="Get Access"
+            body="Start the ₹499/month Blue Pill membership. Billed monthly, cancel anytime from your account."
             icon={<span className="text-[11px] font-bold tracking-widest">₹499</span>}
           />
           <Step
             n="02"
-            title="Claim your Discord role"
-            body="Link Discord in one click and the Blueprint bot drops the Blue Pill role, unlocking every private channel."
+            title="Claim your Premium Discord role"
+            body="Claim an exclusive premium Discord role where you'll get access for our members-only content."
             icon={<DiscordGlyph />}
           />
           <Step
             n="03"
-            title="Trade every NY session"
-            body="Live calls during New York, recorded VODs of every session, weekly Sunday reviews — all indexed for you."
+            title="Access Premium Education"
+            body="Premium IFVG Trading Education - Uncut and Raw directly from The Red Pill Mentorship recordings."
             icon={<Play className="size-4" fill="currentColor" />}
           />
         </div>
@@ -208,7 +207,7 @@ function Landing() {
                 </span>
                 <span className="text-[15px] text-[#6B6B72]">/month</span>
               </div>
-              <p className="mt-2 text-[13px] text-[#6B6B72]">Monthly · billed via Razorpay</p>
+              <p className="mt-2 text-[13px] text-[#6B6B72]">Monthly · billed securely via Razorpay</p>
               <Link
                 to="/auth"
                 className="mt-7 inline-flex items-center gap-2 h-13 px-7 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
@@ -220,11 +219,11 @@ function Landing() {
             </div>
             <ul className="grid grid-cols-1 gap-3">
               {[
-                "Full library of every recorded session",
-                "Live NY session calls, every trading day",
-                "Weekly Sunday market reviews",
+                "Premium IFVG Education - Even absolute beginners can understand.",
+                "Exclusive Trade alerts of setups that I personally take.",
+                "Exclusive Trading livestreams.",
                 "Members-only Discord with Blue Pill role",
-                "New courses and modules added continuously",
+                "Monthly one private call with me.",
                 "Cancel anytime, no lock-in",
               ].map((item) => (
                 <li
@@ -245,8 +244,8 @@ function Landing() {
       {/* FOOTER */}
       <footer className="relative z-10 border-t border-black/5">
         <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between text-[12px] text-[#6B6B72]">
-          <span>© Blueprint · IFVG · est. 2026</span>
-          <span>Built by Arjun</span>
+          <span>© Blueprint ·by Arjun IFVG&nbsp;</span>
+          <span>All rights reserved</span>
         </div>
       </footer>
     </div>

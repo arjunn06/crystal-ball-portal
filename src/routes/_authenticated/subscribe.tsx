@@ -82,9 +82,6 @@ function Subscribe() {
         }}
       />
 
-import { LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-
       <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">
         <div className="w-full max-w-xl">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">

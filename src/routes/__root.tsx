@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider, useTheme } from "@/components/theme-provider";
 import { ConfirmProvider } from "@/components/app/confirm";
+import { SmoothScroll } from "@/components/smooth-scroll";
 
 function NotFoundComponent() {
   return (
@@ -148,7 +149,9 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <ConfirmProvider>
-          <Outlet />
+          <SmoothScroll>
+            <Outlet />
+          </SmoothScroll>
           <ThemedToaster />
         </ConfirmProvider>
       </ThemeProvider>

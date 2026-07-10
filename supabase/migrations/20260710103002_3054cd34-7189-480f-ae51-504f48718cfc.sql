@@ -1,0 +1,1 @@
+DELETE FROM public.reserved_handles WHERE handle = 'arjun';

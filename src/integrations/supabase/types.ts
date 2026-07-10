@@ -236,6 +236,7 @@ export type Database = {
           discord_user_id: string | null
           email: string | null
           full_name: string | null
+          handle: string | null
           id: string
           updated_at: string
         }
@@ -247,6 +248,7 @@ export type Database = {
           discord_user_id?: string | null
           email?: string | null
           full_name?: string | null
+          handle?: string | null
           id: string
           updated_at?: string
         }
@@ -258,8 +260,21 @@ export type Database = {
           discord_user_id?: string | null
           email?: string | null
           full_name?: string | null
+          handle?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      reserved_handles: {
+        Row: {
+          handle: string
+        }
+        Insert: {
+          handle: string
+        }
+        Update: {
+          handle?: string
         }
         Relationships: []
       }

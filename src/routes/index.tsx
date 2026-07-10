@@ -196,9 +196,9 @@ function Landing() {
                 style={{ ...clash, letterSpacing: "-0.005em" }}
                 className="mt-4 text-[36px] md:text-[44px] font-bold leading-[1.08]"
               >
-                Everything you need
+                Take The Blue Pill, Neo.
                 <br />
-                to trade with the room.
+                The Gates are Open.
               </h3>
               <div className="mt-8 flex items-baseline gap-1">
                 <span style={clash} className="text-[56px] font-bold leading-none">

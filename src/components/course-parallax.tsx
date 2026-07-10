@@ -1,5 +1,5 @@
 "use client";
-import { useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { motion, useScroll, useTransform, useSpring, type MotionValue } from "motion/react";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
@@ -20,27 +20,46 @@ const MODULES: Module[] = [
 
 export function CourseParallax() {
   const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.4 });
+  const railRef = useRef<HTMLDivElement>(null);
+  const [distance, setDistance] = useState(0); // px the rail must translate
 
-  // Move the horizontal rail across ~85% of the total pinned scroll.
-  const x = useTransform(smooth, [0.05, 0.95], ["6vw", "-82%"]);
+  useLayoutEffect(() => {
+    const measure = () => {
+      const rail = railRef.current;
+      if (!rail) return;
+      const vw = window.innerWidth;
+      // rail scroll width minus what fits in the viewport, + a little breathing room
+      const d = Math.max(0, rail.scrollWidth - vw + 48);
+      setDistance(d);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
+  const smooth = useSpring(scrollYProgress, { stiffness: 140, damping: 32, mass: 0.35 });
+
+  // Translate the rail exactly by the measured distance over the full pinned scroll.
+  const x = useTransform(smooth, [0, 1], [0, -distance]);
 
   // Layered parallax on the sticky header/background.
-  const bgY = useTransform(smooth, [0, 1], ["-6%", "6%"]);
-  const eyebrowY = useTransform(smooth, [0, 1], [40, -40]);
-  const titleY = useTransform(smooth, [0, 1], [80, -80]);
-  const glowX = useTransform(smooth, [0, 1], ["-10%", "10%"]);
-  const counterOpacity = useTransform(smooth, [0.02, 0.08], [0, 1]);
+  const bgY = useTransform(smooth, [0, 1], ["-4%", "4%"]);
+  const titleY = useTransform(smooth, [0, 1], [30, -30]);
+  const glowX = useTransform(smooth, [0, 1], ["-8%", "8%"]);
+
+  // Section height = 1 viewport (for the pin) + horizontal distance to scroll.
+  const sectionHeight =
+    distance > 0 ? `calc(100vh + ${distance}px)` : `${MODULES.length * 45}vh`;
 
   return (
     <section
       id="inside"
       ref={ref}
       className="relative z-10 bg-[#0A0A0F]"
-      style={{ height: `${MODULES.length * 55 + 100}vh` }}
+      style={{ height: sectionHeight }}
     >
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div className="sticky top-0 h-screen overflow-hidden flex flex-col">
         {/* Parallax background layers */}
         <motion.div
           aria-hidden
@@ -62,51 +81,51 @@ export function CourseParallax() {
         <motion.div
           aria-hidden
           style={{ x: glowX }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[60vmin] rounded-full bg-[radial-gradient(circle,rgba(171,71,188,0.25),transparent_70%)] blur-3xl"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[55vmin] rounded-full bg-[radial-gradient(circle,rgba(171,71,188,0.22),transparent_70%)] blur-3xl"
         />
 
         {/* Header */}
-        <div className="relative z-10 mx-auto max-w-6xl px-6 pt-20 md:pt-24">
-          <motion.div
-            style={{ y: eyebrowY }}
-            className="flex items-center gap-3"
-          >
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pt-14 md:pt-16 shrink-0">
+          <div className="flex items-center gap-3">
             <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full border border-[#1B1B21] bg-[#101014]/60 backdrop-blur text-[#8B8B96] text-[11px] font-semibold tracking-[0.16em] uppercase">
               <span className="size-1.5 rounded-full bg-[#E53935]" />
               The Curriculum
               <span className="size-1.5 rounded-full bg-[#AB47BC]" />
             </div>
-            <motion.span
-              style={{ opacity: counterOpacity }}
-              className="ml-auto hidden md:inline text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B8B96]"
-            >
+            <span className="ml-auto hidden md:inline text-[11px] font-semibold tracking-[0.16em] uppercase text-[#8B8B96]">
               <ProgressCounter progress={smooth} total={MODULES.length} />
-            </motion.span>
-          </motion.div>
+            </span>
+          </div>
           <motion.h2
             style={{ y: titleY, ...clash, letterSpacing: "-0.01em" }}
-            className="mt-6 text-[44px] md:text-[68px] font-bold leading-[1.02] text-[#FAFAFA] max-w-3xl"
+            className="mt-4 text-[36px] md:text-[54px] font-bold leading-[1.02] text-[#FAFAFA] max-w-3xl"
           >
-            Nine modules.<br />
-            <span className="text-[#8B8B96]">One Blueprint.</span>
+            Nine modules. <span className="text-[#8B8B96]">One Blueprint.</span>
           </motion.h2>
         </div>
 
-        {/* Horizontal rail */}
-        <div className="absolute bottom-0 left-0 right-0 pb-16 md:pb-20">
-          <motion.div style={{ x }} className="flex gap-6 will-change-transform">
+        {/* Horizontal rail — fills remaining vertical space */}
+        <div className="relative z-10 flex-1 min-h-0 flex flex-col justify-center">
+          <motion.div
+            ref={railRef}
+            style={{ x }}
+            className="flex gap-6 will-change-transform px-6"
+          >
             {MODULES.map((m, i) => (
               <ModuleCard key={m.n} m={m} index={i} progress={smooth} total={MODULES.length} />
             ))}
           </motion.div>
-          {/* Scroll hint line */}
-          <div className="relative mx-6 mt-10 h-px bg-[#1B1B21] overflow-hidden">
+        </div>
+
+        {/* Progress bar */}
+        <div className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-8 shrink-0">
+          <div className="relative h-px bg-[#1B1B21] overflow-hidden">
             <motion.div
               style={{ scaleX: smooth, transformOrigin: "left" }}
               className="absolute inset-0 bg-gradient-to-r from-[#E53935] via-[#AB47BC] to-[#FFC107]"
             />
           </div>
-          <div className="mx-6 mt-3 flex items-center justify-between text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B6B72]">
+          <div className="mt-3 flex items-center justify-between text-[11px] font-semibold tracking-[0.16em] uppercase text-[#6B6B72]">
             <span>Scroll to explore</span>
             <span>{MODULES.length} modules · self-paced</span>
           </div>
@@ -138,7 +157,7 @@ function ModuleCard({
   return (
     <motion.article
       style={{ y, scale, opacity }}
-      className="relative shrink-0 w-[78vw] sm:w-[420px] md:w-[460px] h-[52vh] max-h-[440px] rounded-3xl border border-[#1B1B21] bg-[#101014] overflow-hidden"
+      className="relative shrink-0 w-[78vw] sm:w-[380px] md:w-[420px] h-[58vh] max-h-[520px] min-h-[380px] rounded-3xl border border-[#1B1B21] bg-[#101014] overflow-hidden"
     >
       {/* Accent glow */}
       <div

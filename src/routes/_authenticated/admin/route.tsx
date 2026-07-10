@@ -13,6 +13,7 @@ import {
   CreditCard,
   ArrowLeft,
   ScrollText,
+  Ticket,
 } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 
@@ -45,6 +46,7 @@ function AdminLayout() {
         { to: "/admin", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
         { to: "/admin/subscriptions", label: "Payments", icon: <CreditCard className="size-4" /> },
         { to: "/admin/users", label: "Users", icon: <Users className="size-4" /> },
+        { to: "/admin/promos", label: "Promo codes", icon: <Ticket className="size-4" /> },
         { to: "/admin/discord", label: "Discord", icon: <DiscordIcon className="size-4" /> },
         { to: "/admin/audit", label: "Audit log", icon: <ScrollText className="size-4" /> },
       ],

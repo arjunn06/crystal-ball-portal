@@ -294,7 +294,12 @@ export async function recordPromoRedemption(
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
       .from("promo_redemptions")
-      .insert({ promo_id: promoId, user_id: userId, subscription_id: subscriptionId, details });
+      .insert({
+        promo_id: promoId,
+        user_id: userId,
+        subscription_id: subscriptionId,
+        details: details as any,
+      });
     // Increment counter atomically-ish (best effort).
     const { data: promo } = await supabaseAdmin
       .from("promo_codes")

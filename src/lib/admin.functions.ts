@@ -246,3 +246,80 @@ export const adminBanUser = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/**
+ * Invite a user by email and grant them a manual trial subscription that lasts
+ * `trial_days` from now. Used to port members from the previous platform: their
+ * trial should match their existing renewal date, and they can subscribe
+ * normally after the trial ends.
+ */
+export const adminInviteTrialUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        email: z.string().trim().toLowerCase().email().max(255),
+        trial_days: z.number().int().min(1).max(365),
+        redirect_to: z.string().url().optional(),
+        full_name: z.string().trim().max(120).optional(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Find existing auth user by email (paginate defensively).
+    let existingUserId: string | null = null;
+    for (let page = 1; page <= 20 && !existingUserId; page++) {
+      const { data: list, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage: 200,
+      });
+      if (error) throw new Error(error.message);
+      const match = list.users.find((u) => u.email?.toLowerCase() === data.email);
+      if (match) existingUserId = match.id;
+      if (list.users.length < 200) break;
+    }
+
+    let userId = existingUserId;
+    let invited = false;
+
+    if (!userId) {
+      const { data: inv, error: invErr } =
+        await supabaseAdmin.auth.admin.inviteUserByEmail(data.email, {
+          redirectTo: data.redirect_to,
+          data: data.full_name ? { full_name: data.full_name } : undefined,
+        });
+      if (invErr || !inv?.user) throw new Error(invErr?.message ?? "Could not send invite.");
+      userId = inv.user.id;
+      invited = true;
+    } else {
+      // Existing user — check they don't already have an active paid subscription.
+      const { data: sub } = await supabaseAdmin
+        .from("subscriptions")
+        .select("status, razorpay_subscription_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (sub?.status === "active" && sub.razorpay_subscription_id) {
+        throw new Error("User already has an active paid subscription.");
+      }
+    }
+
+    const periodEnd = new Date(Date.now() + data.trial_days * 86_400_000).toISOString();
+    const { error: subErr } = await supabaseAdmin
+      .from("subscriptions")
+      .upsert(
+        {
+          user_id: userId,
+          status: "active",
+          current_period_end: periodEnd,
+          cancelled_at: null,
+          razorpay_subscription_id: null,
+        },
+        { onConflict: "user_id" },
+      );
+    if (subErr) throw new Error(subErr.message);
+
+    return { ok: true, user_id: userId, invited, trial_ends: periodEnd };
+  });

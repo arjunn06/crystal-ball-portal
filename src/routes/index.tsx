@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Play, Check, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import { LogoIcon } from "@/components/logo-icon";
 import { CourseParallax } from "@/components/course-parallax";
 
@@ -43,34 +44,8 @@ function Landing() {
       />
 
       {/* NAV */}
-      <header className="relative z-10">
-        <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <LogoIcon className="size-9 text-black" />
-          </Link>
-          <nav className="hidden md:flex items-center gap-8 text-[14px] font-medium text-[#1A1A1F]">
-            <a href="#inside" className="hover:opacity-70 transition-opacity">
-              What's Inside
-            </a>
-            <a href="#how" className="hover:opacity-70 transition-opacity">
-              How it Works
-            </a>
-            <a href="#pricing" className="hover:opacity-70 transition-opacity">
-              Pricing
-            </a>
-            <Link to="/auth" className="hover:opacity-70 transition-opacity">
-              Sign in
-            </Link>
-          </nav>
-          <Link
-            to="/auth"
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full bg-[#0B0B10] text-white text-[13.5px] font-semibold hover:bg-black transition-colors shadow-[0_4px_16px_-4px_rgba(0,0,0,0.35)]"
-          >
-            Join Blueprint
-            <ArrowRight className="size-4" />
-          </Link>
-        </div>
-      </header>
+      <SiteNav />
+      <div className="h-20" aria-hidden />
 
       {/* HERO */}
       <section className="relative z-10 mx-auto max-w-7xl px-6 pt-10 lg:pt-16 pb-24 grid lg:grid-cols-2 gap-12 lg:gap-6 items-center">
@@ -255,6 +230,64 @@ function Landing() {
 }
 
 /* ---------- floating trading cards ---------- */
+
+function SiteNav() {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleAnchor = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 pointer-events-none">
+      <div
+        className={`mx-auto flex items-center justify-between transition-all duration-300 ease-out pointer-events-auto ${
+          scrolled
+            ? "mt-3 max-w-4xl px-3 h-14 rounded-full bg-white/95 backdrop-blur border border-black/5 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.18)]"
+            : "mt-0 max-w-7xl px-6 h-20 bg-transparent"
+        }`}
+      >
+        <Link to="/" className={`flex items-center gap-2.5 ${scrolled ? "pl-3" : ""}`}>
+          <LogoIcon className={`text-black transition-all ${scrolled ? "size-7" : "size-9"}`} />
+        </Link>
+        <nav
+          className={`hidden md:flex items-center text-[14px] font-medium text-[#1A1A1F] ${
+            scrolled ? "gap-6" : "gap-8"
+          }`}
+        >
+          <a href="#inside" onClick={(e) => handleAnchor(e, "inside")} className="hover:opacity-70 transition-opacity">
+            Course Overview
+          </a>
+          <a href="#how" onClick={(e) => handleAnchor(e, "how")} className="hover:opacity-70 transition-opacity">
+            How it Works
+          </a>
+          <a href="#pricing" onClick={(e) => handleAnchor(e, "pricing")} className="hover:opacity-70 transition-opacity">
+            Pricing
+          </a>
+          <Link to="/auth" className="hover:opacity-70 transition-opacity">
+            Sign in
+          </Link>
+        </nav>
+        <Link
+          to="/auth"
+          className={`inline-flex items-center gap-2 rounded-full bg-[#0B0B10] text-white font-semibold hover:bg-black transition-all shadow-[0_4px_16px_-4px_rgba(0,0,0,0.35)] ${
+            scrolled ? "h-10 px-4 text-[12.5px]" : "h-11 px-5 text-[13.5px]"
+          }`}
+        >
+          Join Blueprint
+          <ArrowRight className="size-4" />
+        </Link>
+      </div>
+    </header>
+  );
+}
 
 function ChartCard() {
   return (

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { resolvePromoForCheckout, recordPromoRedemption } from "@/lib/promos.functions";
 
 /**
  * Create (or reuse) a Razorpay subscription for the current user and return
@@ -8,8 +9,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
  */
 export const createSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d) =>
+    z.object({ promo_code: z.string().trim().min(1).max(40).optional().nullable() }).optional().parse(d),
+  )
+  .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
+    const promo = await resolvePromoForCheckout(userId, data?.promo_code ?? null);
     const planId = process.env.RAZORPAY_PLAN_ID;
     const keyId = process.env.RAZORPAY_KEY_ID;
     const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -22,32 +27,61 @@ export const createSubscription = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing?.status === "active") throw new Error("You already have an active membership.");
 
+    const body: Record<string, unknown> = {
+      plan_id: planId,
+      total_count: 120,
+      customer_notify: 1,
+      notes: { user_id: userId, promo_code: promo?.code ?? null },
+    };
+    let trialEndsAt: string | null = null;
+    if (promo) {
+      if (promo.discount_type === "trial_days") {
+        const startAt = Math.floor(Date.now() / 1000) + promo.discount_value * 86400;
+        body.start_at = startAt;
+        trialEndsAt = new Date(startAt * 1000).toISOString();
+      } else if (promo.razorpay_offer_id) {
+        body.offer_id = promo.razorpay_offer_id;
+      }
+    }
+
     const auth = "Basic " + Buffer.from(`${keyId}:${secret}`).toString("base64");
     const res = await fetch("https://api.razorpay.com/v1/subscriptions", {
       method: "POST",
       headers: { Authorization: auth, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        plan_id: planId,
-        total_count: 120,
-        customer_notify: 1,
-        notes: { user_id: userId },
-      }),
+      body: JSON.stringify(body),
     });
-    const body = await res.json();
+    const respBody = await res.json();
     if (!res.ok) {
-      console.error("Razorpay error", body);
-      throw new Error(body?.error?.description ?? "Could not start subscription.");
+      console.error("Razorpay error", respBody);
+      throw new Error(respBody?.error?.description ?? "Could not start subscription.");
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
       .from("subscriptions")
       .upsert(
-        { user_id: userId, razorpay_subscription_id: body.id, status: "created" },
+        {
+          user_id: userId,
+          razorpay_subscription_id: respBody.id,
+          status: trialEndsAt ? "active" : "created",
+          current_period_end: trialEndsAt,
+        },
         { onConflict: "user_id" },
       );
 
-    return { subscriptionId: body.id as string, keyId };
+    if (promo) {
+      await recordPromoRedemption(userId, promo.id, respBody.id as string, {
+        discount_type: promo.discount_type,
+        discount_value: promo.discount_value,
+      });
+    }
+
+    return {
+      subscriptionId: respBody.id as string,
+      keyId,
+      trialEndsAt,
+      appliedPromo: promo ? { code: promo.code, discount_type: promo.discount_type, discount_value: promo.discount_value } : null,
+    };
   });
 
 /**

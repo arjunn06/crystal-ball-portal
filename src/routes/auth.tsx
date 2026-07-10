@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { LogoIcon } from "@/components/logo-icon";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -19,66 +20,107 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-const schema = z.object({
-  email: z.string().trim().email("Enter a valid email").max(255),
-  password: z.string().min(8, "At least 8 characters").max(72),
-});
+const emailSchema = z.string().trim().email("Enter a valid email").max(255);
+
+async function routeAfterLogin(navigate: ReturnType<typeof useNavigate>, userId: string) {
+  const { data } = await supabase
+    .from("profiles")
+    .select("handle")
+    .eq("id", userId)
+    .maybeSingle();
+  if (!data?.handle) navigate({ to: "/onboarding", replace: true });
+  else navigate({ to: "/app", replace: true });
+}
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signup");
+  const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [code, setCode] = useState("");
+  const [sending, setSending] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app" });
+      if (data.session) routeAfterLogin(navigate, data.session.user.id);
     });
   }, [navigate]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function sendCode(targetEmail: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email: targetEmail,
+      options: { shouldCreateUser: true },
+    });
+    if (error) throw error;
+  }
+
+  async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const parsed = schema.safeParse({ email, password });
+    const parsed = emailSchema.safeParse(email);
     if (!parsed.success) {
       toast.error(parsed.error.errors[0].message);
       return;
     }
-    setLoading(true);
+    setSending(true);
     try {
-      if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email: parsed.data.email,
-          password: parsed.data.password,
-          options: { emailRedirectTo: window.location.origin + "/app" },
-        });
-        if (error) throw error;
-        toast.success("Account created.");
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email: parsed.data.email,
-          password: parsed.data.password,
-        });
-        if (error) throw error;
-      }
-      navigate({ to: "/app" });
+      await sendCode(parsed.data);
+      setEmail(parsed.data);
+      setStep("code");
+      toast.success("We sent a 6-digit code to your email.");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Something went wrong");
+      toast.error(err instanceof Error ? err.message : "Could not send code");
     } finally {
-      setLoading(false);
+      setSending(false);
+    }
+  }
+
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(code)) {
+      toast.error("Enter the 6-digit code");
+      return;
+    }
+    setVerifying(true);
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: code,
+        type: "email",
+      });
+      if (error) throw error;
+      if (!data.session) throw new Error("No session created");
+      await routeAfterLogin(navigate, data.session.user.id);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Invalid or expired code");
+    } finally {
+      setVerifying(false);
+    }
+  }
+
+  async function handleResend() {
+    setResending(true);
+    try {
+      await sendCode(email);
+      toast.success("New code sent.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not resend code");
+    } finally {
+      setResending(false);
     }
   }
 
   async function handleGoogle() {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/app",
+      redirect_uri: window.location.origin + "/auth/callback",
     });
     if (result.error) {
       toast.error("Google sign-in failed");
       return;
     }
     if (result.redirected) return;
-    navigate({ to: "/app" });
+    const { data } = await supabase.auth.getSession();
+    if (data.session) await routeAfterLogin(navigate, data.session.user.id);
   }
 
   return (
@@ -93,65 +135,113 @@ function AuthPage() {
       </header>
       <div className="flex-1 flex items-center justify-center px-6 py-14">
         <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {mode === "signup" ? "Create your account" : "Welcome back"}
-          </h1>
-          <p className="mt-1.5 text-sm text-muted-foreground">
-            {mode === "signup"
-              ? "One membership. Every recorded session, live calls, and the members-only Discord."
-              : "Sign in to your Blueprint membership."}
-          </p>
+          {step === "email" ? (
+            <>
+              <h1 className="text-2xl font-semibold tracking-tight">
+                Sign in to Blueprint
+              </h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                Enter your email — we'll send you a one-time code. No password needed.
+              </p>
 
-          <Button
-            onClick={handleGoogle}
-            variant="outline"
-            className="mt-6 w-full h-10 rounded-lg bg-surface border-border hover:bg-hover"
-          >
-            Continue with Google
-          </Button>
+              <Button
+                onClick={handleGoogle}
+                variant="outline"
+                className="mt-6 w-full h-10 rounded-lg bg-surface border-border hover:bg-hover"
+              >
+                Continue with Google
+              </Button>
 
-          <div className="my-5 flex items-center gap-3 text-[11px] text-muted-foreground uppercase tracking-wider">
-            <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
-          </div>
+              <div className="my-5 flex items-center gap-3 text-[11px] text-muted-foreground uppercase tracking-wider">
+                <div className="h-px flex-1 bg-border" /> or <div className="h-px flex-1 bg-border" />
+              </div>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <div>
-              <Label htmlFor="email" className="text-xs text-muted-foreground">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5 bg-surface border-border h-10 rounded-lg"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password" className="text-xs text-muted-foreground">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1.5 bg-surface border-border h-10 rounded-lg"
-              />
-            </div>
-            <Button type="submit" disabled={loading} className="w-full h-10 rounded-lg mt-2">
-              {loading ? "Please wait…" : mode === "signup" ? "Create account" : "Sign in"}
-            </Button>
-          </form>
+              <form onSubmit={handleEmailSubmit} className="space-y-3">
+                <div>
+                  <Label htmlFor="email" className="text-xs text-muted-foreground">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    inputMode="email"
+                    required
+                    autoFocus
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="mt-1.5 bg-surface border-border h-10 rounded-lg"
+                  />
+                </div>
+                <Button type="submit" disabled={sending} className="w-full h-10 rounded-lg mt-2">
+                  {sending ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Sending…
+                    </>
+                  ) : (
+                    "Send code"
+                  )}
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  setCode("");
+                  setStep("email");
+                }}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
+              >
+                <ArrowLeft className="size-3.5" />
+                Use a different email
+              </button>
+              <h1 className="text-2xl font-semibold tracking-tight">Check your email</h1>
+              <p className="mt-1.5 text-sm text-muted-foreground">
+                We sent a 6-digit code to <span className="text-foreground font-medium">{email}</span>.
+              </p>
 
-          <button
-            type="button"
-            onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            className="mt-6 w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            {mode === "signin" ? "New to Blueprint? Create an account" : "Already have an account? Sign in"}
-          </button>
+              <form onSubmit={handleVerify} className="mt-6 space-y-3">
+                <div>
+                  <Label htmlFor="code" className="text-xs text-muted-foreground">Verification code</Label>
+                  <Input
+                    id="code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    required
+                    autoFocus
+                    autoComplete="one-time-code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="123456"
+                    className="mt-1.5 bg-surface border-border h-12 rounded-lg text-center text-xl font-mono tracking-[0.4em]"
+                  />
+                </div>
+                <Button type="submit" disabled={verifying} className="w-full h-10 rounded-lg mt-2">
+                  {verifying ? (
+                    <>
+                      <Loader2 className="mr-2 size-4 animate-spin" />
+                      Verifying…
+                    </>
+                  ) : (
+                    "Continue"
+                  )}
+                </Button>
+              </form>
+
+              <button
+                type="button"
+                onClick={handleResend}
+                disabled={resending}
+                className="mt-6 w-full text-center text-xs text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+              >
+                {resending ? "Resending…" : "Didn't get it? Resend code"}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

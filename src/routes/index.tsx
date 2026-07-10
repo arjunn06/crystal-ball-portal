@@ -255,7 +255,7 @@ function SiteNav() {
         }`}
       >
         <Link to="/" className={`flex items-center gap-2.5 ${scrolled ? "pl-3" : ""}`}>
-          <LogoIcon className={`text-black transition-all ${scrolled ? "size-7" : "size-9"}`} />
+          <LogoIcon className={`text-black transition-all ${scrolled ? "size-8" : "size-10"}`} />
         </Link>
         <nav
           className={`hidden md:flex items-center text-[14px] font-medium text-[#1A1A1F] ${

@@ -85,6 +85,48 @@ export type Database = {
         }
         Relationships: []
       }
+      discord_config: {
+        Row: {
+          bot_installed_at: string | null
+          created_at: string
+          guild_icon: string | null
+          guild_id: string | null
+          guild_name: string | null
+          id: number
+          oauth_state: string | null
+          oauth_state_expires_at: string | null
+          role_ids: string[]
+          roles_cache: Json
+          updated_at: string
+        }
+        Insert: {
+          bot_installed_at?: string | null
+          created_at?: string
+          guild_icon?: string | null
+          guild_id?: string | null
+          guild_name?: string | null
+          id?: number
+          oauth_state?: string | null
+          oauth_state_expires_at?: string | null
+          role_ids?: string[]
+          roles_cache?: Json
+          updated_at?: string
+        }
+        Update: {
+          bot_installed_at?: string | null
+          created_at?: string
+          guild_icon?: string | null
+          guild_id?: string | null
+          guild_name?: string | null
+          id?: number
+          oauth_state?: string | null
+          oauth_state_expires_at?: string | null
+          role_ids?: string[]
+          roles_cache?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       discord_role_claims: {
         Row: {
           actioned_at: string | null

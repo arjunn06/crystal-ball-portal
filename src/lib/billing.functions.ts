@@ -100,18 +100,94 @@ export const verifySubscriptionPayment = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    const keyId = process.env.RAZORPAY_KEY_ID;
     const secret = process.env.RAZORPAY_KEY_SECRET;
-    if (!secret) throw new Error("Payments are not configured.");
+    if (!keyId || !secret) throw new Error("Payments are not configured.");
     const { createHmac } = await import("crypto");
     const payload = `${data.razorpay_payment_id}|${data.razorpay_subscription_id}`;
     const expected = createHmac("sha256", secret).update(payload).digest("hex");
     if (expected !== data.razorpay_signature) throw new Error("Signature verification failed.");
 
+    // Pull the authoritative state from Razorpay so we also store the correct
+    // current_period_end alongside status.
+    const patch: { status: string; current_period_end?: string } = { status: "active" };
+    try {
+      const auth = "Basic " + Buffer.from(`${keyId}:${secret}`).toString("base64");
+      const res = await fetch(
+        `https://api.razorpay.com/v1/subscriptions/${data.razorpay_subscription_id}`,
+        { headers: { Authorization: auth } },
+      );
+      if (res.ok) {
+        const sub = (await res.json()) as { current_end?: number; charge_at?: number };
+        const end = sub.current_end ?? sub.charge_at;
+        if (end) patch.current_period_end = new Date(end * 1000).toISOString();
+      }
+    } catch (err) {
+      console.warn("verifySubscriptionPayment: fetch sub failed", err);
+    }
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
       .from("subscriptions")
-      .update({ status: "active" })
+      .update(patch)
       .eq("razorpay_subscription_id", data.razorpay_subscription_id)
       .eq("user_id", context.userId);
     return { ok: true };
+  });
+
+/**
+ * Reconcile the current user's subscription against Razorpay. Handles the
+ * "user paid but sync never landed" case (closed tab, network drop, webhook
+ * race). Safe to call on subscribe-page mount, on Razorpay modal dismiss,
+ * and as a short poll after checkout.
+ */
+export const reconcileSubscription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!keyId || !secret) return { status: null, changed: false };
+
+    const { data: sub } = await supabase
+      .from("subscriptions")
+      .select("status, razorpay_subscription_id, current_period_end")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (!sub?.razorpay_subscription_id) return { status: null, changed: false };
+
+    const auth = "Basic " + Buffer.from(`${keyId}:${secret}`).toString("base64");
+    const res = await fetch(
+      `https://api.razorpay.com/v1/subscriptions/${sub.razorpay_subscription_id}`,
+      { headers: { Authorization: auth } },
+    );
+    if (!res.ok) return { status: sub.status, changed: false };
+    const remote = (await res.json()) as {
+      status?: string;
+      current_end?: number;
+      charge_at?: number;
+      ended_at?: number;
+    };
+
+    // Map Razorpay's states to ours.
+    const active = ["active", "authenticated", "charged", "resumed"].includes(remote.status ?? "");
+    const cancelled = ["cancelled", "completed", "halted", "paused", "expired"].includes(
+      remote.status ?? "",
+    );
+    const newStatus = active ? "active" : cancelled ? "cancelled" : sub.status;
+    const end = remote.current_end ?? remote.charge_at;
+    const newEnd = end ? new Date(end * 1000).toISOString() : sub.current_period_end;
+
+    const patch: { status?: string; current_period_end?: string; cancelled_at?: string } = {};
+    if (newStatus !== sub.status) patch.status = newStatus ?? undefined;
+    if (newEnd && newEnd !== sub.current_period_end) patch.current_period_end = newEnd;
+    if (cancelled && sub.status !== "cancelled") patch.cancelled_at = new Date().toISOString();
+
+    let changed = false;
+    if (Object.keys(patch).length > 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin.from("subscriptions").update(patch).eq("user_id", userId);
+      changed = true;
+    }
+    return { status: newStatus, changed };
   });

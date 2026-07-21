@@ -74,18 +74,20 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
         }
 
         try {
-          const patch: Record<string, unknown> = activating
+          const patch: {
+            status?: string;
+            current_period_end?: string;
+            cancelled_at?: string;
+          } = activating
             ? {
                 status: "active",
-                current_period_end: s?.current_end
-                  ? new Date(s.current_end * 1000).toISOString()
+                ...(s?.current_end
+                  ? { current_period_end: new Date(s.current_end * 1000).toISOString() }
                   : s?.charge_at
-                    ? new Date(s.charge_at * 1000).toISOString()
-                    : undefined,
+                    ? { current_period_end: new Date(s.charge_at * 1000).toISOString() }
+                    : {}),
               }
             : { status: "cancelled", cancelled_at: new Date().toISOString() };
-          // Strip undefineds so we don't overwrite existing values with null.
-          Object.keys(patch).forEach((k) => patch[k] === undefined && delete patch[k]);
 
           const { data: updated, error: updErr } = await supabaseAdmin
             .from("subscriptions")

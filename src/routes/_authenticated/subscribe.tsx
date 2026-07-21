@@ -1,7 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { createSubscription, verifySubscriptionPayment } from "@/lib/billing.functions";
+import {
+  createSubscription,
+  verifySubscriptionPayment,
+  reconcileSubscription,
+} from "@/lib/billing.functions";
 import { validatePromoCode } from "@/lib/promos.functions";
 import { getAccountOverview } from "@/lib/account.functions";
 import { useEffect, useState } from "react";
@@ -22,11 +26,38 @@ export const Route = createFileRoute("/_authenticated/subscribe")({
 
 function Subscribe() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const acct = useServerFn(getAccountOverview);
   const create = useServerFn(createSubscription);
   const verify = useServerFn(verifySubscriptionPayment);
+  const reconcile = useServerFn(reconcileSubscription);
   const validate = useServerFn(validatePromoCode);
-  const { data } = useQuery({ queryKey: ["account", "overview"], queryFn: () => acct() });
+  const { data, refetch } = useQuery({
+    queryKey: ["account", "overview"],
+    queryFn: () => acct(),
+  });
+
+  // Poll reconcile until Razorpay reports active (or we give up). Handles
+  // "user paid but the client handler never ran" and webhook races.
+  async function pollReconcile(maxMs = 30_000) {
+    const started = Date.now();
+    let delay = 1500;
+    while (Date.now() - started < maxMs) {
+      try {
+        const r = await reconcile();
+        if (r.status === "active") {
+          await qc.invalidateQueries({ queryKey: ["account", "overview"] });
+          return true;
+        }
+      } catch {
+        /* keep polling */
+      }
+      await new Promise((r) => setTimeout(r, delay));
+      delay = Math.min(delay + 500, 4000);
+    }
+    await refetch();
+    return false;
+  }
   const [codeInput, setCodeInput] = useState("");
   const [applied, setApplied] = useState<{
     code: string;
@@ -52,6 +83,19 @@ function Subscribe() {
   useEffect(() => {
     if (data?.isSubscribed) navigate({ to: "/app" });
   }, [data?.isSubscribed, navigate]);
+
+  // On mount, if there's a pending subscription row, sync with Razorpay in
+  // case a previous checkout succeeded but never wrote back locally.
+  useEffect(() => {
+    if (data?.subscription?.razorpay_subscription_id && data.subscription.status !== "active") {
+      reconcile()
+        .then((r) => {
+          if (r.changed) qc.invalidateQueries({ queryKey: ["account", "overview"] });
+        })
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.subscription?.razorpay_subscription_id]);
 
   const mut = useMutation({
     mutationFn: () => create({ data: { promo_code: applied?.code ?? null } }),
@@ -83,10 +127,28 @@ function Subscribe() {
                 },
               });
               toast.success("You're in.");
+              await qc.invalidateQueries({ queryKey: ["account", "overview"] });
               navigate({ to: "/app" });
             } catch (e: any) {
-              toast.error(e.message ?? "Payment verification failed");
+              // Fall back to server-side reconciliation — the webhook or a
+              // Razorpay poll will confirm the charge.
+              toast.message("Confirming your payment…");
+              const ok = await pollReconcile();
+              if (ok) {
+                toast.success("You're in.");
+                navigate({ to: "/app" });
+              } else {
+                toast.error(e.message ?? "Payment verification failed");
+              }
             }
+          },
+          modal: {
+            ondismiss: () => {
+              // User closed checkout — if a charge did land, sync it.
+              pollReconcile(15_000).then((ok) => {
+                if (ok) navigate({ to: "/app" });
+              });
+            },
           },
         });
       } catch (e: any) {

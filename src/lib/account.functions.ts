@@ -54,8 +54,19 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
       .select("razorpay_subscription_id, status")
       .eq("user_id", userId)
       .maybeSingle();
-    if (!sub?.razorpay_subscription_id) throw new Error("No active subscription.");
+    if (!sub) throw new Error("No active subscription.");
     if (sub.status === "cancelled") throw new Error("Already cancelled.");
+
+    // Manual / invited trials have no Razorpay subscription — just mark them
+    // cancelled locally; access continues until current_period_end.
+    if (!sub.razorpay_subscription_id) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("subscriptions")
+        .update({ cancelled_at: new Date().toISOString() })
+        .eq("user_id", userId);
+      return { ok: true };
+    }
 
     const id = process.env.RAZORPAY_KEY_ID;
     const secret = process.env.RAZORPAY_KEY_SECRET;
@@ -69,7 +80,11 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
         body: JSON.stringify({ cancel_at_cycle_end: 1 }),
       },
     );
-    if (!res.ok) throw new Error("Failed to cancel with payment provider.");
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      console.error("Razorpay cancel failed", res.status, body);
+      throw new Error("Failed to cancel with payment provider.");
+    }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin

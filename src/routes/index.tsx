@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Play, Check, TrendingUp } from "lucide-react";
+import { ArrowRight, Play, Check } from "lucide-react";
+import courseImg from "@/assets/course-curriculum.png.asset.json";
+import discordImg from "@/assets/discord-preview.png.asset.json";
 import { useEffect, useState } from "react";
 import { LogoIcon } from "@/components/logo-icon";
 import { CourseParallax } from "@/components/course-parallax";
@@ -305,9 +307,6 @@ function SiteNav() {
     </header>
   );
 }
-
-import courseImg from "@/assets/course-curriculum.png.asset.json";
-import discordImg from "@/assets/discord-preview.png.asset.json";
 
 function HeroShowcase() {
   return (

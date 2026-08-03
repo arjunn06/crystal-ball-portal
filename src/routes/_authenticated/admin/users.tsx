@@ -52,7 +52,7 @@ type Row = {
   subscription: { status: string; current_period_end: string | null; cancelled_at: string | null } | null;
 };
 
-type Tab = "all" | "members" | "visitors";
+type Tab = "all" | "members";
 
 type Membership = {
   id: string;
@@ -92,7 +92,6 @@ function UsersPage() {
   const rows: Row[] = useMemo(() => {
     let list = (data ?? []) as Row[];
     if (tab === "members") list = list.filter((u) => u.subscription);
-    if (tab === "visitors") list = list.filter((u) => !u.subscription);
     if (statusFilter) {
       list = list.filter((u) => statusFor(u) === statusFilter);
     }
@@ -123,7 +122,7 @@ function UsersPage() {
     <>
       {/* Tabs */}
       <div className="flex items-center gap-6 border-b border-border/70 mb-4 text-sm">
-        {(["all", "members", "visitors"] as Tab[]).map((t) => (
+        {(["all", "members"] as Tab[]).map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -134,7 +133,7 @@ function UsersPage() {
                 : "border-transparent text-muted-foreground hover:text-foreground")
             }
           >
-            {t === "all" ? "Users" : t === "members" ? "Memberships" : "Visitors"}
+            {t === "all" ? "All users" : "Active memberships"}
           </button>
         ))}
       </div>

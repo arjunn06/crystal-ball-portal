@@ -11,6 +11,7 @@ import {
   adminSetUserRole,
   adminListMemberships,
 } from "@/lib/admin.functions";
+import { adminGetUserDetail } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw, UserPlus, Loader2, CalendarDays, Trash2, Shield, ShieldOff } from "lucide-react";
@@ -31,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/app/confirm";
 import { toast } from "sonner";
@@ -85,6 +87,7 @@ function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [joinedFilter, setJoinedFilter] = useState<JoinedOpt | null>("Recently joined");
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const rows: Row[] = useMemo(() => {
     let list = (data ?? []) as Row[];
@@ -138,7 +141,7 @@ function UsersPage() {
 
       {/* Filter row */}
       {tab === "members" ? (
-        <MembershipsTable />
+        <MembershipsTable onSelect={setDetailId} />
       ) : (
       <>
       <div className="flex items-center justify-between mb-4">
@@ -213,7 +216,11 @@ function UsersPage() {
                 const initials = (u.full_name ?? u.email ?? "··").slice(0, 2).toUpperCase();
                 const status = statusFor(u);
                 return (
-                  <tr key={u.id} className="hover:bg-hover/40 text-[13px]">
+                  <tr
+                    key={u.id}
+                    onClick={() => setDetailId(u.id)}
+                    className="hover:bg-hover/40 text-[13px] cursor-pointer"
+                  >
                     <Td>
                       <div className="flex items-center gap-2">
                         {u.avatar_url ? (
@@ -247,7 +254,7 @@ function UsersPage() {
                         ? new Date(u.subscription.current_period_end).toLocaleDateString()
                         : "—"}
                     </Td>
-                    <Td>
+                    <Td onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         <IconBtn href={u.email ? `mailto:${u.email}` : undefined}>
                           <Mail className="size-3.5" />
@@ -259,7 +266,7 @@ function UsersPage() {
                         )}
                       </div>
                     </Td>
-                    <Td>
+                    <Td onClick={(e) => e.stopPropagation()}>
                       <RowMenu user={u} status={status} />
                     </Td>
                   </tr>
@@ -283,11 +290,12 @@ function UsersPage() {
       )}
 
       <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
+      <UserDetailPane userId={detailId} onClose={() => setDetailId(null)} />
     </>
   );
 }
 
-function MembershipsTable() {
+function MembershipsTable({ onSelect }: { onSelect: (id: string) => void }) {
   const fn = useServerFn(adminListMemberships);
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "memberships"],

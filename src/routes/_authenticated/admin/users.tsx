@@ -344,7 +344,11 @@ function MembershipsTable({ onSelect }: { onSelect: (id: string) => void }) {
                   .toUpperCase();
                 const since = m.first_payment_at ?? m.created_at;
                 return (
-                  <tr key={m.id} className="hover:bg-hover/40 text-[13px]">
+                  <tr
+                    key={m.id}
+                    onClick={() => onSelect(m.user_id)}
+                    className="hover:bg-hover/40 text-[13px] cursor-pointer"
+                  >
                     <Td>
                       <div className="flex items-center gap-2">
                         {m.profile?.avatar_url ? (

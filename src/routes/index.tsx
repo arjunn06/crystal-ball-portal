@@ -117,9 +117,7 @@ function Landing() {
 
         {/* Right — floating tilted trading cards */}
         <div className="relative h-[560px] hidden lg:block">
-          <ChartCard />
-          <LiveSessionCard />
-          <DiscordRolesCard />
+          <HeroShowcase />
         </div>
       </section>
 

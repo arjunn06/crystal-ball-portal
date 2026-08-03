@@ -313,7 +313,7 @@ function HeroShowcase() {
     <div className="relative h-full w-full">
       {/* Discord community — back layer, top right */}
       <div
-        className="absolute right-0 top-4 w-[420px] rounded-2xl overflow-hidden border border-black/5 bg-white shadow-[0_40px_80px_-30px_rgba(0,0,0,0.35)]"
+        className="absolute -right-6 top-0 w-[520px] rounded-2xl overflow-hidden border border-black/10 bg-white ring-1 ring-black/5 shadow-[0_50px_90px_-25px_rgba(11,11,16,0.5),0_18px_40px_-20px_rgba(11,11,16,0.35)]"
         style={{ transform: "rotate(2deg)" }}
       >
         <img
@@ -326,7 +326,7 @@ function HeroShowcase() {
 
       {/* Course curriculum — front layer, bottom left */}
       <div
-        className="absolute left-0 bottom-6 w-[250px] rounded-2xl overflow-hidden border border-black/5 bg-white shadow-[0_40px_80px_-25px_rgba(0,0,0,0.4)]"
+        className="absolute left-0 bottom-6 w-[260px] rounded-2xl overflow-hidden border border-black/10 bg-white ring-1 ring-black/5 shadow-[0_55px_100px_-25px_rgba(11,11,16,0.55),0_20px_45px_-20px_rgba(11,11,16,0.35)]"
         style={{ transform: "rotate(-3deg)" }}
       >
         <img

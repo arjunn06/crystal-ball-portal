@@ -306,182 +306,40 @@ function SiteNav() {
   );
 }
 
-function ChartCard() {
+import courseImg from "@/assets/course-curriculum.png.asset.json";
+import discordImg from "@/assets/discord-preview.png.asset.json";
+
+function HeroShowcase() {
   return (
-    <div
-      className="absolute top-2 right-0 w-[360px] rounded-2xl bg-white border border-black/5 p-4 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.25)]"
-      style={{ transform: "rotate(4deg)" }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span style={clash} className="text-[13px] font-bold">
-            NQ · 5m
-          </span>
-          <span className="text-[10px] font-semibold text-[#E53935] bg-[#E53935]/10 px-1.5 py-0.5 rounded">
-            IFVG
-          </span>
-        </div>
-        <span className="text-[10px] font-semibold text-[#6B6B72]">NY · 09:42</span>
+    <div className="relative h-full w-full">
+      {/* Discord community — back layer, top right */}
+      <div
+        className="absolute right-0 top-4 w-[420px] rounded-2xl overflow-hidden border border-black/5 bg-white shadow-[0_40px_80px_-30px_rgba(0,0,0,0.35)]"
+        style={{ transform: "rotate(2deg)" }}
+      >
+        <img
+          src={discordImg.url}
+          alt="Members-only Discord with premium alerts from Arjun IFVG"
+          loading="lazy"
+          className="block w-full h-auto"
+        />
       </div>
-      <Candles />
-      <div className="mt-3 flex items-center justify-between text-[11px]">
-        <div className="flex items-center gap-1.5 text-[#0B0B10]">
-          <TrendingUp className="size-3 text-[#16A34A]" />
-          <span className="font-semibold">+1.24%</span>
-          <span className="text-[#6B6B72]">since open</span>
-        </div>
-        <span className="text-[#6B6B72]">Entry: 20,412.50</span>
+
+      {/* Course curriculum — front layer, bottom left */}
+      <div
+        className="absolute left-0 bottom-6 w-[250px] rounded-2xl overflow-hidden border border-black/5 bg-white shadow-[0_40px_80px_-25px_rgba(0,0,0,0.4)]"
+        style={{ transform: "rotate(-3deg)" }}
+      >
+        <img
+          src={courseImg.url}
+          alt="Blueprint course curriculum with modules and lessons"
+          loading="lazy"
+          className="block w-full h-auto"
+        />
       </div>
     </div>
   );
 }
-
-function Candles() {
-  const candles = [
-    { o: 60, c: 40, h: 30, l: 70, up: true },
-    { o: 55, c: 45, h: 35, l: 65, up: true },
-    { o: 50, c: 58, h: 40, l: 66, up: false },
-    { o: 58, c: 42, h: 32, l: 68, up: true },
-    { o: 42, c: 34, h: 24, l: 52, up: true },
-    { o: 34, c: 46, h: 26, l: 56, up: false },
-    { o: 46, c: 38, h: 28, l: 60, up: true },
-    { o: 38, c: 30, h: 20, l: 48, up: true },
-    { o: 30, c: 40, h: 22, l: 48, up: false },
-    { o: 40, c: 28, h: 18, l: 52, up: true },
-    { o: 28, c: 22, h: 14, l: 42, up: true },
-    { o: 22, c: 32, h: 16, l: 40, up: false },
-    { o: 32, c: 20, h: 12, l: 44, up: true },
-    { o: 20, c: 14, h: 8, l: 34, up: true },
-  ];
-  return (
-    <svg viewBox="0 0 320 120" className="w-full h-[120px]">
-      <rect x="0" y="40" width="320" height="18" fill="#E53935" opacity="0.08" />
-      <line x1="0" y1="40" x2="320" y2="40" stroke="#E53935" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.5" />
-      <line x1="0" y1="58" x2="320" y2="58" stroke="#E53935" strokeWidth="0.6" strokeDasharray="3 3" opacity="0.5" />
-      {candles.map((c, i) => {
-        const x = 12 + i * 22;
-        const color = c.up ? "#16A34A" : "#E53935";
-        const top = Math.min(c.o, c.c);
-        const h = Math.abs(c.o - c.c);
-        return (
-          <g key={i}>
-            <line x1={x + 5} x2={x + 5} y1={c.h} y2={c.l} stroke={color} strokeWidth="1" />
-            <rect x={x} y={top} width="10" height={h} fill={color} rx="1" />
-          </g>
-        );
-      })}
-      <g>
-        <line x1="0" y1="48" x2="320" y2="48" stroke="#0B0B10" strokeWidth="0.8" strokeDasharray="2 2" />
-        <rect x="272" y="42" width="44" height="12" rx="3" fill="#0B0B10" />
-        <text
-          x="294"
-          y="51"
-          fontSize="8"
-          fill="white"
-          fontWeight="700"
-          textAnchor="middle"
-          fontFamily="Archivo"
-        >
-          ENTRY
-        </text>
-      </g>
-    </svg>
-  );
-}
-
-function LiveSessionCard() {
-  return (
-    <div
-      className="absolute top-[210px] -left-2 w-[300px] rounded-2xl bg-white border border-black/5 p-3 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.28)]"
-      style={{ transform: "rotate(-7deg)" }}
-    >
-      <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-[#1A1A24] to-[#0B0B10] aspect-video grid place-items-center">
-        <svg viewBox="0 0 240 100" className="absolute inset-0 w-full h-full opacity-70">
-          <defs>
-            <linearGradient id="lsg" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#FF6B35" />
-              <stop offset="100%" stopColor="#FF6B35" stopOpacity="0" />
-            </linearGradient>
-          </defs>
-          <path
-            d="M0,70 L30,60 L55,72 L85,50 L120,58 L155,38 L185,44 L215,20 L240,28"
-            fill="none"
-            stroke="#FF6B35"
-            strokeWidth="2"
-          />
-          <path
-            d="M0,70 L30,60 L55,72 L85,50 L120,58 L155,38 L185,44 L215,20 L240,28 L240,100 L0,100 Z"
-            fill="url(#lsg)"
-            opacity="0.35"
-          />
-        </svg>
-        <div className="relative size-12 rounded-full bg-white grid place-items-center shadow-lg">
-          <Play className="size-5 text-[#E53935] ml-0.5" fill="currentColor" />
-        </div>
-        <span className="absolute top-2 left-2 inline-flex items-center gap-1.5 h-6 px-2 rounded-full bg-[#E53935] text-white text-[10px] font-bold tracking-wider">
-          <span className="size-1.5 rounded-full bg-white animate-pulse" />
-          LIVE · NY
-        </span>
-        <span className="absolute bottom-2 right-2 text-[10px] font-mono text-white/80 bg-black/40 backdrop-blur px-1.5 py-0.5 rounded">
-          14:20
-        </span>
-      </div>
-      <div className="mt-3 px-1 pb-1">
-        <p style={clash} className="text-[14px] font-bold leading-tight">
-          The IFVG Model : Full Class
-        </p>
-        <p className="text-[11px] text-[#6B6B72] mt-0.5">
-          Part 1 - 14:20 mins
-        </p>
-        <div className="mt-2 h-1 w-full bg-black/5 rounded-full overflow-hidden">
-          <div className="h-full w-[62%] bg-[#E53935] rounded-full" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DiscordRolesCard() {
-  return (
-    <div
-      className="absolute bottom-4 right-4 w-[260px] rounded-2xl bg-white border border-black/5 p-4 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.25)]"
-      style={{ transform: "rotate(6deg)" }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-[10px] font-bold tracking-[0.16em] text-[#6B6B72] uppercase">
-          DISCORD ROLES
-        </span>
-        <DiscordGlyph small />
-      </div>
-      <div className="space-y-2">
-        <div className="flex items-center justify-between rounded-xl bg-[#AB47BC]/10 border border-[#AB47BC]/25 px-3 py-2">
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-[#AB47BC]" />
-            <span className="text-[12px] font-semibold text-[#0B0B10]">Blue Pill</span>
-          </div>
-          <span className="text-[9px] font-bold text-[#AB47BC] bg-white px-1.5 py-0.5 rounded">
-            Premium Member
-          </span>
-        </div>
-        <div className="flex items-center justify-between rounded-xl bg-[#E53935]/10 border border-[#E53935]/25 px-3 py-2">
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-[#E53935]" />
-            <span className="text-[12px] font-semibold text-[#0B0B10]">Red Pill</span>
-          </div>
-          <span className="text-[9px] font-bold text-[#6B6B72]">LOCKED</span>
-        </div>
-        <div className="flex items-center justify-between rounded-xl bg-black/[0.03] border border-black/5 px-3 py-2">
-          <div className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-[#6B6B72]" />
-            <span className="text-[12px] font-semibold text-[#0B0B10]">Verified</span>
-          </div>
-          <Check className="size-3 text-[#16A34A]" strokeWidth={3} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 
 function Step({
   n,

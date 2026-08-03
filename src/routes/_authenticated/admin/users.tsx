@@ -9,6 +9,7 @@ import {
   adminInviteTrialUser,
   adminDeleteUser,
   adminSetUserRole,
+  adminListMemberships,
 } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
@@ -50,6 +51,22 @@ type Row = {
 };
 
 type Tab = "all" | "members" | "visitors";
+
+type Membership = {
+  id: string;
+  user_id: string;
+  status: string;
+  razorpay_subscription_id: string | null;
+  current_period_end: string | null;
+  cancelled_at: string | null;
+  created_at: string;
+  profile: { id: string; email: string | null; full_name: string | null; avatar_url: string | null } | null;
+  payments_count: number;
+  total_paid: number;
+  last_payment_at: string | null;
+  first_payment_at: string | null;
+  last_invoice_url: string | null;
+};
 
 const JOINED_OPTIONS = [
   "Recently joined",
@@ -120,6 +137,10 @@ function UsersPage() {
       </div>
 
       {/* Filter row */}
+      {tab === "members" ? (
+        <MembershipsTable />
+      ) : (
+      <>
       <div className="flex items-center justify-between mb-4">
         <div className="flex flex-wrap items-center gap-2">
           <Chip
@@ -258,10 +279,151 @@ function UsersPage() {
           <span>Showing {rows.length} of {(data ?? []).length}</span>
         </div>
       </div>
+      </>
+      )}
 
       <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </>
   );
+}
+
+function MembershipsTable() {
+  const fn = useServerFn(adminListMemberships);
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "memberships"],
+    queryFn: () => fn(),
+  });
+  const rows = (data ?? []) as Membership[];
+  const mrr = rows.length * 499;
+
+  return (
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <Stat label="Paying members" value={String(rows.length)} />
+        <Stat label="Monthly recurring" value={`₹${mrr.toLocaleString("en-IN")}`} />
+        <Stat
+          label="Lifetime collected"
+          value={`₹${Math.round(rows.reduce((s, r) => s + r.total_paid, 0) / 100).toLocaleString("en-IN")}`}
+        />
+      </div>
+
+      <div className="rounded-xl border border-border/70 bg-surface overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm min-w-[900px]">
+            <thead className="text-left text-[11px] uppercase tracking-wider text-muted-foreground/80 border-b border-border/70 bg-surface-2/40">
+              <tr>
+                <Th>Member</Th>
+                <Th>Email</Th>
+                <Th>Last payment</Th>
+                <Th>Payments</Th>
+                <Th>Paid to date</Th>
+                <Th>Subscriber for</Th>
+                <Th>Renews</Th>
+                <th className="w-8"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {isLoading && (
+                <tr>
+                  <td colSpan={8} className="py-10 text-center text-xs text-muted-foreground">
+                    Loading payments…
+                  </td>
+                </tr>
+              )}
+              {rows.map((m) => {
+                const initials = (m.profile?.full_name ?? m.profile?.email ?? "··")
+                  .slice(0, 2)
+                  .toUpperCase();
+                const since = m.first_payment_at ?? m.created_at;
+                return (
+                  <tr key={m.id} className="hover:bg-hover/40 text-[13px]">
+                    <Td>
+                      <div className="flex items-center gap-2">
+                        {m.profile?.avatar_url ? (
+                          <img src={m.profile.avatar_url} className="size-6 rounded-full object-cover shrink-0" alt="" />
+                        ) : (
+                          <div className="size-6 rounded-full bg-surface-2 border border-border grid place-items-center text-[10px] font-medium shrink-0">
+                            {initials}
+                          </div>
+                        )}
+                        <span className="truncate">
+                          {m.profile?.full_name ?? m.profile?.email?.split("@")[0] ?? "—"}
+                        </span>
+                      </div>
+                    </Td>
+                    <Td className="text-muted-foreground truncate max-w-[220px]">
+                      {m.profile?.email ?? "—"}
+                    </Td>
+                    <Td>
+                      {m.last_payment_at ? (
+                        <span title={new Date(m.last_payment_at).toLocaleString()}>
+                          {timeAgo(m.last_payment_at)}
+                        </span>
+                      ) : (
+                        "—"
+                      )}
+                    </Td>
+                    <Td className="text-muted-foreground">{m.payments_count}</Td>
+                    <Td className="font-medium">
+                      ₹{Math.round(m.total_paid / 100).toLocaleString("en-IN")}
+                    </Td>
+                    <Td className="text-muted-foreground">{duration(since)}</Td>
+                    <Td className="text-muted-foreground">
+                      {m.current_period_end
+                        ? new Date(m.current_period_end).toLocaleDateString()
+                        : "—"}
+                    </Td>
+                    <Td>
+                      {m.last_invoice_url ? (
+                        <a
+                          href={m.last_invoice_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-muted-foreground hover:text-foreground underline"
+                        >
+                          Invoice
+                        </a>
+                      ) : null}
+                    </Td>
+                  </tr>
+                );
+              })}
+              {!isLoading && rows.length === 0 && (
+                <tr>
+                  <td colSpan={8} className="py-10 text-center text-xs text-muted-foreground">
+                    No paying members yet.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="border-t border-border/70 px-4 py-2.5 text-xs text-muted-foreground">
+          Only active subscriptions with at least one successful payment are shown.
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl border border-border/70 bg-surface px-4 py-3">
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground/80">{label}</p>
+      <p className="text-lg font-semibold mt-0.5">{value}</p>
+    </div>
+  );
+}
+
+function duration(iso: string) {
+  const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 864e5));
+  if (days < 1) return "today";
+  if (days < 31) return `${days} day${days === 1 ? "" : "s"}`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"}`;
+  const years = Math.floor(months / 12);
+  const rem = months % 12;
+  return `${years}y${rem ? ` ${rem}m` : ""}`;
 }
 
 function InviteUserDialog({

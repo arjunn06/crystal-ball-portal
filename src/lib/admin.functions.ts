@@ -239,8 +239,32 @@ export const adminListMemberships = createServerFn({ method: "GET" })
         }
         const paid = payments.filter((i) => i.status === "paid" && i.paid_at);
         paid.sort((a, b) => (b.paid_at ?? 0) - (a.paid_at ?? 0));
+
+        // Renewal date: prefer the authoritative value from Razorpay, since
+        // older rows predate us persisting current_period_end locally.
+        let periodEnd = s.current_period_end;
+        try {
+          const rs = await razorpay(
+            `/subscriptions/${encodeURIComponent(s.razorpay_subscription_id!)}`,
+          );
+          const ts: number | undefined = rs?.current_end ?? rs?.charge_at ?? undefined;
+          if (ts) {
+            const iso = new Date(ts * 1000).toISOString();
+            if (iso !== periodEnd) {
+              periodEnd = iso;
+              await supabaseAdmin
+                .from("subscriptions")
+                .update({ current_period_end: iso })
+                .eq("id", s.id);
+            }
+          }
+        } catch (e) {
+          console.error("razorpay subscription fetch failed", s.razorpay_subscription_id, e);
+        }
+
         return {
           ...s,
+          current_period_end: periodEnd,
           profile: pMap.get(s.user_id) ?? null,
           payments_count: paid.length,
           total_paid: paid.reduce((sum, i) => sum + (i.amount_paid ?? 0), 0),

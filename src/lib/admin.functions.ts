@@ -257,24 +257,6 @@ export const adminListMemberships = createServerFn({ method: "GET" })
     return enriched.filter((s) => s.payments_count > 0);
   });
 
-export const adminListSubscriptionsRaw = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    await assertAdmin(context);
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: subs } = await supabaseAdmin
-      .from("subscriptions")
-      .select("*")
-      .order("created_at", { ascending: false });
-    const ids = (subs ?? []).map((s) => s.user_id);
-    const { data: profs } = await supabaseAdmin
-      .from("profiles")
-      .select("id, email, full_name")
-      .in("id", ids.length ? ids : ["00000000-0000-0000-0000-000000000000"]);
-    const m = new Map((profs ?? []).map((p) => [p.id, p]));
-    return (subs ?? []).map((s) => ({ ...s, profile: m.get(s.user_id) ?? null }));
-  });
-
 /** Fetch the latest Razorpay invoice for a subscription and return its short URL. */
 export const adminGetInvoiceUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

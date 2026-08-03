@@ -571,3 +571,122 @@ export const adminListAuditLog = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+/**
+ * Full detail for one user: profile, subscription, Razorpay payment history
+ * (incl. payment method), Discord role claim state and course progress.
+ */
+export const adminGetUserDetail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({ user_id: z.string().uuid() }).parse(d))
+  .handler(async ({ context, data }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const [profileRes, subRes, claimsRes, rolesRes, progressRes, lessonsRes] = await Promise.all([
+      supabaseAdmin.from("profiles").select("*").eq("id", data.user_id).maybeSingle(),
+      supabaseAdmin
+        .from("subscriptions")
+        .select("*")
+        .eq("user_id", data.user_id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("discord_role_claims")
+        .select("id, discord_user_id, status, error_message, created_at, actioned_at")
+        .eq("user_id", data.user_id)
+        .order("created_at", { ascending: false }),
+      supabaseAdmin.from("user_roles").select("role").eq("user_id", data.user_id),
+      supabaseAdmin
+        .from("lesson_progress")
+        .select("lesson_id, completed_at")
+        .eq("user_id", data.user_id),
+      supabaseAdmin
+        .from("lessons")
+        .select("id, module_id, course_modules!inner(course_id, courses!inner(id, title, published))"),
+    ]);
+
+    const sub = subRes.data;
+
+    // Payment history from Razorpay (source of truth for amounts + method).
+    type Payment = {
+      id: string;
+      amount: number;
+      status: string;
+      method: string | null;
+      created_at: string;
+      description: string | null;
+      invoice_url: string | null;
+    };
+    let payments: Payment[] = [];
+    if (sub?.razorpay_subscription_id) {
+      try {
+        const body = await razorpay(
+          `/invoices?subscription_id=${encodeURIComponent(sub.razorpay_subscription_id)}&count=100`,
+        );
+        const invoices = (body?.items ?? []) as any[];
+        const paidInvoices = invoices.filter((i) => i.status === "paid");
+        payments = await Promise.all(
+          paidInvoices.map(async (inv) => {
+            let method: string | null = null;
+            if (inv.payment_id) {
+              try {
+                const p = await razorpay(`/payments/${encodeURIComponent(inv.payment_id)}`);
+                method = [p?.method, p?.card?.network, p?.card?.last4 ? `•••• ${p.card.last4}` : null, p?.wallet, p?.vpa, p?.bank]
+                  .filter(Boolean)
+                  .join(" · ") || null;
+              } catch (e) {
+                console.error("razorpay payment fetch failed", inv.payment_id, e);
+              }
+            }
+            return {
+              id: String(inv.id),
+              amount: Number(inv.amount_paid ?? inv.amount ?? 0),
+              status: String(inv.status),
+              method,
+              created_at: new Date((inv.paid_at ?? inv.created_at) * 1000).toISOString(),
+              description: inv.description ?? null,
+              invoice_url: inv.short_url ?? null,
+            };
+          }),
+        );
+        payments.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
+      } catch (e) {
+        console.error("razorpay invoices failed", sub.razorpay_subscription_id, e);
+      }
+    }
+
+    const allLessons = (lessonsRes.data ?? []) as any[];
+    const publishedLessons = allLessons.filter((l) => l.course_modules?.courses?.published);
+    const completed = new Set((progressRes.data ?? []).map((p) => p.lesson_id));
+    const byCourse = new Map<string, { title: string; total: number; done: number }>();
+    for (const l of publishedLessons) {
+      const c = l.course_modules.courses;
+      const entry = byCourse.get(c.id) ?? { title: c.title, total: 0, done: 0 };
+      entry.total += 1;
+      if (completed.has(l.id)) entry.done += 1;
+      byCourse.set(c.id, entry);
+    }
+    const lastCompleted = (progressRes.data ?? [])
+      .map((p) => p.completed_at)
+      .sort()
+      .pop() ?? null;
+
+    return {
+      profile: profileRes.data ?? null,
+      roles: (rolesRes.data ?? []).map((r) => r.role as string),
+      subscription: sub ?? null,
+      payments,
+      total_paid: payments.reduce((s, p) => s + p.amount, 0),
+      first_payment_at: payments.length ? payments[payments.length - 1]!.created_at : null,
+      last_payment_at: payments.length ? payments[0]!.created_at : null,
+      default_method: payments.find((p) => p.method)?.method ?? null,
+      discord_claims: claimsRes.data ?? [],
+      progress: {
+        lessons_total: publishedLessons.length,
+        lessons_done: publishedLessons.filter((l) => completed.has(l.id)).length,
+        last_activity_at: lastCompleted,
+        courses: Array.from(byCourse.values()),
+      },
+    };
+  });

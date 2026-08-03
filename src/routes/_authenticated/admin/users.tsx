@@ -11,6 +11,7 @@ import {
   adminSetUserRole,
   adminListMemberships,
 } from "@/lib/admin.functions";
+import { adminGetUserDetail } from "@/lib/admin.functions";
 import { Input } from "@/components/ui/input";
 import { useMemo, useState } from "react";
 import { Plus, Mail, Filter, X, MoreHorizontal, Ban, XCircle, RefreshCw, UserPlus, Loader2, CalendarDays, Trash2, Shield, ShieldOff } from "lucide-react";
@@ -31,6 +32,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/components/app/confirm";
 import { toast } from "sonner";
@@ -85,6 +87,7 @@ function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [joinedFilter, setJoinedFilter] = useState<JoinedOpt | null>("Recently joined");
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const rows: Row[] = useMemo(() => {
     let list = (data ?? []) as Row[];
@@ -138,7 +141,7 @@ function UsersPage() {
 
       {/* Filter row */}
       {tab === "members" ? (
-        <MembershipsTable />
+        <MembershipsTable onSelect={setDetailId} />
       ) : (
       <>
       <div className="flex items-center justify-between mb-4">
@@ -213,7 +216,11 @@ function UsersPage() {
                 const initials = (u.full_name ?? u.email ?? "··").slice(0, 2).toUpperCase();
                 const status = statusFor(u);
                 return (
-                  <tr key={u.id} className="hover:bg-hover/40 text-[13px]">
+                  <tr
+                    key={u.id}
+                    onClick={() => setDetailId(u.id)}
+                    className="hover:bg-hover/40 text-[13px] cursor-pointer"
+                  >
                     <Td>
                       <div className="flex items-center gap-2">
                         {u.avatar_url ? (
@@ -247,7 +254,7 @@ function UsersPage() {
                         ? new Date(u.subscription.current_period_end).toLocaleDateString()
                         : "—"}
                     </Td>
-                    <Td>
+                    <Td onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center gap-1">
                         <IconBtn href={u.email ? `mailto:${u.email}` : undefined}>
                           <Mail className="size-3.5" />
@@ -259,7 +266,7 @@ function UsersPage() {
                         )}
                       </div>
                     </Td>
-                    <Td>
+                    <Td onClick={(e) => e.stopPropagation()}>
                       <RowMenu user={u} status={status} />
                     </Td>
                   </tr>
@@ -283,11 +290,12 @@ function UsersPage() {
       )}
 
       <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
+      <UserDetailPane userId={detailId} onClose={() => setDetailId(null)} />
     </>
   );
 }
 
-function MembershipsTable() {
+function MembershipsTable({ onSelect }: { onSelect: (id: string) => void }) {
   const fn = useServerFn(adminListMemberships);
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "memberships"],
@@ -336,7 +344,11 @@ function MembershipsTable() {
                   .toUpperCase();
                 const since = m.first_payment_at ?? m.created_at;
                 return (
-                  <tr key={m.id} className="hover:bg-hover/40 text-[13px]">
+                  <tr
+                    key={m.id}
+                    onClick={() => onSelect(m.user_id)}
+                    className="hover:bg-hover/40 text-[13px] cursor-pointer"
+                  >
                     <Td>
                       <div className="flex items-center gap-2">
                         {m.profile?.avatar_url ? (
@@ -753,8 +765,200 @@ function RowMenu({ user, status }: { user: Row; status: string }) {
 function Th({ children }: { children: React.ReactNode }) {
   return <th className="py-2.5 px-4 font-medium">{children}</th>;
 }
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={"py-2.5 px-4 " + (className ?? "")}>{children}</td>;
+function Td({
+  children,
+  className,
+  onClick,
+  title,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  onClick?: React.MouseEventHandler<HTMLTableCellElement>;
+  title?: string;
+}) {
+  return (
+    <td className={"py-2.5 px-4 " + (className ?? "")} onClick={onClick} title={title}>
+      {children}
+    </td>
+  );
+}
+
+function UserDetailPane({ userId, onClose }: { userId: string | null; onClose: () => void }) {
+  const fn = useServerFn(adminGetUserDetail);
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin", "user-detail", userId],
+    queryFn: () => fn({ data: { user_id: userId! } }),
+    enabled: !!userId,
+  });
+
+  const p = data?.profile as any;
+  const sub = data?.subscription as any;
+  const claim = (data?.discord_claims ?? [])[0] as any;
+  const prog = data?.progress;
+  const pct = prog && prog.lessons_total ? Math.round((prog.lessons_done / prog.lessons_total) * 100) : 0;
+  const name = p?.full_name ?? p?.email?.split("@")[0] ?? "—";
+
+  return (
+    <Sheet open={!!userId} onOpenChange={(o) => !o && onClose()}>
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto bg-surface">
+        <SheetHeader>
+          <SheetTitle className="text-base">User details</SheetTitle>
+        </SheetHeader>
+
+        {isLoading || !data ? (
+          <div className="py-16 grid place-items-center text-xs text-muted-foreground">
+            <Loader2 className="size-4 animate-spin mb-2" />
+            Loading user…
+          </div>
+        ) : (
+          <div className="mt-4 space-y-6 text-[13px]">
+            {/* Identity */}
+            <div className="flex items-center gap-3">
+              {p?.avatar_url ? (
+                <img src={p.avatar_url} alt="" className="size-12 rounded-full object-cover" />
+              ) : (
+                <div className="size-12 rounded-full bg-surface-2 border border-border grid place-items-center text-sm font-medium">
+                  {(p?.full_name ?? p?.email ?? "··").slice(0, 2).toUpperCase()}
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="font-medium truncate">{name}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {p?.handle ? `@${p.handle}` : "no handle"} · {(data.roles ?? []).join(", ") || "member"}
+                </p>
+              </div>
+            </div>
+
+            {/* Contact */}
+            <Section title="Contact">
+              <Field label="Email" value={p?.email ?? "—"} />
+              <Field
+                label="Discord"
+                value={p?.discord_user_id ? `ID ${p.discord_user_id}` : "not linked"}
+              />
+              <Field label="Joined" value={p?.created_at ? new Date(p.created_at).toLocaleDateString() : "—"} />
+            </Section>
+
+            {/* Membership */}
+            <Section title="Membership">
+              <Field label="Status" value={sub?.status ?? "no subscription"} />
+              <Field
+                label="Subscriber for"
+                value={
+                  data.first_payment_at
+                    ? duration(data.first_payment_at)
+                    : sub?.created_at
+                      ? duration(sub.created_at)
+                      : "—"
+                }
+              />
+              <Field
+                label="Renews"
+                value={sub?.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "—"}
+              />
+              <Field label="Payment method" value={data.default_method ?? "—"} />
+              <Field
+                label="Paid to date"
+                value={`₹${Math.round((data.total_paid ?? 0) / 100).toLocaleString("en-IN")}`}
+              />
+            </Section>
+
+            {/* Payment history */}
+            <Section title={`Payment history (${data.payments.length})`}>
+              {data.payments.length === 0 ? (
+                <p className="text-xs text-muted-foreground">No successful payments recorded.</p>
+              ) : (
+                <ul className="divide-y divide-border/50">
+                  {data.payments.map((pay) => (
+                    <li key={pay.id} className="py-2 flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-medium">₹{Math.round(pay.amount / 100).toLocaleString("en-IN")}</p>
+                        <p className="text-[11px] text-muted-foreground truncate">
+                          {new Date(pay.created_at).toLocaleDateString()} · {pay.method ?? "method n/a"}
+                        </p>
+                      </div>
+                      {pay.invoice_url && (
+                        <a
+                          href={pay.invoice_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] text-muted-foreground hover:text-foreground underline shrink-0"
+                        >
+                          Invoice
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Section>
+
+            {/* Discord role */}
+            <Section title="Discord role">
+              {claim ? (
+                <>
+                  <Field label="Claim" value={claim.status} />
+                  <Field
+                    label="Claimed at"
+                    value={claim.actioned_at ?? claim.created_at ? new Date(claim.actioned_at ?? claim.created_at).toLocaleString() : "—"}
+                  />
+                  {claim.error_message && <Field label="Error" value={claim.error_message} />}
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">Role not claimed yet.</p>
+              )}
+            </Section>
+
+            {/* Course progress */}
+            <Section title="Course progress">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-1.5 flex-1 rounded-full bg-surface-2 overflow-hidden">
+                  <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                </div>
+                <span className="text-xs text-muted-foreground shrink-0">
+                  {prog?.lessons_done}/{prog?.lessons_total} · {pct}%
+                </span>
+              </div>
+              {prog?.courses.length ? (
+                <ul className="space-y-1">
+                  {prog.courses.map((c) => (
+                    <li key={c.title} className="flex items-center justify-between text-xs">
+                      <span className="truncate text-muted-foreground">{c.title}</span>
+                      <span>
+                        {c.done}/{c.total}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              <Field
+                label="Last activity"
+                value={prog?.last_activity_at ? timeAgo(prog.last_activity_at) : "no lessons watched"}
+              />
+            </Section>
+          </div>
+        )}
+      </SheetContent>
+    </Sheet>
+  );
+}
+
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border/70 bg-surface-2/30 p-3">
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground/80 mb-2">{title}</p>
+      <div className="space-y-1.5">{children}</div>
+    </div>
+  );
+}
+
+function Field({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-3">
+      <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+      <span className="text-[13px] text-right break-words">{value}</span>
+    </div>
+  );
 }
 
 function IconBtn({ children, href }: { children: React.ReactNode; href?: string }) {

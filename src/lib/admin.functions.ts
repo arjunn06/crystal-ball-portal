@@ -202,6 +202,61 @@ export const adminListSubscriptions = createServerFn({ method: "GET" })
     return (subs ?? []).map((s) => ({ ...s, profile: m.get(s.user_id) ?? null }));
   });
 
+/**
+ * Paying members only: an active Razorpay subscription with at least one
+ * captured payment. Enriched with real payment history from Razorpay
+ * (last payment date, number of payments, lifetime amount paid).
+ */
+export const adminListMemberships = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: subs } = await supabaseAdmin
+      .from("subscriptions")
+      .select("*")
+      .eq("status", "active")
+      .not("razorpay_subscription_id", "is", null)
+      .order("created_at", { ascending: false });
+
+    const list = subs ?? [];
+    const { data: profs } = await supabaseAdmin
+      .from("profiles")
+      .select("id, email, full_name, avatar_url")
+      .in("id", list.length ? list.map((s) => s.user_id) : ["00000000-0000-0000-0000-000000000000"]);
+    const pMap = new Map((profs ?? []).map((p) => [p.id, p]));
+
+    const enriched = await Promise.all(
+      list.map(async (s) => {
+        let payments: Array<{ status?: string; paid_at?: number; amount_paid?: number; short_url?: string }> = [];
+        try {
+          const body = await razorpay(
+            `/invoices?subscription_id=${encodeURIComponent(s.razorpay_subscription_id!)}&count=100`,
+          );
+          payments = (body?.items ?? []) as typeof payments;
+        } catch (e) {
+          console.error("razorpay invoices failed", s.razorpay_subscription_id, e);
+        }
+        const paid = payments.filter((i) => i.status === "paid" && i.paid_at);
+        paid.sort((a, b) => (b.paid_at ?? 0) - (a.paid_at ?? 0));
+        return {
+          ...s,
+          profile: pMap.get(s.user_id) ?? null,
+          payments_count: paid.length,
+          total_paid: paid.reduce((sum, i) => sum + (i.amount_paid ?? 0), 0),
+          last_payment_at: paid[0]?.paid_at ? new Date(paid[0].paid_at * 1000).toISOString() : null,
+          first_payment_at: paid.length
+            ? new Date(paid[paid.length - 1]!.paid_at! * 1000).toISOString()
+            : null,
+          last_invoice_url: paid[0]?.short_url ?? null,
+        };
+      }),
+    );
+
+    // Only real, successful payments count as a membership.
+    return enriched.filter((s) => s.payments_count > 0);
+  });
+
 /** Fetch the latest Razorpay invoice for a subscription and return its short URL. */
 export const adminGetInvoiceUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

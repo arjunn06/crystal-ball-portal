@@ -7,14 +7,14 @@ const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-u
 type Module = { n: string; title: string; phase: string; accent: string };
 
 const MODULES: Module[] = [
-  { n: "01", title: "Introduction to Trading", phase: "Foundation", accent: "#E53935" },
-  { n: "02", title: "Introduction to Market Profiles", phase: "Foundation", accent: "#E53935" },
-  { n: "03", title: "Navigate TradingView for Beginners", phase: "Foundation", accent: "#E53935" },
-  { n: "04", title: "What are PD Arrays", phase: "Core Model", accent: "#AB47BC" },
-  { n: "05", title: "Optimal Trade Entries & ICT Fibonacci", phase: "Core Model", accent: "#AB47BC" },
-  { n: "06", title: "Importance of Time & Price", phase: "Core Model", accent: "#AB47BC" },
-  { n: "07", title: "The IFVG Model — Explained with Examples", phase: "Core Model", accent: "#AB47BC" },
-  { n: "08", title: "How to use SMT Divergences", phase: "Core Model", accent: "#AB47BC" },
+  { n: "01", title: "Introduction to Trading", phase: "Foundation", accent: "#1E6BFF" },
+  { n: "02", title: "Introduction to Market Profiles", phase: "Foundation", accent: "#1E6BFF" },
+  { n: "03", title: "Navigate TradingView for Beginners", phase: "Foundation", accent: "#1E6BFF" },
+  { n: "04", title: "What are PD Arrays", phase: "Core Model", accent: "#2FA8FF" },
+  { n: "05", title: "Optimal Trade Entries & ICT Fibonacci", phase: "Core Model", accent: "#2FA8FF" },
+  { n: "06", title: "Importance of Time & Price", phase: "Core Model", accent: "#2FA8FF" },
+  { n: "07", title: "The IFVG Model — Explained with Examples", phase: "Core Model", accent: "#2FA8FF" },
+  { n: "08", title: "How to use SMT Divergences", phase: "Core Model", accent: "#2FA8FF" },
   { n: "09", title: "Futures & Forex Prop Firm Rules", phase: "ADVANCED", accent: "#FFC107" },
 ];
 
@@ -60,9 +60,9 @@ export function CourseParallax() {
       {/* Header */}
       <div className="relative z-10 mx-auto max-w-4xl px-6 text-center">
         <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full border border-[#1B1B21] bg-[#101014]/60 backdrop-blur text-[#8B8B96] text-[11px] font-semibold tracking-[0.16em] uppercase">
-          <span className="size-1.5 rounded-full bg-[#E53935]" />
+          <span className="size-1.5 rounded-full bg-[#1E6BFF]" />
           The Curriculum
-          <span className="size-1.5 rounded-full bg-[#AB47BC]" />
+          <span className="size-1.5 rounded-full bg-[#2FA8FF]" />
         </div>
         <h2
           style={{ ...clash, letterSpacing: "-0.01em" }}
@@ -81,7 +81,7 @@ export function CourseParallax() {
         <div className="pointer-events-none absolute left-6 md:left-1/2 top-0 bottom-0 md:-translate-x-1/2 w-px bg-[#1B1B21]" />
         <motion.div
           style={{ scaleY: railScale, transformOrigin: "top" }}
-          className="pointer-events-none absolute left-6 md:left-1/2 top-0 bottom-0 md:-translate-x-1/2 w-px bg-gradient-to-b from-[#E53935] via-[#AB47BC] to-[#FFC107]"
+          className="pointer-events-none absolute left-6 md:left-1/2 top-0 bottom-0 md:-translate-x-1/2 w-px bg-gradient-to-b from-[#1E6BFF] via-[#2FA8FF] to-[#FFC107]"
         />
 
         <ol className="relative space-y-10 md:space-y-16">

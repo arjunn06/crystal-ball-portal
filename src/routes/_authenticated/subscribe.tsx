@@ -183,7 +183,7 @@ function Subscribe() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
         style={{
           background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFD7B8 0%, #FBE6D0 35%, rgba(245,238,227,0) 75%)",
+            "radial-gradient(1200px 500px at 50% -100px, #C9DDFF 0%, #E4EEFF 35%, rgba(245,238,227,0) 75%)",
         }}
       />
 
@@ -212,9 +212,9 @@ function Subscribe() {
       <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">
         <div className="w-full max-w-xl">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#2FA8FF]" />
             ONE STEP TO GO
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#2FA8FF]" />
           </div>
           <h1
             style={{ ...clash, letterSpacing: "-0.005em" }}
@@ -225,9 +225,9 @@ function Subscribe() {
             <span className="inline-flex items-center gap-3 flex-wrap">
               membership
               <span
-                className="inline-flex items-center h-11 md:h-12 px-4 rounded-full text-white text-[15px] md:text-[17px] font-semibold shadow-[0_10px_30px_-10px_rgba(229,57,53,0.7)]"
+                className="inline-flex items-center h-11 md:h-12 px-4 rounded-full text-white text-[15px] md:text-[17px] font-semibold shadow-[0_10px_30px_-10px_rgba(30,107,255,0.7)]"
                 style={{
-                  background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)",
+                  background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)",
                   ...clash,
                 }}
               >
@@ -246,7 +246,7 @@ function Subscribe() {
             <div
               aria-hidden
               className="absolute -top-20 -right-20 size-72 rounded-full opacity-40"
-              style={{ background: "radial-gradient(closest-side,#FFD7B8,transparent)" }}
+              style={{ background: "radial-gradient(closest-side,#C9DDFF,transparent)" }}
             />
             <div className="relative">
               <div className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-[#0B0B10]/5 text-[#0B0B10] text-[11px] font-semibold tracking-[0.16em] uppercase">
@@ -274,7 +274,7 @@ function Subscribe() {
                     className="flex items-start gap-3 rounded-2xl bg-[#F7F1E8] border border-black/5 px-4 py-3"
                   >
                     <span className="mt-0.5 size-5 rounded-full bg-white border border-black/5 grid place-items-center shrink-0">
-                      <Check className="size-3 text-[#E53935]" strokeWidth={3} />
+                      <Check className="size-3 text-[#1E6BFF]" strokeWidth={3} />
                     </span>
                     <span className="text-[14px] text-[#1A1A1F] font-medium">{f}</span>
                   </li>
@@ -284,8 +284,8 @@ function Subscribe() {
               <Button
                 onClick={() => mut.mutate()}
                 disabled={mut.isPending}
-                className="mt-7 w-full h-13 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform border-0"
-                style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+                className="mt-7 w-full h-13 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(30,107,255,0.65)] hover:-translate-y-px transition-transform border-0"
+                style={{ background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)" }}
               >
                 {mut.isPending ? (
                   "Opening checkout…"
@@ -306,9 +306,9 @@ function Subscribe() {
               {/* Promo code */}
               <div className="mt-4">
                 {applied ? (
-                  <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#E53935]/20 bg-[#FFF3EE] px-3.5 py-2.5">
+                  <div className="flex items-center justify-between gap-2 rounded-2xl border border-[#1E6BFF]/20 bg-[#EEF4FF] px-3.5 py-2.5">
                     <div className="flex items-center gap-2 text-[13px] text-[#0B0B10]">
-                      <Tag className="size-3.5 text-[#E53935]" />
+                      <Tag className="size-3.5 text-[#1E6BFF]" />
                       <span className="font-semibold">{applied.code}</span>
                       <span className="text-[#6B6B72]">
                         ·{" "}

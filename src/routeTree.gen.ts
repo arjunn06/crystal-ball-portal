@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BluepillRouteImport } from './routes/bluepill'
 import { Route as RedpillRouteImport } from './routes/redpill'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedEnrollRouteImport } from './routes/_authenticated/enroll'
@@ -68,6 +69,11 @@ const BluepillRoute = BluepillRouteImport.update({
 const RedpillRoute = RedpillRouteImport.update({
   id: '/redpill',
   path: '/redpill',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRouteRoute = AuthenticatedAdminRouteRouteImport.update({
@@ -246,6 +252,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/enroll': typeof AuthenticatedEnrollRoute
@@ -283,6 +290,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/enroll': typeof AuthenticatedEnrollRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/enroll': typeof AuthenticatedEnrollRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/bluepill'
     | '/redpill'
+    | '/unsubscribe'
     | '/admin'
     | '/app'
     | '/enroll'
@@ -394,6 +404,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/bluepill'
     | '/redpill'
+    | '/unsubscribe'
     | '/enroll'
     | '/onboarding'
     | '/subscribe'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/bluepill'
     | '/redpill'
+    | '/unsubscribe'
     | '/_authenticated/admin'
     | '/_authenticated/app'
     | '/_authenticated/enroll'
@@ -467,6 +479,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   BluepillRoute: typeof BluepillRoute
   RedpillRoute: typeof RedpillRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
@@ -514,6 +527,13 @@ declare module '@tanstack/react-router' {
       path: '/redpill'
       fullPath: '/redpill'
       preLoaderRoute: typeof RedpillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -848,6 +868,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   BluepillRoute: BluepillRoute,
   RedpillRoute: RedpillRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,

@@ -98,7 +98,7 @@ function Chooser() {
             <h2 style={clash} className="mt-5 text-[34px] md:text-[40px] font-bold leading-[1.06]">
               1-Month Live
               <br />
-              Mentorship
+              Trading Training
             </h2>
             <p className="mt-4 text-[15px] leading-[1.55] text-[#5A5A62]">
               Basics to advanced IFVG, taught live on Zoom. The full course is
@@ -155,9 +155,9 @@ function Chooser() {
               THE BLUE PILL
             </span>
             <h2 style={clash} className="mt-5 text-[34px] md:text-[40px] font-bold leading-[1.06]">
-              The Members
+              The Inner Circle
               <br />
-              Community
+              Access
             </h2>
             <p className="mt-4 text-[15px] leading-[1.55] text-[#5A5A62]">
               Every recorded Red Pill session, uncut. Live NY calls, trade
@@ -167,7 +167,7 @@ function Chooser() {
               {[
                 "All premium class recordings, uncut",
                 "Exclusive trade alerts of my own setups",
-                "Live trading streams & one private call monthly",
+                "Live trading streams for high impact news events & one private call monthly",
                 "Members-only Discord with Blue Pill role",
               ].map((i) => (
                 <li key={i} className="flex items-start gap-3 text-[14px] text-[#1A1A1F]">

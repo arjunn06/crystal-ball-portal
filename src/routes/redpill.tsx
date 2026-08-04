@@ -205,13 +205,13 @@ function RedPill() {
           <Phase
             tag="WEEK 1"
             title="The full course, live"
-            body="Every module from basics to advanced IFVG, delivered live on Zoom with Q&A. Recordings of the concepts stay with you."
+            body="Every module from basics to advanced IFVG, delivered live on Zoom with live Q&A anytime in between the session."
             icon={<Video className="size-4" />}
           />
           <Phase
             tag="WEEKS 2–4"
             title="We trade together"
-            body="Daily live sessions where we take the market together — bias, setups, entries and risk in real time."
+            body="Daily live sessions where we take the market together — setups, entries and risk management in real time."
             icon={<LineChart className="size-4" />}
           />
           <Phase

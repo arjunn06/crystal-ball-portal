@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 
 function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const fn = useServerFn(getAccountOverview);
   const { data, isLoading } = useQuery({
     queryKey: ["account", "overview"],
@@ -27,6 +28,19 @@ function AppLayout() {
       navigate({ to: "/subscribe" });
     }
   }, [isLoading, data, navigate]);
+
+  // Red Pill members only get the Discord role screen.
+  useEffect(() => {
+    if (
+      !isLoading &&
+      data?.isSubscribed &&
+      data.pill === "red" &&
+      !data.isAdmin &&
+      location.pathname !== "/app/discord"
+    ) {
+      navigate({ to: "/app/discord" });
+    }
+  }, [isLoading, data, location.pathname, navigate]);
 
   const isRedPill = data?.pill === "red";
 

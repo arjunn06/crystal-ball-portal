@@ -182,6 +182,7 @@ function ConfigCard() {
       <GuildAndRolePicker
         currentGuildId={cfg?.guild_id ?? null}
         currentRoleIds={cfg?.role_ids ?? []}
+        currentRedRoleIds={cfg?.red_pill_role_ids ?? []}
       />
     </div>
   );
@@ -190,9 +191,11 @@ function ConfigCard() {
 function GuildAndRolePicker({
   currentGuildId,
   currentRoleIds,
+  currentRedRoleIds,
 }: {
   currentGuildId: string | null;
   currentRoleIds: string[];
+  currentRedRoleIds: string[];
 }) {
   const qc = useQueryClient();
   const listGuilds = useServerFn(listBotGuilds);
@@ -201,11 +204,13 @@ function GuildAndRolePicker({
 
   const [selectedGuild, setSelectedGuild] = useState<string | null>(currentGuildId);
   const [selectedRoles, setSelectedRoles] = useState<string[]>(currentRoleIds);
+  const [selectedRedRoles, setSelectedRedRoles] = useState<string[]>(currentRedRoleIds);
 
   useEffect(() => {
     setSelectedGuild(currentGuildId);
     setSelectedRoles(currentRoleIds);
-  }, [currentGuildId, currentRoleIds.join(",")]);
+    setSelectedRedRoles(currentRedRoleIds);
+  }, [currentGuildId, currentRoleIds.join(","), currentRedRoleIds.join(",")]);
 
   const guildsQuery = useQuery({
     queryKey: ["admin", "discord", "guilds"],
@@ -220,7 +225,13 @@ function GuildAndRolePicker({
 
   const saveMut = useMutation({
     mutationFn: () =>
-      saveFn({ data: { guild_id: selectedGuild!, role_ids: selectedRoles } }),
+      saveFn({
+        data: {
+          guild_id: selectedGuild!,
+          role_ids: selectedRoles,
+          red_pill_role_ids: selectedRedRoles,
+        },
+      }),
     onSuccess: () => {
       toast.success("Saved. Members will receive these roles.");
       qc.invalidateQueries({ queryKey: ["admin", "discord", "config"] });
@@ -230,11 +241,10 @@ function GuildAndRolePicker({
 
   const dirty = useMemo(() => {
     if (selectedGuild !== currentGuildId) return true;
-    if (selectedRoles.length !== currentRoleIds.length) return true;
-    const a = [...selectedRoles].sort();
-    const b = [...currentRoleIds].sort();
-    return a.some((v, i) => v !== b[i]);
-  }, [selectedGuild, selectedRoles, currentGuildId, currentRoleIds]);
+    const changed = (a: string[], b: string[]) =>
+      a.length !== b.length || [...a].sort().some((v, i) => v !== [...b].sort()[i]);
+    return changed(selectedRoles, currentRoleIds) || changed(selectedRedRoles, currentRedRoleIds);
+  }, [selectedGuild, selectedRoles, selectedRedRoles, currentGuildId, currentRoleIds, currentRedRoleIds]);
 
   return (
     <>

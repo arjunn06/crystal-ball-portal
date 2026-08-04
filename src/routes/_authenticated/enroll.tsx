@@ -172,7 +172,7 @@ function Enroll() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
         style={{
           background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFD7B8 0%, #FBE6D0 35%, rgba(245,238,227,0) 75%)",
+            "radial-gradient(1200px 500px at 50% -100px, #FFCCC4 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
         }}
       />
 
@@ -200,9 +200,9 @@ function Enroll() {
       <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">
         <div className="w-full max-w-xl">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
             ONE STEP TO GO
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
           </div>
           <h1
             style={{ ...clash, letterSpacing: "-0.005em" }}
@@ -215,7 +215,7 @@ function Enroll() {
               <span
                 className="inline-flex items-center h-11 md:h-12 px-4 rounded-full text-white text-[15px] md:text-[17px] font-semibold shadow-[0_10px_30px_-10px_rgba(229,57,53,0.7)]"
                 style={{
-                  background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)",
+                  background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)",
                   ...clash,
                 }}
               >
@@ -232,7 +232,7 @@ function Enroll() {
             <div
               aria-hidden
               className="absolute -top-20 -right-20 size-72 rounded-full opacity-40"
-              style={{ background: "radial-gradient(closest-side,#FFD7B8,transparent)" }}
+              style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
             />
             <div className="relative">
               <div className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-[#0B0B10]/5 text-[#0B0B10] text-[11px] font-semibold tracking-[0.16em] uppercase">
@@ -266,7 +266,7 @@ function Enroll() {
                 onClick={() => mut.mutate()}
                 disabled={mut.isPending}
                 className="mt-7 w-full h-13 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform border-0"
-                style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+                style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
               >
                 {mut.isPending ? (
                   "Opening checkout…"

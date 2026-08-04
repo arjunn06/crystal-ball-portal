@@ -137,7 +137,7 @@ function AuthPage() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[560px]"
         style={{
           background:
-            "radial-gradient(1000px 420px at 50% -80px, #FFD7B8 0%, #FBE6D0 35%, rgba(245,238,227,0) 75%)",
+            "radial-gradient(1000px 420px at 50% -80px, #FFCCC4 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
         }}
       />
       <header className="relative z-10">
@@ -202,7 +202,7 @@ function AuthPage() {
                   type="submit"
                   disabled={sending}
                   className="w-full h-12 rounded-full mt-3 inline-flex items-center justify-center gap-2 text-white text-[14px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform disabled:opacity-70 disabled:hover:translate-y-0"
-                  style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+                  style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
                 >
                   {sending ? (
                     <>
@@ -260,7 +260,7 @@ function AuthPage() {
                   type="submit"
                   disabled={verifying}
                   className="w-full h-12 rounded-full mt-3 inline-flex items-center justify-center gap-2 text-white text-[14px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform disabled:opacity-70 disabled:hover:translate-y-0"
-                  style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+                  style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
                 >
                   {verifying ? (
                     <>

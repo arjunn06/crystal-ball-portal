@@ -46,7 +46,7 @@ function Chooser() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
         style={{
           background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFD7B8 0%, #FBE6D0 35%, rgba(245,238,227,0) 75%)",
+            "radial-gradient(1200px 500px at 50% -100px, #FFCCC4 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
         }}
       />
 
@@ -64,7 +64,7 @@ function Chooser() {
 
       <section className="relative z-10 mx-auto max-w-7xl px-6 pt-8 pb-16 text-center">
         <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-          <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+          <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
           BLUEPRINT BY ARJUN IFVG
         </div>
         <h1
@@ -90,7 +90,7 @@ function Chooser() {
           <div className="relative">
             <span
               className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full text-white text-[11px] font-bold tracking-[0.16em] uppercase"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
             >
               <Zap className="size-3.5" fill="currentColor" />
               THE RED PILL
@@ -131,7 +131,7 @@ function Chooser() {
             <Link
               to="/redpill"
               className="mt-5 inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
             >
               Take the Red Pill
               <ArrowRight className="size-4" />

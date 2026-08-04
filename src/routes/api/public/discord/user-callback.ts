@@ -86,26 +86,30 @@ export const Route = createFileRoute("/api/public/discord/user-callback")({
         const me = (await meRes.json()) as { id: string; username: string };
         const discordUserId = me.id;
 
-        // 3. get configured guild + roles
-        const { data: cfg } = await supabaseAdmin
-          .from("discord_config")
-          .select("guild_id, role_ids")
-          .eq("id", 1)
-          .maybeSingle();
-        const guildId = cfg?.guild_id as string | undefined;
-        const roleIds = (cfg?.role_ids ?? []) as string[];
-        if (!guildId || roleIds.length === 0) {
-          return done({ discord: "error", reason: "Discord roles are not configured yet" });
-        }
-
-        // 4. verify active subscription (defensive)
+        // 3. verify active subscription (defensive)
         const { data: sub } = await supabaseAdmin
           .from("subscriptions")
-          .select("status")
+          .select("status, pill")
           .eq("user_id", userId)
           .maybeSingle();
         if (sub?.status !== "active") {
           return done({ discord: "error", reason: "Active membership required" });
+        }
+
+        // 4. get configured guild + roles for this member's pill
+        const { data: cfg } = await supabaseAdmin
+          .from("discord_config")
+          .select("guild_id, role_ids, red_pill_role_ids")
+          .eq("id", 1)
+          .maybeSingle();
+        const guildId = cfg?.guild_id as string | undefined;
+        const isRed = sub.pill === "red";
+        const roleIds = ((isRed ? cfg?.red_pill_role_ids : cfg?.role_ids) ?? []) as string[];
+        if (!guildId || roleIds.length === 0) {
+          return done({
+            discord: "error",
+            reason: `Discord ${isRed ? "Red Pill" : "Blue Pill"} roles are not configured yet`,
+          });
         }
 
         // 5. save discord id + create/update claim row

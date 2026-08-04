@@ -14,7 +14,7 @@ export const getAccountOverview = createServerFn({ method: "GET" })
         .maybeSingle(),
       supabase
         .from("subscriptions")
-        .select("status, current_period_end, cancelled_at, razorpay_subscription_id")
+        .select("status, current_period_end, cancelled_at, razorpay_subscription_id, pill")
         .eq("user_id", userId)
         .maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
@@ -24,6 +24,7 @@ export const getAccountOverview = createServerFn({ method: "GET" })
       subscription,
       isAdmin: (roles ?? []).some((r) => r.role === "admin"),
       isSubscribed: subscription?.status === "active",
+      pill: (subscription?.pill ?? "blue") as "red" | "blue",
     };
   });
 

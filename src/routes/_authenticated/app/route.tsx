@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useLocation } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
@@ -16,6 +16,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 
 function AppLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const fn = useServerFn(getAccountOverview);
   const { data, isLoading } = useQuery({
     queryKey: ["account", "overview"],
@@ -28,12 +29,29 @@ function AppLayout() {
     }
   }, [isLoading, data, navigate]);
 
-  const items: NavItem[] = [
-    { to: "/app", label: "Home", icon: <LayoutDashboard className="size-4" /> },
-    { to: "/app/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
-    { to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> },
-    { to: "/app/settings", label: "Settings", icon: <Settings className="size-4" /> },
-  ];
+  // Red Pill members only get the Discord role screen.
+  useEffect(() => {
+    if (
+      !isLoading &&
+      data?.isSubscribed &&
+      data.pill === "red" &&
+      !data.isAdmin &&
+      location.pathname !== "/app/discord"
+    ) {
+      navigate({ to: "/app/discord" });
+    }
+  }, [isLoading, data, location.pathname, navigate]);
+
+  const isRedPill = data?.pill === "red";
+
+  const items: NavItem[] = isRedPill
+    ? [{ to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> }]
+    : [
+        { to: "/app", label: "Home", icon: <LayoutDashboard className="size-4" /> },
+        { to: "/app/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
+        { to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> },
+        { to: "/app/settings", label: "Settings", icon: <Settings className="size-4" /> },
+      ];
   if (data?.isAdmin) {
     items.push({ to: "/admin", label: "Admin", icon: <Shield className="size-4" /> });
   }

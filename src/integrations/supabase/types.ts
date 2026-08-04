@@ -128,6 +128,8 @@ export type Database = {
           id: number
           oauth_state: string | null
           oauth_state_expires_at: string | null
+          red_pill_role_ids: string[]
+          red_roles_cache: Json
           role_ids: string[]
           roles_cache: Json
           updated_at: string
@@ -141,6 +143,8 @@ export type Database = {
           id?: number
           oauth_state?: string | null
           oauth_state_expires_at?: string | null
+          red_pill_role_ids?: string[]
+          red_roles_cache?: Json
           role_ids?: string[]
           roles_cache?: Json
           updated_at?: string
@@ -154,6 +158,8 @@ export type Database = {
           id?: number
           oauth_state?: string | null
           oauth_state_expires_at?: string | null
+          red_pill_role_ids?: string[]
+          red_roles_cache?: Json
           role_ids?: string[]
           roles_cache?: Json
           updated_at?: string
@@ -493,6 +499,7 @@ export type Database = {
           created_at: string
           current_period_end: string | null
           id: string
+          pill: Database["public"]["Enums"]["pill_type"]
           razorpay_subscription_id: string | null
           status: string
           updated_at: string
@@ -503,6 +510,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          pill?: Database["public"]["Enums"]["pill_type"]
           razorpay_subscription_id?: string | null
           status?: string
           updated_at?: string
@@ -513,6 +521,7 @@ export type Database = {
           created_at?: string
           current_period_end?: string | null
           id?: string
+          pill?: Database["public"]["Enums"]["pill_type"]
           razorpay_subscription_id?: string | null
           status?: string
           updated_at?: string

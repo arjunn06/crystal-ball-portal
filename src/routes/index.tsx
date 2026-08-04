@@ -188,7 +188,8 @@ function Chooser() {
             </div>
             <Link
               to="/bluepill"
-              className="mt-5 inline-flex items-center gap-2 h-14 px-7 rounded-full bg-[#0B0B10] text-white text-[15px] font-semibold hover:bg-black transition-colors shadow-[0_4px_16px_-4px_rgba(0,0,0,0.35)]"
+              className="mt-5 inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold hover:-translate-y-px transition-transform shadow-[0_12px_30px_-10px_rgba(30,107,255,0.6)]"
+              style={{ background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)" }}
             >
               Explore the Blue Pill
               <ArrowRight className="size-4" />

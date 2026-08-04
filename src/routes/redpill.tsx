@@ -107,8 +107,8 @@ function RedPill() {
       </header>
 
       {/* HERO */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 pt-8 pb-20 grid lg:grid-cols-[1.1fr_0.9fr] gap-12 items-center">
-        <div>
+      <section className="relative z-10 mx-auto max-w-4xl px-6 pt-8 pb-20 flex flex-col items-center text-center">
+        <div className="flex flex-col items-center">
           <span
             className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full text-white text-[11px] font-bold tracking-[0.16em] uppercase"
             style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
@@ -126,13 +126,13 @@ function RedPill() {
             <br />
             IFVG trading.
           </h1>
-          <p className="mt-7 max-w-lg text-[17px] leading-[1.55] text-[#4A4A52]">
+          <p className="mt-7 max-w-xl text-[17px] leading-[1.55] text-[#4A4A52]">
             An intense one-month training program conducted entirely live on
             Zoom. The full course is completed in the <strong>first week</strong> —
             for the rest of the days we trade together and analyse my executions
             live, with premium Discord access included.
           </p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
             <Link
               to="/enroll"
               onClick={markRedPillIntent}
@@ -149,50 +149,28 @@ function RedPill() {
               See what's covered
             </a>
           </div>
-          <div className="mt-8 flex items-center gap-2 text-[12px] text-[#6B6B72]">
+          <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-[#6B6B72]">
             <span className="size-1.5 rounded-full bg-[#E53935] animate-pulse" />
             Limited seats each cohort · one-time payment
           </div>
         </div>
 
-        <div className="relative rounded-[28px] border border-black/5 bg-white p-8 shadow-[0_40px_90px_-40px_rgba(0,0,0,0.3)]">
+        <div className="mt-14 w-full">
           <div className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#6B6B72]">
-            Program at a glance
+            Learn more about the program
           </div>
-          <div className="mt-6 flex items-baseline gap-1">
-            <span style={clash} className="text-[56px] font-bold leading-none">
-              ₹2,999
-            </span>
-            <span className="text-[15px] text-[#6B6B72]">one-time</span>
+          <div className="mt-5 relative overflow-hidden rounded-[28px] border border-black/5 bg-black shadow-[0_40px_90px_-40px_rgba(0,0,0,0.45)]">
+            <div className="aspect-video">
+              <iframe
+                src="https://www.youtube.com/embed/2fxjbw5fdsk"
+                title="The Red Pill — program walkthrough"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="h-full w-full border-0"
+              />
+            </div>
           </div>
-          <p className="mt-2 text-[13px] text-[#6B6B72]">
-            Full 1-month program · billed securely via Razorpay
-          </p>
-          <ul className="mt-7 space-y-3">
-            {[
-              "All classes live on Zoom — nothing pre-recorded",
-              "Complete course delivered in Week 1",
-              "Weeks 2–4: live trading + execution breakdowns",
-              "Premium Discord access for the full program",
-              "Q&A in every session",
-            ].map((i) => (
-              <li key={i} className="flex items-start gap-3 text-[14px] text-[#1A1A1F] font-medium">
-                <span className="mt-0.5 size-5 rounded-full bg-[#F7F1E8] border border-black/5 grid place-items-center shrink-0">
-                  <Check className="size-3 text-[#E53935]" strokeWidth={3} />
-                </span>
-                {i}
-              </li>
-            ))}
-          </ul>
-          <Link
-            to="/enroll"
-            onClick={markRedPillIntent}
-            className="mt-8 inline-flex w-full justify-center items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-          >
-            Get started
-            <ArrowRight className="size-4" />
-          </Link>
         </div>
       </section>
 

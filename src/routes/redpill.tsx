@@ -48,6 +48,14 @@ export const Route = createFileRoute("/redpill")({
   component: RedPill,
 });
 
+function markRedPillIntent() {
+  try {
+    localStorage.setItem("bp_intent", "redpill");
+  } catch {
+    /* ignore */
+  }
+}
+
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
 
@@ -126,7 +134,8 @@ function RedPill() {
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
-              to="/auth"
+              to="/enroll"
+              onClick={markRedPillIntent}
               className="inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
               style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
             >
@@ -176,7 +185,8 @@ function RedPill() {
             ))}
           </ul>
           <Link
-            to="/auth"
+            to="/enroll"
+            onClick={markRedPillIntent}
             className="mt-8 inline-flex w-full justify-center items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
             style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
           >
@@ -267,7 +277,8 @@ function RedPill() {
               </p>
             </div>
             <Link
-              to="/auth"
+              to="/enroll"
+              onClick={markRedPillIntent}
               className="inline-flex items-center gap-2 h-12 px-6 rounded-full text-white text-[14px] font-semibold"
               style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
             >
@@ -293,7 +304,8 @@ function RedPill() {
             One month, live, with me. ₹2,999 one-time - premium Discord included.
           </p>
           <Link
-            to="/auth"
+            to="/enroll"
+            onClick={markRedPillIntent}
             className="relative mt-8 inline-flex items-center gap-2 h-14 px-8 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
             style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
           >

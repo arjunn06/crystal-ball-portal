@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated/subscribe'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedEnrollRouteImport } from './routes/_authenticated/enroll'
 import { Route as AuthenticatedAppRouteRouteImport } from './routes/_authenticated/app/route'
 import { Route as AuthenticatedAdminRouteRouteImport } from './routes/_authenticated/admin/route'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app/index'
@@ -78,6 +79,11 @@ const AuthenticatedSubscribeRoute = AuthenticatedSubscribeRouteImport.update({
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedEnrollRoute = AuthenticatedEnrollRouteImport.update({
+  id: '/enroll',
+  path: '/enroll',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAppRouteRoute = AuthenticatedAppRouteRouteImport.update({
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/redpill': typeof RedpillRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/enroll': typeof AuthenticatedEnrollRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
+  '/enroll': typeof AuthenticatedEnrollRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/redpill': typeof RedpillRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
+  '/_authenticated/enroll': typeof AuthenticatedEnrollRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/redpill'
     | '/admin'
     | '/app'
+    | '/enroll'
     | '/onboarding'
     | '/subscribe'
     | '/auth/callback'
@@ -342,6 +352,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/bluepill'
     | '/redpill'
+    | '/enroll'
     | '/onboarding'
     | '/subscribe'
     | '/auth/callback'
@@ -373,6 +384,7 @@ export interface FileRouteTypes {
     | '/redpill'
     | '/_authenticated/admin'
     | '/_authenticated/app'
+    | '/_authenticated/enroll'
     | '/_authenticated/onboarding'
     | '/_authenticated/subscribe'
     | '/auth/callback'
@@ -469,6 +481,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/enroll': {
+      id: '/_authenticated/enroll'
+      path: '/enroll'
+      fullPath: '/enroll'
+      preLoaderRoute: typeof AuthenticatedEnrollRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/app': {
@@ -715,6 +734,7 @@ const AuthenticatedAppRouteRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRouteRoute: typeof AuthenticatedAdminRouteRouteWithChildren
   AuthenticatedAppRouteRoute: typeof AuthenticatedAppRouteRouteWithChildren
+  AuthenticatedEnrollRoute: typeof AuthenticatedEnrollRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSubscribeRoute: typeof AuthenticatedSubscribeRoute
 }
@@ -722,6 +742,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRouteRoute: AuthenticatedAdminRouteRouteWithChildren,
   AuthenticatedAppRouteRoute: AuthenticatedAppRouteRouteWithChildren,
+  AuthenticatedEnrollRoute: AuthenticatedEnrollRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSubscribeRoute: AuthenticatedSubscribeRoute,
 }

@@ -84,6 +84,21 @@ function Subscribe() {
     if (data?.isSubscribed) navigate({ to: "/app" });
   }, [data?.isSubscribed, navigate]);
 
+  // Someone who came from the Red Pill page belongs on the one-time checkout.
+  useEffect(() => {
+    if (data && !data.isSubscribed) {
+      let intent: string | null = null;
+      try {
+        intent = localStorage.getItem("bp_intent");
+      } catch {
+        /* ignore */
+      }
+      if (intent === "redpill" || data.subscription?.pill === "red") {
+        navigate({ to: "/enroll", replace: true });
+      }
+    }
+  }, [data, navigate]);
+
   // On mount, if there's a pending subscription row, sync with Razorpay in
   // case a previous checkout succeeded but never wrote back locally.
   useEffect(() => {

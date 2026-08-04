@@ -9,6 +9,7 @@ import {
 } from "@/lib/redpill-billing.functions";
 import { getAccountOverview } from "@/lib/account.functions";
 import { openRazorpay } from "@/lib/razorpay-checkout";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, LogOut } from "lucide-react";
@@ -83,6 +84,24 @@ function Enroll() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.subscription?.razorpay_subscription_id]);
 
+  async function sendWelcomeEmail(orderId: string) {
+    const email = data?.profile?.email;
+    if (!email) return;
+    try {
+      await sendTransactionalEmail({
+        templateName: "redpill-enrolled",
+        recipientEmail: email,
+        idempotencyKey: `redpill-enrolled-${orderId}`,
+        templateData: {
+          name: data?.profile?.full_name ?? undefined,
+          claimUrl: `${window.location.origin}/app/discord`,
+        },
+      });
+    } catch (e) {
+      console.error("Failed to send enrolment email", e);
+    }
+  }
+
   async function pollReconcile(maxMs = 30_000) {
     const started = Date.now();
     let delay = 1500;
@@ -130,6 +149,7 @@ function Enroll() {
                 },
               });
               toast.success("You're in. Welcome to The Red Pill.");
+              await sendWelcomeEmail(resp.razorpay_order_id!);
               try {
                 localStorage.removeItem("bp_intent");
               } catch {
@@ -142,6 +162,7 @@ function Enroll() {
               const ok = await pollReconcile();
               if (ok) {
                 toast.success("You're in.");
+                await sendWelcomeEmail(resp.razorpay_order_id!);
                 navigate({ to: "/app/discord" });
               } else {
                 toast.error(e.message ?? "Payment verification failed");
@@ -150,8 +171,11 @@ function Enroll() {
           },
           modal: {
             ondismiss: () => {
-              pollReconcile(15_000).then((ok) => {
-                if (ok) navigate({ to: "/app/discord" });
+              pollReconcile(15_000).then(async (ok) => {
+                if (ok) {
+                  await sendWelcomeEmail(orderId);
+                  navigate({ to: "/app/discord" });
+                }
               });
             },
           },

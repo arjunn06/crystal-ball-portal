@@ -28,12 +28,16 @@ function AppLayout() {
     }
   }, [isLoading, data, navigate]);
 
-  const items: NavItem[] = [
-    { to: "/app", label: "Home", icon: <LayoutDashboard className="size-4" /> },
-    { to: "/app/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
-    { to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> },
-    { to: "/app/settings", label: "Settings", icon: <Settings className="size-4" /> },
-  ];
+  const isRedPill = data?.pill === "red";
+
+  const items: NavItem[] = isRedPill
+    ? [{ to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> }]
+    : [
+        { to: "/app", label: "Home", icon: <LayoutDashboard className="size-4" /> },
+        { to: "/app/courses", label: "Courses", icon: <BookOpen className="size-4" /> },
+        { to: "/app/discord", label: "Discord role", icon: <DiscordIcon className="size-4" /> },
+        { to: "/app/settings", label: "Settings", icon: <Settings className="size-4" /> },
+      ];
   if (data?.isAdmin) {
     items.push({ to: "/admin", label: "Admin", icon: <Shield className="size-4" /> });
   }

@@ -311,11 +311,11 @@ function GuildAndRolePicker({
 
       {selectedGuild && (
         <Card className="p-5">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-semibold tracking-tight text-sm">Assign these roles</h3>
+              <h3 className="font-semibold tracking-tight text-sm">Roles per offering</h3>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Every paying member will receive all selected roles.
+                Members receive the roles configured for the pill they bought.
               </p>
             </div>
             <button
@@ -336,45 +336,33 @@ function GuildAndRolePicker({
           ) : (rolesQuery.data ?? []).length === 0 ? (
             <p className="text-sm text-muted-foreground">No assignable roles found.</p>
           ) : (
-            <div className="grid gap-1.5">
-              {rolesQuery.data!.map((r) => {
-                const checked = selectedRoles.includes(r.id);
-                return (
-                  <label
-                    key={r.id}
-                    className={
-                      "flex items-center gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors " +
-                      (checked
-                        ? "border-primary/50 bg-primary/5"
-                        : "border-border bg-surface hover:bg-hover")
-                    }
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={(e) => {
-                        setSelectedRoles((cur) =>
-                          e.target.checked
-                            ? [...cur, r.id]
-                            : cur.filter((x) => x !== r.id),
-                        );
-                      }}
-                      className="size-4 accent-primary"
-                    />
-                    <span
-                      className="size-2.5 rounded-full shrink-0"
-                      style={{ background: r.color ?? "#8B8B96" }}
-                    />
-                    <span className="text-sm flex-1 truncate">{r.name}</span>
-                  </label>
-                );
-              })}
+            <div className="grid md:grid-cols-2 gap-5">
+              <RoleGroup
+                label="Blue Pill"
+                hint="₹499/mo subscribers"
+                accent="#AB47BC"
+                roles={rolesQuery.data!}
+                selected={selectedRoles}
+                onToggle={(id, on) =>
+                  setSelectedRoles((cur) => (on ? [...cur, id] : cur.filter((x) => x !== id)))
+                }
+              />
+              <RoleGroup
+                label="Red Pill"
+                hint="₹2,999 live mentorship"
+                accent="#E53935"
+                roles={rolesQuery.data!}
+                selected={selectedRedRoles}
+                onToggle={(id, on) =>
+                  setSelectedRedRoles((cur) => (on ? [...cur, id] : cur.filter((x) => x !== id)))
+                }
+              />
             </div>
           )}
 
-          <div className="mt-5 flex items-center justify-between gap-3">
+          <div className="mt-6 flex items-center justify-between gap-3">
             <p className="text-xs text-muted-foreground">
-              {selectedRoles.length} selected
+              Blue Pill: {selectedRoles.length} · Red Pill: {selectedRedRoles.length}
             </p>
             <Button
               onClick={() => saveMut.mutate()}
@@ -389,6 +377,60 @@ function GuildAndRolePicker({
         </Card>
       )}
     </>
+  );
+}
+
+function RoleGroup({
+  label,
+  hint,
+  accent,
+  roles,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  hint: string;
+  accent: string;
+  roles: Array<{ id: string; name: string; color: string | null }>;
+  selected: string[];
+  onToggle: (id: string, on: boolean) => void;
+}) {
+  return (
+    <div className="rounded-lg border border-border p-3">
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="size-2.5 rounded-full" style={{ background: accent }} />
+        <p className="text-sm font-medium">{label}</p>
+        <span className="text-[11px] text-muted-foreground">{hint}</span>
+      </div>
+      <div className="grid gap-1.5">
+        {roles.map((r) => {
+          const checked = selected.includes(r.id);
+          return (
+            <label
+              key={r.id}
+              className={
+                "flex items-center gap-3 rounded-md border px-3 py-2 cursor-pointer transition-colors " +
+                (checked
+                  ? "border-primary/50 bg-primary/5"
+                  : "border-border bg-surface hover:bg-hover")
+              }
+            >
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={(e) => onToggle(r.id, e.target.checked)}
+                className="size-4 accent-primary"
+              />
+              <span
+                className="size-2.5 rounded-full shrink-0"
+                style={{ background: r.color ?? "#8B8B96" }}
+              />
+              <span className="text-sm flex-1 truncate">{r.name}</span>
+            </label>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

@@ -12,19 +12,25 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
   if (!data) throw new Error("Forbidden");
 }
 
-async function assignDiscordRole(discordUserId: string) {
+type Pill = "red" | "blue";
+
+async function assignDiscordRole(discordUserId: string, pill: Pill = "blue") {
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) throw new Error("Discord bot is not configured.");
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data: cfg } = await supabaseAdmin
     .from("discord_config")
-    .select("guild_id, role_ids")
+    .select("guild_id, role_ids, red_pill_role_ids")
     .eq("id", 1)
     .maybeSingle();
   const guildId = cfg?.guild_id;
-  const roleIds = (cfg?.role_ids ?? []) as string[];
+  const roleIds = (pill === "red"
+    ? ((cfg?.red_pill_role_ids ?? []) as string[])
+    : ((cfg?.role_ids ?? []) as string[]));
   if (!guildId || roleIds.length === 0) {
-    throw new Error("Discord roles are not configured yet. Ask an admin to finish setup.");
+    throw new Error(
+      `Discord ${pill === "red" ? "Red Pill" : "Blue Pill"} roles are not configured yet. Ask an admin to finish setup.`,
+    );
   }
   for (const roleId of roleIds) {
     const res = await fetch(

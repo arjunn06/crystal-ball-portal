@@ -32,6 +32,13 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
         type PaymentEntity = {
           id?: string;
           subscription_id?: string;
+          order_id?: string;
+          amount?: number;
+          notes?: Record<string, unknown> | null;
+        };
+        type OrderEntity = {
+          id?: string;
+          status?: string;
           notes?: Record<string, unknown> | null;
         };
         let payload: {
@@ -39,6 +46,7 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           payload?: {
             subscription?: { entity?: SubEntity };
             payment?: { entity?: PaymentEntity };
+            order?: { entity?: OrderEntity };
           };
         };
         try {
@@ -51,6 +59,44 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
         const event = payload.event ?? "";
         const s = payload.payload?.subscription?.entity;
         const p = payload.payload?.payment?.entity;
+        const o = payload.payload?.order?.entity;
+
+        // ── Red Pill: one-time order payments ───────────────────────────────
+        const orderId = o?.id ?? p?.order_id;
+        const orderNotes = o?.notes ?? p?.notes ?? null;
+        const isRedPillOrder =
+          !!orderId &&
+          !p?.subscription_id &&
+          (event === "order.paid" || event === "payment.captured") &&
+          (!orderNotes || orderNotes.pill === "red" || typeof orderNotes.user_id === "string");
+        if (isRedPillOrder) {
+          try {
+            const endsAt = new Date(Date.now() + 31 * 86400_000).toISOString();
+            const patch = {
+              status: "active",
+              pill: "red" as const,
+              current_period_end: endsAt,
+            };
+            const { data: updated, error: updErr } = await supabaseAdmin
+              .from("subscriptions")
+              .update(patch)
+              .eq("razorpay_subscription_id", orderId!)
+              .select("user_id");
+            if (updErr) throw updErr;
+            const noteUser =
+              orderNotes && typeof orderNotes.user_id === "string" ? orderNotes.user_id : null;
+            if ((updated?.length ?? 0) === 0 && noteUser) {
+              await supabaseAdmin.from("subscriptions").upsert(
+                { user_id: noteUser, razorpay_subscription_id: orderId!, ...patch },
+                { onConflict: "user_id" },
+              );
+            }
+          } catch (err) {
+            console.error("Razorpay webhook (red pill order) error", event, err);
+            return new Response("Handler error", { status: 500 });
+          }
+          return new Response("ok");
+        }
 
         const subscriptionId = s?.id ?? p?.subscription_id;
         const userIdFromNotes =

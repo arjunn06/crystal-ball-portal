@@ -263,7 +263,7 @@ function RedPill() {
                 Premium Discord access included
               </div>
               <p className="text-[14px] text-[#8B8B96]">
-                Alerts, session links and community access for the full program.
+                Trade Alerts, session links and community access for the full program.
               </p>
             </div>
             <Link

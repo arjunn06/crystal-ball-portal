@@ -301,9 +301,9 @@ function RedPill() {
             <ArrowRight className="size-4" />
           </Link>
           <div className="relative mt-6 text-[13px] text-[#6B6B72]">
-            Prefer month-to-month?{" "}
+            Prefer to start small?{" "}
             <Link to="/bluepill" className="font-semibold underline">
-              Explore the Blue Pill at ₹499/mo
+              Try the Blue Pill at ₹499/mo
             </Link>
           </div>
         </div>

@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RedpillRouteImport } from './routes/redpill'
+import { Route as BluepillRouteImport } from './routes/bluepill'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -39,6 +41,16 @@ import { Route as ApiPublicDiscordCallbackRouteImport } from './routes/api/publi
 import { Route as AuthenticatedAppCoursesSlugRouteImport } from './routes/_authenticated/app/courses.$slug'
 import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
 
+const RedpillRoute = RedpillRouteImport.update({
+  id: '/redpill',
+  path: '/redpill',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BluepillRoute = BluepillRouteImport.update({
+  id: '/bluepill',
+  path: '/bluepill',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -200,6 +212,8 @@ const AuthenticatedAdminCoursesIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/bluepill': typeof BluepillRoute
+  '/redpill': typeof RedpillRoute
   '/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
@@ -230,6 +244,8 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteWithChildren
+  '/bluepill': typeof BluepillRoute
+  '/redpill': typeof RedpillRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -258,6 +274,8 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/bluepill': typeof BluepillRoute
+  '/redpill': typeof RedpillRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteRouteWithChildren
   '/_authenticated/app': typeof AuthenticatedAppRouteRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
@@ -290,6 +308,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/bluepill'
+    | '/redpill'
     | '/admin'
     | '/app'
     | '/onboarding'
@@ -320,6 +340,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/bluepill'
+    | '/redpill'
     | '/onboarding'
     | '/subscribe'
     | '/auth/callback'
@@ -347,6 +369,8 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/bluepill'
+    | '/redpill'
     | '/_authenticated/admin'
     | '/_authenticated/app'
     | '/_authenticated/onboarding'
@@ -379,6 +403,8 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  BluepillRoute: typeof BluepillRoute
+  RedpillRoute: typeof RedpillRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
   ApiPublicDiscordUserCallbackRoute: typeof ApiPublicDiscordUserCallbackRoute
   ApiPublicWebhooksRazorpayRoute: typeof ApiPublicWebhooksRazorpayRoute
@@ -389,6 +415,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/redpill': {
+      id: '/redpill'
+      path: '/redpill'
+      fullPath: '/redpill'
+      preLoaderRoute: typeof RedpillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bluepill': {
+      id: '/bluepill'
+      path: '/bluepill'
+      fullPath: '/bluepill'
+      preLoaderRoute: typeof BluepillRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
@@ -703,6 +743,8 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  BluepillRoute: BluepillRoute,
+  RedpillRoute: RedpillRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,
   ApiPublicDiscordUserCallbackRoute: ApiPublicDiscordUserCallbackRoute,
   ApiPublicWebhooksRazorpayRoute: ApiPublicWebhooksRazorpayRoute,

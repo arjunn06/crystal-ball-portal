@@ -82,7 +82,7 @@ function RedPill() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
         style={{
           background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFC9B0 0%, #FBE0D0 35%, rgba(245,238,227,0) 75%)",
+            "radial-gradient(1200px 500px at 50% -100px, #FFC6BC 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
         }}
       />
 
@@ -111,7 +111,7 @@ function RedPill() {
         <div>
           <span
             className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full text-white text-[11px] font-bold tracking-[0.16em] uppercase"
-            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
           >
             <span className="size-1.5 rounded-full bg-white animate-pulse" />
             THE RED PILL · LIVE ON ZOOM
@@ -137,7 +137,7 @@ function RedPill() {
               to="/enroll"
               onClick={markRedPillIntent}
               className="inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
             >
               Enroll now · ₹2,999
               <ArrowRight className="size-4" />
@@ -188,7 +188,7 @@ function RedPill() {
             to="/enroll"
             onClick={markRedPillIntent}
             className="mt-8 inline-flex w-full justify-center items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
           >
             Get started
             <ArrowRight className="size-4" />
@@ -200,9 +200,9 @@ function RedPill() {
       <section className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <div className="flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
             HOW THE MONTH RUNS
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
           </div>
           <h2
             style={{ ...clash, letterSpacing: "-0.005em" }}
@@ -280,7 +280,7 @@ function RedPill() {
               to="/enroll"
               onClick={markRedPillIntent}
               className="inline-flex items-center gap-2 h-12 px-6 rounded-full text-white text-[14px] font-semibold"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
             >
               Enroll · ₹2,999
               <ArrowRight className="size-4" />
@@ -295,7 +295,7 @@ function RedPill() {
           <div
             aria-hidden
             className="absolute -top-24 -right-24 size-80 rounded-full opacity-40"
-            style={{ background: "radial-gradient(closest-side,#FFD7B8,transparent)" }}
+            style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
           />
           <h2 style={clash} className="relative text-[34px] md:text-[46px] font-bold leading-[1.08]">
             Take The Red Pill.
@@ -307,7 +307,7 @@ function RedPill() {
             to="/enroll"
             onClick={markRedPillIntent}
             className="relative mt-8 inline-flex items-center gap-2 h-14 px-8 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
           >
             Enroll now
             <ArrowRight className="size-4" />
@@ -347,7 +347,7 @@ function Phase({
       <div className="flex items-center justify-between mb-6">
         <span
           className="inline-flex items-center h-11 px-4 rounded-full text-white text-[12px] font-bold tracking-wider"
-          style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+          style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
         >
           {tag}
         </span>

@@ -72,7 +72,7 @@ export const startMemberDiscordConnect = createServerFn({ method: "POST" })
     }
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("status")
+      .select("status, pill")
       .eq("user_id", userId)
       .maybeSingle();
     if (sub?.status !== "active") {
@@ -81,10 +81,14 @@ export const startMemberDiscordConnect = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: cfg } = await supabaseAdmin
       .from("discord_config")
-      .select("guild_id, role_ids")
+      .select("guild_id, role_ids, red_pill_role_ids")
       .eq("id", 1)
       .maybeSingle();
-    if (!cfg?.guild_id || !(cfg.role_ids as string[] | null)?.length) {
+    const pillRoles = (sub.pill === "red" ? cfg?.red_pill_role_ids : cfg?.role_ids) as
+      | string[]
+      | null
+      | undefined;
+    if (!cfg?.guild_id || !pillRoles?.length) {
       throw new Error("Discord isn't set up yet. Please check back soon.");
     }
 
@@ -125,7 +129,7 @@ export const claimDiscordRole = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("status")
+      .select("status, pill")
       .eq("user_id", userId)
       .maybeSingle();
     if (sub?.status !== "active") throw new Error("You need an active membership to claim your role.");
@@ -139,7 +143,7 @@ export const claimDiscordRole = createServerFn({ method: "POST" })
       .single();
 
     try {
-      await assignDiscordRole(data.discord_user_id);
+      await assignDiscordRole(data.discord_user_id, (sub.pill ?? "blue") as Pill);
       await supabaseAdmin
         .from("discord_role_claims")
         .update({ status: "assigned", actioned_at: new Date().toISOString() })
@@ -200,8 +204,13 @@ export const adminRetryClaim = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (!claim) throw new Error("Not found");
+    const { data: claimSub } = await supabaseAdmin
+      .from("subscriptions")
+      .select("pill")
+      .eq("user_id", claim.user_id)
+      .maybeSingle();
     try {
-      await assignDiscordRole(claim.discord_user_id);
+      await assignDiscordRole(claim.discord_user_id, (claimSub?.pill ?? "blue") as Pill);
       await supabaseAdmin
         .from("discord_role_claims")
         .update({

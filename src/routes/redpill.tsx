@@ -52,14 +52,14 @@ const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-u
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
 
 const WEEK1 = [
-  "Introduction to Trading",
-  "Introduction to Market Profiles",
-  "How to navigate TradingView for beginners",
-  "What are PD Arrays",
-  "Optimal Trade Entries & other ICT Fibonacci concepts",
+  "Introduction to Trading - Candlestick anatomy and basics",
+  "What is Price Action and How does the markets move?",
+  "What are ICT Concepts & How to apply them",
+  "What is Liquidity",
+  "Liquidity Sweeps & Reading Price",
   "Importance of Time & Price",
   "The IFVG Model explained with examples",
-  "How to use SMT Divergences",
+  "How to apply SMT Divergences",
   "Futures & Forex prop firm rules and guide",
 ];
 
@@ -205,13 +205,13 @@ function RedPill() {
           <Phase
             tag="WEEK 1"
             title="The full course, live"
-            body="Every module from basics to advanced IFVG, delivered live on Zoom with Q&A. Recordings of the concepts stay with you."
+            body="Every module from basics to advanced IFVG, delivered live on Zoom with live Q&A anytime in between the session."
             icon={<Video className="size-4" />}
           />
           <Phase
             tag="WEEKS 2–4"
             title="We trade together"
-            body="Daily live sessions where we take the market together — bias, setups, entries and risk in real time."
+            body="Daily live sessions where we take the market together — setups, entries and risk management in real time."
             icon={<LineChart className="size-4" />}
           />
           <Phase
@@ -263,7 +263,7 @@ function RedPill() {
                 Premium Discord access included
               </div>
               <p className="text-[14px] text-[#8B8B96]">
-                Alerts, session links and community access for the full program.
+                Trade Alerts, session links and community access for the full program.
               </p>
             </div>
             <Link
@@ -290,7 +290,7 @@ function RedPill() {
             Take The Red Pill.
           </h2>
           <p className="relative mx-auto mt-4 max-w-lg text-[16px] text-[#5A5A62]">
-            One month, live, with me. ₹2,999 one-time — premium Discord included.
+            One month, live, with me. ₹2,999 one-time - premium Discord included.
           </p>
           <Link
             to="/auth"
@@ -301,9 +301,9 @@ function RedPill() {
             <ArrowRight className="size-4" />
           </Link>
           <div className="relative mt-6 text-[13px] text-[#6B6B72]">
-            Prefer month-to-month?{" "}
+            Prefer to start small?{" "}
             <Link to="/bluepill" className="font-semibold underline">
-              Explore the Blue Pill at ₹499/mo
+              Try the Blue Pill at ₹499/mo
             </Link>
           </div>
         </div>

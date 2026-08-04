@@ -40,7 +40,9 @@ export const getDiscordConfig = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
       .from("discord_config")
-      .select("guild_id, guild_name, guild_icon, role_ids, roles_cache, bot_installed_at, updated_at")
+      .select(
+        "guild_id, guild_name, guild_icon, role_ids, roles_cache, red_pill_role_ids, red_roles_cache, bot_installed_at, updated_at",
+      )
       .eq("id", 1)
       .maybeSingle();
     const clientId = process.env.DISCORD_CLIENT_ID ?? null;
@@ -132,6 +134,7 @@ export const saveDiscordConfig = createServerFn({ method: "POST" })
       .object({
         guild_id: z.string().regex(/^\d+$/),
         role_ids: z.array(z.string().regex(/^\d+$/)).min(1).max(10),
+        red_pill_role_ids: z.array(z.string().regex(/^\d+$/)).max(10).optional(),
       })
       .parse(d),
   )
@@ -150,14 +153,18 @@ export const saveDiscordConfig = createServerFn({ method: "POST" })
       name: string;
       color: number;
     }>;
-    const rolesCache = data.role_ids.map((id) => {
-      const r = roles.find((x) => x.id === id);
-      return {
-        id,
-        name: r?.name ?? "Unknown role",
-        color: r?.color ? `#${r.color.toString(16).padStart(6, "0")}` : null,
-      };
-    });
+    const toCache = (ids: string[]) =>
+      ids.map((id) => {
+        const r = roles.find((x) => x.id === id);
+        return {
+          id,
+          name: r?.name ?? "Unknown role",
+          color: r?.color ? `#${r.color.toString(16).padStart(6, "0")}` : null,
+        };
+      });
+    const rolesCache = toCache(data.role_ids);
+    const redRoleIds = data.red_pill_role_ids ?? [];
+    const redRolesCache = toCache(redRoleIds);
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
@@ -170,6 +177,8 @@ export const saveDiscordConfig = createServerFn({ method: "POST" })
           : null,
         role_ids: data.role_ids,
         roles_cache: rolesCache,
+        red_pill_role_ids: redRoleIds,
+        red_roles_cache: redRolesCache,
       })
       .eq("id", 1);
     return { ok: true };
@@ -188,6 +197,8 @@ export const disconnectDiscord = createServerFn({ method: "POST" })
         guild_icon: null,
         role_ids: [],
         roles_cache: [],
+        red_pill_role_ids: [],
+        red_roles_cache: [],
         bot_installed_at: null,
         oauth_state: null,
         oauth_state_expires_at: null,

@@ -53,7 +53,7 @@ function BluePill() {
         className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
         style={{
           background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFD7B8 0%, #FBE6D0 35%, rgba(245,238,227,0) 75%)",
+            "radial-gradient(1200px 500px at 50% -100px, #C9DDFF 0%, #E4EEFF 35%, rgba(245,238,227,0) 75%)",
         }}
       />
 
@@ -74,14 +74,14 @@ function BluePill() {
               doesn't mean
               <br />
               <span
-                className="inline-flex items-center h-14 md:h-16 pl-2 pr-5 rounded-full text-white text-[22px] md:text-[26px] font-semibold shadow-[0_10px_30px_-10px_rgba(229,57,53,0.7)]"
+                className="inline-flex items-center h-14 md:h-16 pl-2 pr-5 rounded-full text-white text-[22px] md:text-[26px] font-semibold shadow-[0_10px_30px_-10px_rgba(30,107,255,0.7)]"
                 style={{
-                  background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)",
+                  background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)",
                   ...clash,
                 }}
               >
                 <span className="size-10 md:size-12 rounded-full bg-white mr-2 grid place-items-center">
-                  <span className="size-2.5 rounded-full bg-[#E53935] animate-pulse" />
+                  <span className="size-2.5 rounded-full bg-[#1E6BFF] animate-pulse" />
                 </span>
                 Premium price.
               </span>
@@ -97,8 +97,8 @@ function BluePill() {
           <div className="mt-9 flex flex-wrap items-center gap-3">
             <Link
               to="/auth"
-              className="inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+              className="inline-flex items-center gap-2 h-14 px-7 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(30,107,255,0.65)] hover:-translate-y-px transition-transform"
+              style={{ background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)" }}
             >
               Get access now · ₹499/mo
               <ArrowRight className="size-4" />
@@ -112,7 +112,7 @@ function BluePill() {
           </div>
 
           <div className="mt-8 flex items-center gap-2 text-[12px] text-[#6B6B72]">
-            <span className="size-1.5 rounded-full bg-[#E53935] animate-pulse" />
+            <span className="size-1.5 rounded-full bg-[#1E6BFF] animate-pulse" />
             Cancel anytime
           </div>
         </div>
@@ -127,9 +127,9 @@ function BluePill() {
       <section id="how" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
         <div className="flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#2FA8FF]" />
             HOW IT WORKS
-            <span className="size-1.5 rounded-full bg-[#FF6B35]" />
+            <span className="size-1.5 rounded-full bg-[#2FA8FF]" />
           </div>
           <h2
             style={{ ...clash, letterSpacing: "-0.005em" }}
@@ -175,7 +175,7 @@ function BluePill() {
           <div
             aria-hidden
             className="absolute -top-24 -right-24 size-80 rounded-full opacity-40"
-            style={{ background: "radial-gradient(closest-side,#FFD7B8,transparent)" }}
+            style={{ background: "radial-gradient(closest-side,#C9DDFF,transparent)" }}
           />
           <div className="relative grid md:grid-cols-2 gap-10 items-start">
             <div>
@@ -199,8 +199,8 @@ function BluePill() {
               <p className="mt-2 text-[13px] text-[#6B6B72]">Monthly · billed securely via Razorpay</p>
               <Link
                 to="/auth"
-                className="mt-7 inline-flex items-center gap-2 h-13 px-7 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform"
-                style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+                className="mt-7 inline-flex items-center gap-2 h-13 px-7 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(30,107,255,0.65)] hover:-translate-y-px transition-transform"
+                style={{ background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)" }}
               >
                 Get Started
                 <ArrowRight className="size-4" />
@@ -220,7 +220,7 @@ function BluePill() {
                   className="flex items-start gap-3 rounded-2xl bg-[#F7F1E8] border border-black/5 px-4 py-3"
                 >
                   <span className="mt-0.5 size-5 rounded-full bg-white border border-black/5 grid place-items-center shrink-0">
-                    <Check className="size-3 text-[#E53935]" strokeWidth={3} />
+                    <Check className="size-3 text-[#1E6BFF]" strokeWidth={3} />
                   </span>
                   <span className="text-[14px] text-[#1A1A1F] font-medium">{item}</span>
                 </li>
@@ -356,11 +356,11 @@ function Step({
       <div className="flex items-center justify-between mb-6">
         <span
           className="inline-flex items-center h-11 px-4 rounded-full text-white text-[13px] font-bold tracking-wider"
-          style={{ background: "linear-gradient(135deg,#E53935 0%,#FF6B35 100%)" }}
+          style={{ background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)" }}
         >
           Step {n}
         </span>
-        <span className="size-10 rounded-full bg-[#F5EEE3] grid place-items-center text-[#E53935]">
+        <span className="size-10 rounded-full bg-[#F5EEE3] grid place-items-center text-[#1E6BFF]">
           {icon}
         </span>
       </div>

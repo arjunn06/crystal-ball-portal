@@ -290,7 +290,7 @@ function RedPill() {
             Take The Red Pill.
           </h2>
           <p className="relative mx-auto mt-4 max-w-lg text-[16px] text-[#5A5A62]">
-            One month, live, with me. ₹2,999 one-time — premium Discord included.
+            One month, live, with me. ₹2,999 one-time - premium Discord included.
           </p>
           <Link
             to="/auth"

@@ -340,7 +340,7 @@ function GuildAndRolePicker({
               <RoleGroup
                 label="Blue Pill"
                 hint="₹499/mo subscribers"
-                accent="#AB47BC"
+                accent="#1E6BFF"
                 roles={rolesQuery.data!}
                 selected={selectedRoles}
                 onToggle={(id, on) =>

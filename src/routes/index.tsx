@@ -144,12 +144,12 @@ function Chooser() {
           <div
             aria-hidden
             className="absolute -top-24 -right-24 size-72 rounded-full opacity-40"
-            style={{ background: "radial-gradient(closest-side,#E3C7F0,transparent)" }}
+            style={{ background: "radial-gradient(closest-side,#C9DDFF,transparent)" }}
           />
           <div className="relative">
             <span
               className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full text-white text-[11px] font-bold tracking-[0.16em] uppercase"
-              style={{ background: "linear-gradient(135deg,#AB47BC 0%,#7E57C2 100%)" }}
+              style={{ background: "linear-gradient(135deg,#1E6BFF 0%,#2FA8FF 100%)" }}
             >
               <Users className="size-3.5" />
               THE BLUE PILL
@@ -172,7 +172,7 @@ function Chooser() {
               ].map((i) => (
                 <li key={i} className="flex items-start gap-3 text-[14px] text-[#1A1A1F]">
                   <span className="mt-0.5 size-5 rounded-full bg-[#F7F1E8] border border-black/5 grid place-items-center shrink-0">
-                    <Check className="size-3 text-[#AB47BC]" strokeWidth={3} />
+                    <Check className="size-3 text-[#1E6BFF]" strokeWidth={3} />
                   </span>
                   {i}
                 </li>

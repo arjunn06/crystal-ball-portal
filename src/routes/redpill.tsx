@@ -52,14 +52,14 @@ const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-u
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
 
 const WEEK1 = [
-  "Introduction to Trading",
-  "Introduction to Market Profiles",
-  "How to navigate TradingView for beginners",
-  "What are PD Arrays",
-  "Optimal Trade Entries & other ICT Fibonacci concepts",
+  "Introduction to Trading - Candlestick anatomy and basics",
+  "What is Price Action and How does the markets move?",
+  "What are ICT Concepts & How to apply them",
+  "What is Liquidity",
+  "Liquidity Sweeps & Reading Price",
   "Importance of Time & Price",
   "The IFVG Model explained with examples",
-  "How to use SMT Divergences",
+  "How to apply SMT Divergences",
   "Futures & Forex prop firm rules and guide",
 ];
 

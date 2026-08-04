@@ -48,6 +48,14 @@ export const Route = createFileRoute("/redpill")({
   component: RedPill,
 });
 
+function markRedPillIntent() {
+  try {
+    localStorage.setItem("bp_intent", "redpill");
+  } catch {
+    /* ignore */
+  }
+}
+
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
 

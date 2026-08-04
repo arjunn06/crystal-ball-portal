@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Check, Video, CalendarDays, LineChart } from "lucide-react";
+import { ArrowRight, Video, CalendarDays, LineChart } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { DiscordIcon } from "@/components/discord-icon";
 

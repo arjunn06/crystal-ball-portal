@@ -15,6 +15,7 @@ import { z } from "zod";
 import { Loader2, Check, X, Camera, User } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { cn } from "@/lib/utils";
+import { postAuthTarget } from "@/lib/intent";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   component: Onboarding,
@@ -52,7 +53,7 @@ function Onboarding() {
         .eq("id", data.user.id)
         .maybeSingle();
       if (profile?.handle) {
-        navigate({ to: "/app", replace: true });
+        navigate({ to: postAuthTarget(), replace: true });
         return;
       }
       const metaName =
@@ -150,7 +151,7 @@ function Onboarding() {
         },
       });
       toast.success("You're in.");
-      navigate({ to: "/app", replace: true });
+      navigate({ to: postAuthTarget(), replace: true });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {

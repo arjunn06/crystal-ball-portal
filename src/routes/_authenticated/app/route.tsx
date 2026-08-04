@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { SignOutButton } from "@/components/app/sign-out-button";
 import { LayoutDashboard, BookOpen, Settings, Shield } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
+import { getIntent } from "@/lib/intent";
 
 export const Route = createFileRoute("/_authenticated/app")({
   head: () => ({ meta: [{ title: "Blueprint" }] }),
@@ -25,7 +26,7 @@ function AppLayout() {
 
   useEffect(() => {
     if (!isLoading && data && !data.isSubscribed) {
-      navigate({ to: "/subscribe" });
+      navigate({ to: getIntent() === "redpill" || data.pill === "red" ? "/enroll" : "/subscribe" });
     }
   }, [isLoading, data, navigate]);
 

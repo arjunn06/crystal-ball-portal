@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ArrowLeft, Loader2 } from "lucide-react";
+import { postAuthTarget } from "@/lib/intent";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -32,7 +33,7 @@ async function routeAfterLogin(navigate: ReturnType<typeof useNavigate>, userId:
     .eq("id", userId)
     .maybeSingle();
   if (!data?.handle) navigate({ to: "/onboarding", replace: true });
-  else navigate({ to: "/app", replace: true });
+  else navigate({ to: postAuthTarget(), replace: true });
 }
 
 function AuthPage() {

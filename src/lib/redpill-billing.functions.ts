@@ -20,10 +20,13 @@ export const createRedPillOrder = createServerFn({ method: "POST" })
 
     const { data: existing } = await supabase
       .from("subscriptions")
-      .select("status")
+      .select("status, pill")
       .eq("user_id", userId)
       .maybeSingle();
-    if (existing?.status === "active") throw new Error("You already have active access.");
+    // Blue Pill members are allowed to upgrade into the Red Pill program.
+    if (existing?.status === "active" && existing.pill === "red") {
+      throw new Error("You already have active Red Pill access.");
+    }
 
     const auth = "Basic " + Buffer.from(`${keyId}:${secret}`).toString("base64");
     const res = await fetch("https://api.razorpay.com/v1/orders", {
@@ -43,16 +46,20 @@ export const createRedPillOrder = createServerFn({ method: "POST" })
     }
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.from("subscriptions").upsert(
-      {
-        user_id: userId,
-        razorpay_subscription_id: body.id as string,
-        status: "created",
-        pill: "red" as const,
-        cancelled_at: null,
-      },
-      { onConflict: "user_id" },
-    );
+    // Don't clobber an existing active (Blue Pill) subscription while the
+    // payment is still pending — only stage a row when there's nothing active.
+    if (existing?.status !== "active") {
+      await supabaseAdmin.from("subscriptions").upsert(
+        {
+          user_id: userId,
+          razorpay_subscription_id: body.id as string,
+          status: "created",
+          pill: "red" as const,
+          cancelled_at: null,
+        },
+        { onConflict: "user_id" },
+      );
+    }
 
     return {
       orderId: body.id as string,
@@ -84,11 +91,26 @@ export const verifyRedPillPayment = createServerFn({ method: "POST" })
 
     const endsAt = new Date(Date.now() + ACCESS_DAYS * 86400_000).toISOString();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin
+    const { data: updated } = await supabaseAdmin
       .from("subscriptions")
       .update({ status: "active", pill: "red" as const, current_period_end: endsAt })
       .eq("user_id", context.userId)
-      .eq("razorpay_subscription_id", data.razorpay_order_id);
+      .eq("razorpay_subscription_id", data.razorpay_order_id)
+      .select("user_id");
+    // Upgrading Blue → Red: the pending order was never staged on the row.
+    if (!updated?.length) {
+      await supabaseAdmin.from("subscriptions").upsert(
+        {
+          user_id: context.userId,
+          razorpay_subscription_id: data.razorpay_order_id,
+          status: "active",
+          pill: "red" as const,
+          current_period_end: endsAt,
+          cancelled_at: null,
+        },
+        { onConflict: "user_id" },
+      );
+    }
     return { ok: true, currentPeriodEnd: endsAt };
   });
 

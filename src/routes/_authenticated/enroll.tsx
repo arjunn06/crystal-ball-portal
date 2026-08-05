@@ -62,7 +62,8 @@ function Enroll() {
   });
 
   useEffect(() => {
-    if (data?.isSubscribed) {
+    // Blue Pill members may still enroll — only bounce out once Red Pill is active.
+    if (data?.isSubscribed && data.pill === "red") {
       try {
         localStorage.removeItem("bp_intent");
       } catch {
@@ -70,7 +71,7 @@ function Enroll() {
       }
       navigate({ to: "/app/discord" });
     }
-  }, [data?.isSubscribed, navigate]);
+  }, [data?.isSubscribed, data?.pill, navigate]);
 
   // If a previous checkout succeeded but never wrote back, sync it.
   useEffect(() => {
@@ -108,7 +109,7 @@ function Enroll() {
     while (Date.now() - started < maxMs) {
       try {
         const r = await reconcile();
-        if (r.status === "active") {
+        if (r.status === "active" && r.pill === "red") {
           await qc.invalidateQueries({ queryKey: ["account", "overview"] });
           return true;
         }

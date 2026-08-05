@@ -120,11 +120,9 @@ function RedPill() {
             style={{ ...clash, letterSpacing: "-0.01em" }}
             className="mt-6 text-[46px] md:text-[68px] font-bold leading-[0.98]"
           >
-            One month.
+            Steal my 5 figure printing
             <br />
-            Basics to advanced
-            <br />
-            IFVG trading.
+            trading strategy!
           </h1>
           <p className="mt-7 max-w-xl text-[17px] leading-[1.55] text-[#4A4A52]">
             An intense one-month training program conducted entirely live on

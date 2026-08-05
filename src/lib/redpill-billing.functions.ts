@@ -121,7 +121,7 @@ export const reconcileRedPillOrder = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const keyId = process.env['RAZORPAY_KEY_ID'];
     const secret = process.env['RAZORPAY_KEY_SECRET'];
-    if (!keyId || !secret) return { status: null as string | null, changed: false };
+    if (!keyId || !secret) return { status: null as string | null, changed: false, pill: null as string | null };
 
     const { data: sub } = await supabase
       .from("subscriptions")
@@ -129,11 +129,11 @@ export const reconcileRedPillOrder = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .maybeSingle();
     if (!sub?.razorpay_subscription_id || sub.pill !== "red") {
-      return { status: sub?.status ?? null, changed: false };
+      return { status: sub?.status ?? null, changed: false, pill: sub?.pill ?? null };
     }
-    if (sub.status === "active") return { status: "active", changed: false };
+    if (sub.status === "active") return { status: "active", changed: false, pill: "red" };
     if (!sub.razorpay_subscription_id.startsWith("order_")) {
-      return { status: sub.status, changed: false };
+      return { status: sub.status, changed: false, pill: sub.pill };
     }
 
     const auth = "Basic " + Buffer.from(`${keyId}:${secret}`).toString("base64");
@@ -141,9 +141,9 @@ export const reconcileRedPillOrder = createServerFn({ method: "POST" })
       `https://api.razorpay.com/v1/orders/${sub.razorpay_subscription_id}`,
       { headers: { Authorization: auth } },
     );
-    if (!res.ok) return { status: sub.status, changed: false };
+    if (!res.ok) return { status: sub.status, changed: false, pill: sub.pill };
     const order = (await res.json()) as { status?: string };
-    if (order.status !== "paid") return { status: sub.status, changed: false };
+    if (order.status !== "paid") return { status: sub.status, changed: false, pill: sub.pill };
 
     const endsAt = new Date(Date.now() + ACCESS_DAYS * 86400_000).toISOString();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -151,5 +151,5 @@ export const reconcileRedPillOrder = createServerFn({ method: "POST" })
       .from("subscriptions")
       .update({ status: "active", current_period_end: endsAt })
       .eq("user_id", userId);
-    return { status: "active", changed: true };
+    return { status: "active", changed: true, pill: "red" };
   });

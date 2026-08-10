@@ -288,25 +288,16 @@ function Enroll() {
               </ul>
 
               <Button
-                onClick={() => mut.mutate()}
-                disabled={mut.isPending}
-                className="mt-7 w-full h-13 py-4 rounded-full text-white text-[15px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform border-0"
-                style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+                disabled
+                className="mt-7 w-full h-13 py-4 rounded-full bg-[#0B0B10]/10 text-[#0B0B10] text-[15px] font-semibold border-0 disabled:opacity-100"
               >
-                {mut.isPending ? (
-                  "Opening checkout…"
-                ) : (
-                  <>
-                    Pay ₹2,999 · Enroll now
-                    <ArrowRight className="size-4 ml-1" />
-                  </>
-                )}
+                Slots full · Registrations closed
               </Button>
 
               <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
-                Secure checkout by Razorpay.{" "}
+                This cohort is fully booked.{" "}
                 <Link to="/subscribe" className="underline">
-                  Prefer ₹499/mo instead?
+                  Start with the Blue Pill at ₹499/mo
                 </Link>
               </p>
             </div>

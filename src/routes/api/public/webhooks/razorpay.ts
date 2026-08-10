@@ -115,8 +115,66 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           event === "subscription.halted" ||
           event === "subscription.paused";
 
-        if (!subscriptionId || (!activating && !cancelling)) {
+        const paymentDue =
+          event === "subscription.pending" ||
+          (event === "payment.failed" && !!subscriptionId);
+
+        if (!subscriptionId || (!activating && !cancelling && !paymentDue)) {
           return new Response("ignored");
+        }
+
+        // Existing row (if any) — used for previous status and member details.
+        const { data: existingRow } = await supabaseAdmin
+          .from("subscriptions")
+          .select("user_id, status, pill, current_period_end")
+          .eq("razorpay_subscription_id", subscriptionId)
+          .maybeSingle();
+
+        const notify = async (
+          templateName: string,
+          extra: Record<string, unknown> = {},
+        ) => {
+          try {
+            const uid = existingRow?.user_id ?? userIdFromNotes;
+            if (!uid) return;
+            if (existingRow && existingRow.pill !== "blue") return;
+            const { data: profile } = await supabaseAdmin
+              .from("profiles")
+              .select("email, full_name")
+              .eq("id", uid)
+              .maybeSingle();
+            if (!profile?.email) return;
+            const { sendTransactionalServer } = await import("@/lib/email/send.server");
+            await sendTransactionalServer({
+              templateName,
+              recipientEmail: profile.email,
+              idempotencyKey: `${templateName}-${subscriptionId}-${event}`,
+              templateData: {
+                name: profile.full_name?.split(" ")[0] ?? undefined,
+                ...extra,
+              },
+            });
+          } catch (err) {
+            console.error("Blue Pill notification failed", templateName, err);
+          }
+        };
+
+        const fmtDate = (iso?: string | null) =>
+          iso
+            ? new Date(iso).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
+            : undefined;
+
+        if (paymentDue) {
+          await notify("bluepill-payment-due", {
+            amount: p?.amount ? `₹${(p.amount / 100).toLocaleString("en-IN")}` : "₹499",
+            dueDate: fmtDate(existingRow?.current_period_end) ?? "As soon as possible",
+            billingUrl: "https://blueprint.ifvg.in/app/settings",
+          });
+          return new Response("ok");
         }
 
         try {
@@ -153,6 +211,22 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
               },
               { onConflict: "user_id" },
             );
+          }
+
+          // Lifecycle emails — only on a real state transition.
+          if (activating && existingRow?.status !== "active") {
+            await notify("bluepill-subscription-started", {
+              amount: "₹499/month",
+              nextChargeDate: fmtDate(patch.current_period_end) ?? "One month from today",
+              appUrl: "https://blueprint.ifvg.in/app",
+            });
+          } else if (cancelling && existingRow?.status === "active") {
+            await notify("bluepill-cancelled", {
+              accessUntil:
+                fmtDate(existingRow?.current_period_end) ??
+                "The end of your current billing period",
+              resubscribeUrl: "https://blueprint.ifvg.in/bluepill",
+            });
           }
         } catch (err) {
           console.error("Razorpay webhook handler error", event, err);

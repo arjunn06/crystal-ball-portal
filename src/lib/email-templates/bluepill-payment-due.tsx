@@ -24,7 +24,6 @@ const BluePillPaymentDue = ({ name, amount, dueDate, billingUrl }: Props) => (
   <EmailShell
     preview="Action needed — your Blue Pill payment is due"
     eyebrow="BLUE PILL · PAYMENT DUE"
-    eyebrowColor="#FFC107"
   >
     <Heading style={h1}>{name ? `${name}, a payment is due.` : 'A payment is due.'}</Heading>
     <Text style={text}>

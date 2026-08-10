@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Video, CalendarDays, LineChart } from "lucide-react";
+import { Video, CalendarDays, LineChart } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { DiscordIcon } from "@/components/discord-icon";
 
@@ -47,14 +47,6 @@ export const Route = createFileRoute("/redpill")({
   }),
   component: RedPill,
 });
-
-function markRedPillIntent() {
-  try {
-    localStorage.setItem("bp_intent", "redpill");
-  } catch {
-    /* ignore */
-  }
-}
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };

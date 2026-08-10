@@ -14,6 +14,8 @@ export const createRedPillOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
+    // Registrations are closed for the current cohort.
+    throw new Error("Slots are full — Red Pill registrations are closed.");
     const keyId = process.env['RAZORPAY_KEY_ID'];
     const secret = process.env['RAZORPAY_KEY_SECRET'];
     if (!keyId || !secret) throw new Error("Payments are not configured yet.");

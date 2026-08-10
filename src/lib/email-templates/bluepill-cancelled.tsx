@@ -23,7 +23,6 @@ const BluePillCancelled = ({ name, accessUntil, resubscribeUrl }: Props) => (
   <EmailShell
     preview="Your Blue Pill membership has been cancelled"
     eyebrow="BLUE PILL · SUBSCRIPTION CANCELLED"
-    eyebrowColor="#8B8B96"
   >
     <Heading style={h1}>
       {name ? `${name}, your membership is cancelled.` : 'Your membership is cancelled.'}

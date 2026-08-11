@@ -91,7 +91,10 @@ export const Route = createFileRoute("/api/public/cron/subscription-sweep")({
             }
 
             // 2. Expire rows whose access window has closed.
-            if (status === "active" && (!periodEnd || new Date(periodEnd) <= new Date())) {
+            if (
+              (status === "active" || status === "cancelled") &&
+              (!periodEnd || new Date(periodEnd) <= new Date())
+            ) {
               await supabaseAdmin
                 .from("subscriptions")
                 .update({ status: "expired" })

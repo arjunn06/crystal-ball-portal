@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
 import { Route as AuthenticatedAppCoursesIndexRouteImport } from './routes/_authenticated/app/courses.index'
 import { Route as AuthenticatedAppCoursesSlugRouteImport } from './routes/_authenticated/app/courses.$slug'
+import { Route as ApiPublicCronSubscriptionSweepRouteImport } from './routes/api/public/cron/subscription-sweep'
 import { Route as ApiPublicDiscordCallbackRouteImport } from './routes/api/public/discord/callback'
 import { Route as ApiPublicDiscordUserCallbackRouteImport } from './routes/api/public/discord/user-callback'
 import { Route as ApiPublicWebhooksRazorpayRouteImport } from './routes/api/public/webhooks/razorpay'
@@ -200,6 +201,12 @@ const AuthenticatedAppCoursesSlugRoute =
     path: '/$slug',
     getParentRoute: () => AuthenticatedAppCoursesRoute,
   } as any)
+const ApiPublicCronSubscriptionSweepRoute =
+  ApiPublicCronSubscriptionSweepRouteImport.update({
+    id: '/api/public/cron/subscription-sweep',
+    path: '/api/public/cron/subscription-sweep',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicDiscordCallbackRoute =
   ApiPublicDiscordCallbackRouteImport.update({
     id: '/api/public/discord/callback',
@@ -274,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/app/': typeof AuthenticatedAppIndexRoute
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
+  '/api/public/cron/subscription-sweep': typeof ApiPublicCronSubscriptionSweepRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/user-callback': typeof ApiPublicDiscordUserCallbackRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
@@ -308,6 +316,7 @@ export interface FileRoutesByTo {
   '/app': typeof AuthenticatedAppIndexRoute
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
+  '/api/public/cron/subscription-sweep': typeof ApiPublicCronSubscriptionSweepRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/user-callback': typeof ApiPublicDiscordUserCallbackRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
@@ -348,6 +357,7 @@ export interface FileRoutesById {
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
   '/_authenticated/app/courses/$slug': typeof AuthenticatedAppCoursesSlugRoute
+  '/api/public/cron/subscription-sweep': typeof ApiPublicCronSubscriptionSweepRoute
   '/api/public/discord/callback': typeof ApiPublicDiscordCallbackRoute
   '/api/public/discord/user-callback': typeof ApiPublicDiscordUserCallbackRoute
   '/api/public/webhooks/razorpay': typeof ApiPublicWebhooksRazorpayRoute
@@ -388,6 +398,7 @@ export interface FileRouteTypes {
     | '/app/'
     | '/admin/courses/$id'
     | '/app/courses/$slug'
+    | '/api/public/cron/subscription-sweep'
     | '/api/public/discord/callback'
     | '/api/public/discord/user-callback'
     | '/api/public/webhooks/razorpay'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/admin/courses/$id'
     | '/app/courses/$slug'
+    | '/api/public/cron/subscription-sweep'
     | '/api/public/discord/callback'
     | '/api/public/discord/user-callback'
     | '/api/public/webhooks/razorpay'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/'
     | '/_authenticated/admin/courses/$id'
     | '/_authenticated/app/courses/$slug'
+    | '/api/public/cron/subscription-sweep'
     | '/api/public/discord/callback'
     | '/api/public/discord/user-callback'
     | '/api/public/webhooks/razorpay'
@@ -482,6 +495,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
+  ApiPublicCronSubscriptionSweepRoute: typeof ApiPublicCronSubscriptionSweepRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
   ApiPublicDiscordUserCallbackRoute: typeof ApiPublicDiscordUserCallbackRoute
   ApiPublicWebhooksRazorpayRoute: typeof ApiPublicWebhooksRazorpayRoute
@@ -697,6 +711,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCoursesSlugRouteImport
       parentRoute: typeof AuthenticatedAppCoursesRoute
     }
+    '/api/public/cron/subscription-sweep': {
+      id: '/api/public/cron/subscription-sweep'
+      path: '/api/public/cron/subscription-sweep'
+      fullPath: '/api/public/cron/subscription-sweep'
+      preLoaderRoute: typeof ApiPublicCronSubscriptionSweepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/discord/callback': {
       id: '/api/public/discord/callback'
       path: '/api/public/discord/callback'
@@ -871,6 +892,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
+  ApiPublicCronSubscriptionSweepRoute: ApiPublicCronSubscriptionSweepRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,
   ApiPublicDiscordUserCallbackRoute: ApiPublicDiscordUserCallbackRoute,
   ApiPublicWebhooksRazorpayRoute: ApiPublicWebhooksRazorpayRoute,

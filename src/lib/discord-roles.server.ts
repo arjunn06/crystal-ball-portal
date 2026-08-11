@@ -30,6 +30,19 @@ export function allManagedRoles(cfg: Cfg) {
   return Array.from(new Set([...cfg.role_ids, ...cfg.red_pill_role_ids]));
 }
 
+
+/** Discord rate-limits role edits aggressively; retry on 429. */
+async function discordFetch(url: string, init: RequestInit, attempt = 0): Promise<Response> {
+  const res = await fetch(url, init);
+  if (res.status === 429 && attempt < 5) {
+    const body = (await res.json().catch(() => null)) as { retry_after?: number } | null;
+    const waitMs = Math.min(5000, Math.ceil((body?.retry_after ?? 1) * 1000) + 250);
+    await new Promise((r) => setTimeout(r, waitMs));
+    return discordFetch(url, init, attempt + 1);
+  }
+  return res;
+}
+
 export async function assignDiscordRoles(discordUserId: string, pill: Pill = "blue") {
   const token = process.env['DISCORD_BOT_TOKEN'];
   if (!token) throw new Error("Discord bot is not configured.");
@@ -41,7 +54,7 @@ export async function assignDiscordRoles(discordUserId: string, pill: Pill = "bl
     );
   }
   for (const roleId of roleIds) {
-    const res = await fetch(
+    const res = await discordFetch(
       `https://discord.com/api/v10/guilds/${cfg.guild_id}/members/${discordUserId}/roles/${roleId}`,
       {
         method: "PUT",
@@ -70,7 +83,7 @@ export async function revokeDiscordRoles(discordUserId: string, pill?: Pill) {
   if (!cfg?.guild_id) throw new Error("Discord server is not configured.");
   const roleIds = pill ? rolesForPill(cfg, pill) : allManagedRoles(cfg);
   for (const roleId of roleIds) {
-    const res = await fetch(
+    const res = await discordFetch(
       `https://discord.com/api/v10/guilds/${cfg.guild_id}/members/${discordUserId}/roles/${roleId}`,
       { method: "DELETE", headers: { Authorization: `Bot ${token}` } },
     );

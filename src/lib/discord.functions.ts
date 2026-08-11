@@ -53,7 +53,7 @@ export const startMemberDiscordConnect = createServerFn({ method: "POST" })
       .select("guild_id, role_ids, red_pill_role_ids")
       .eq("id", 1)
       .maybeSingle();
-    const pillRoles = (sub.pill === "red" ? cfg?.red_pill_role_ids : cfg?.role_ids) as
+    const pillRoles = (sub!.pill === "red" ? cfg?.red_pill_role_ids : cfg?.role_ids) as
       | string[]
       | null
       | undefined;
@@ -112,7 +112,7 @@ export const claimDiscordRole = createServerFn({ method: "POST" })
       .single();
 
     try {
-      await assignDiscordRole(data.discord_user_id, (sub.pill ?? "blue") as Pill);
+      await assignDiscordRole(data.discord_user_id, (sub!.pill ?? "blue") as Pill);
       await supabaseAdmin
         .from("discord_role_claims")
         .update({ status: "assigned", actioned_at: new Date().toISOString() })

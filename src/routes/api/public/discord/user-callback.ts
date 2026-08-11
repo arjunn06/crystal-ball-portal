@@ -104,7 +104,7 @@ export const Route = createFileRoute("/api/public/discord/user-callback")({
           .eq("id", 1)
           .maybeSingle();
         const guildId = cfg?.guild_id as string | undefined;
-        const isRed = sub.pill === "red";
+        const isRed = sub!.pill === "red";
         const roleIds = ((isRed ? cfg?.red_pill_role_ids : cfg?.role_ids) ?? []) as string[];
         if (!guildId || roleIds.length === 0) {
           return done({

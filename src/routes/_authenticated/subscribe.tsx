@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, LogOut, Tag, X as XIcon, Loader2 } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { supabase } from "@/integrations/supabase/client";
+import { getIntent } from "@/lib/intent";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };

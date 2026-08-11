@@ -26,7 +26,8 @@ function AppLayout() {
 
   useEffect(() => {
     if (!isLoading && data && !data.isSubscribed) {
-      navigate({ to: getIntent() === "redpill" || data.pill === "red" ? "/enroll" : "/subscribe" });
+      getIntent();
+      navigate({ to: "/subscribe" });
     }
   }, [isLoading, data, navigate]);
 

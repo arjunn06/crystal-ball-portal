@@ -613,6 +613,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      subscription_sweep_dispatch: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "member"

@@ -9,7 +9,10 @@ export type SubscriptionRow = {
 } | null;
 
 export function isEntitled(sub: SubscriptionRow): boolean {
-  if (!sub || sub.status !== "active") return false;
+  // Cancelling stops renewal, not access already paid for. Razorpay reports a
+  // subscription as `cancelled` immediately even when current_end is still in
+  // the future, so both states grant access through the paid-through date.
+  if (!sub || !["active", "cancelled"].includes(sub.status ?? "")) return false;
   if (!sub.current_period_end) return false; // no paid-through date = no access
   return new Date(sub.current_period_end).getTime() > Date.now();
 }

@@ -178,20 +178,46 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
         }
 
         try {
-          const patch: {
+          let activatingPeriodEnd = s?.current_end ?? s?.charge_at;
+          if (activating && !activatingPeriodEnd) {
+            const keyId = process.env['RAZORPAY_KEY_ID'];
+            const keySecret = process.env['RAZORPAY_KEY_SECRET'];
+            if (keyId && keySecret) {
+              const auth = "Basic " + Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+              const remoteRes = await fetch(
+                `https://api.razorpay.com/v1/subscriptions/${subscriptionId}`,
+                { headers: { Authorization: auth } },
+              );
+              if (remoteRes.ok) {
+                const remote = (await remoteRes.json()) as {
+                  current_end?: number;
+                  charge_at?: number;
+                };
+                activatingPeriodEnd = remote.current_end ?? remote.charge_at;
+              }
+            }
+          }
+
+          const resolvedPeriodEnd = activatingPeriodEnd
+            ? new Date(activatingPeriodEnd * 1000).toISOString()
+            : existingRow?.current_period_end;
+          if (activating && !resolvedPeriodEnd) {
+            throw new Error("Active subscription has no paid-through date; retrying reconciliation.");
+          }
+
+          let patch: {
             status?: string;
             current_period_end?: string;
             cancelled_at?: string;
-          } = activating
-            ? {
-                status: "active",
-                ...(s?.current_end
-                  ? { current_period_end: new Date(s.current_end * 1000).toISOString() }
-                  : s?.charge_at
-                    ? { current_period_end: new Date(s.charge_at * 1000).toISOString() }
-                    : {}),
-              }
-            : { status: "cancelled", cancelled_at: new Date().toISOString() };
+          };
+          if (activating) {
+            if (!resolvedPeriodEnd) {
+              throw new Error("Active subscription has no paid-through date; retrying reconciliation.");
+            }
+            patch = { status: "active", current_period_end: resolvedPeriodEnd };
+          } else {
+            patch = { status: "cancelled", cancelled_at: new Date().toISOString() };
+          }
 
           const { data: updated, error: updErr } = await supabaseAdmin
             .from("subscriptions")
@@ -213,8 +239,13 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
             );
           }
 
-          // Access ended → strip Discord roles immediately.
-          if (cancelling) {
+          // Cancellation stops renewal, but the member keeps access through
+          // the period they already paid for. Revoke immediately only when no
+          // future paid-through date exists; the sweep handles expiry later.
+          const accessEndsAt = existingRow?.current_period_end
+            ? new Date(existingRow.current_period_end).getTime()
+            : 0;
+          if (cancelling && accessEndsAt <= Date.now()) {
             const uid = existingRow?.user_id ?? userIdFromNotes;
             if (uid) {
               const { data: claims } = await supabaseAdmin

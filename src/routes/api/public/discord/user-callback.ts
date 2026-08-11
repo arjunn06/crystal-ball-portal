@@ -89,10 +89,11 @@ export const Route = createFileRoute("/api/public/discord/user-callback")({
         // 3. verify active subscription (defensive)
         const { data: sub } = await supabaseAdmin
           .from("subscriptions")
-          .select("status, pill")
+          .select("status, pill, current_period_end")
           .eq("user_id", userId)
           .maybeSingle();
-        if (sub?.status !== "active") {
+        const { isEntitled } = await import("@/lib/membership.server");
+        if (!isEntitled(sub)) {
           return done({ discord: "error", reason: "Active membership required" });
         }
 
@@ -103,7 +104,7 @@ export const Route = createFileRoute("/api/public/discord/user-callback")({
           .eq("id", 1)
           .maybeSingle();
         const guildId = cfg?.guild_id as string | undefined;
-        const isRed = sub.pill === "red";
+        const isRed = sub!.pill === "red";
         const roleIds = ((isRed ? cfg?.red_pill_role_ids : cfg?.role_ids) ?? []) as string[];
         if (!guildId || roleIds.length === 0) {
           return done({

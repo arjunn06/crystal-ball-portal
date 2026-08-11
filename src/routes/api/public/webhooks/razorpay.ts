@@ -213,6 +213,34 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
             );
           }
 
+          // Access ended → strip Discord roles immediately.
+          if (cancelling) {
+            const uid = existingRow?.user_id ?? userIdFromNotes;
+            if (uid) {
+              const { data: claims } = await supabaseAdmin
+                .from("discord_role_claims")
+                .select("id, discord_user_id")
+                .eq("user_id", uid)
+                .eq("status", "assigned");
+              const { revokeDiscordRoles } = await import("@/lib/discord-roles.server");
+              for (const claim of claims ?? []) {
+                try {
+                  await revokeDiscordRoles(claim.discord_user_id);
+                  await supabaseAdmin
+                    .from("discord_role_claims")
+                    .update({
+                      status: "revoked",
+                      actioned_at: new Date().toISOString(),
+                      error_message: "Subscription ended — roles removed automatically",
+                    })
+                    .eq("id", claim.id);
+                } catch (err) {
+                  console.error("Discord role revoke failed", claim.discord_user_id, err);
+                }
+              }
+            }
+          }
+
           // Lifecycle emails — only on a real state transition.
           if (activating && existingRow?.status !== "active") {
             await notify("bluepill-subscription-started", {

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isEntitled } from "@/lib/membership.server";
 
 async function assertAdmin(ctx: { supabase: any; userId: string }) {
   const { data, error } = await ctx.supabase.rpc("has_role", {
@@ -15,40 +16,8 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 type Pill = "red" | "blue";
 
 async function assignDiscordRole(discordUserId: string, pill: Pill = "blue") {
-  const token = process.env.DISCORD_BOT_TOKEN;
-  if (!token) throw new Error("Discord bot is not configured.");
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: cfg } = await supabaseAdmin
-    .from("discord_config")
-    .select("guild_id, role_ids, red_pill_role_ids")
-    .eq("id", 1)
-    .maybeSingle();
-  const guildId = cfg?.guild_id;
-  const roleIds = (pill === "red"
-    ? ((cfg?.red_pill_role_ids ?? []) as string[])
-    : ((cfg?.role_ids ?? []) as string[]));
-  if (!guildId || roleIds.length === 0) {
-    throw new Error(
-      `Discord ${pill === "red" ? "Red Pill" : "Blue Pill"} roles are not configured yet. Ask an admin to finish setup.`,
-    );
-  }
-  for (const roleId of roleIds) {
-    const res = await fetch(
-      `https://discord.com/api/v10/guilds/${guildId}/members/${discordUserId}/roles/${roleId}`,
-      {
-        method: "PUT",
-        headers: {
-          Authorization: `Bot ${token}`,
-          "Content-Type": "application/json",
-          "Content-Length": "0",
-        },
-      },
-    );
-    if (!res.ok && res.status !== 204) {
-      const body = await res.text();
-      throw new Error(`Discord API ${res.status}: ${body}`);
-    }
-  }
+  const { assignDiscordRoles } = await import("@/lib/discord-roles.server");
+  await assignDiscordRoles(discordUserId, pill);
 }
 
 function b64urlEncode(s: string) {
@@ -72,10 +41,10 @@ export const startMemberDiscordConnect = createServerFn({ method: "POST" })
     }
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("status, pill")
+      .select("status, pill, current_period_end")
       .eq("user_id", userId)
       .maybeSingle();
-    if (sub?.status !== "active") {
+    if (!isEntitled(sub)) {
       throw new Error("You need an active membership to connect Discord.");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -84,7 +53,7 @@ export const startMemberDiscordConnect = createServerFn({ method: "POST" })
       .select("guild_id, role_ids, red_pill_role_ids")
       .eq("id", 1)
       .maybeSingle();
-    const pillRoles = (sub.pill === "red" ? cfg?.red_pill_role_ids : cfg?.role_ids) as
+    const pillRoles = (sub!.pill === "red" ? cfg?.red_pill_role_ids : cfg?.role_ids) as
       | string[]
       | null
       | undefined;
@@ -129,10 +98,10 @@ export const claimDiscordRole = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("status, pill")
+      .select("status, pill, current_period_end")
       .eq("user_id", userId)
       .maybeSingle();
-    if (sub?.status !== "active") throw new Error("You need an active membership to claim your role.");
+    if (!isEntitled(sub)) throw new Error("You need an active membership to claim your role.");
 
     await supabase.from("profiles").update({ discord_user_id: data.discord_user_id }).eq("id", userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -143,7 +112,7 @@ export const claimDiscordRole = createServerFn({ method: "POST" })
       .single();
 
     try {
-      await assignDiscordRole(data.discord_user_id, (sub.pill ?? "blue") as Pill);
+      await assignDiscordRole(data.discord_user_id, (sub!.pill ?? "blue") as Pill);
       await supabaseAdmin
         .from("discord_role_claims")
         .update({ status: "assigned", actioned_at: new Date().toISOString() })
@@ -244,6 +213,17 @@ export const adminMarkClaim = createServerFn({ method: "POST" })
   .handler(async ({ context, data }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.status === "revoked") {
+      const { data: claim } = await supabaseAdmin
+        .from("discord_role_claims")
+        .select("discord_user_id")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (claim?.discord_user_id) {
+        const { revokeDiscordRoles } = await import("@/lib/discord-roles.server");
+        await revokeDiscordRoles(claim.discord_user_id);
+      }
+    }
     await supabaseAdmin
       .from("discord_role_claims")
       .update({

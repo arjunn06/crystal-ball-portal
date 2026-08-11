@@ -66,21 +66,25 @@ export const Route = createFileRoute("/api/public/cron/subscription-sweep")({
                 );
                 const end = remote.current_end ?? remote.charge_at;
                 const newEnd = end ? new Date(end * 1000).toISOString() : periodEnd;
-                const patch: Record<string, string> = {};
+                const patch: {
+                  status?: string;
+                  cancelled_at?: string;
+                  current_period_end?: string;
+                } = {};
                 if (dead && status !== "cancelled") {
-                  patch['status'] = "cancelled";
-                  patch['cancelled_at'] = new Date().toISOString();
+                  patch.status = "cancelled";
+                  patch.cancelled_at = new Date().toISOString();
                 } else if (active && status !== "active") {
-                  patch['status'] = "active";
+                  patch.status = "active";
                 }
-                if (newEnd && newEnd !== periodEnd) patch['current_period_end'] = newEnd;
+                if (newEnd && newEnd !== periodEnd) patch.current_period_end = newEnd;
                 if (Object.keys(patch).length) {
                   await supabaseAdmin
                     .from("subscriptions")
                     .update(patch)
                     .eq("user_id", sub.user_id);
-                  status = patch['status'] ?? status;
-                  periodEnd = patch['current_period_end'] ?? periodEnd;
+                  status = patch.status ?? status;
+                  periodEnd = patch.current_period_end ?? periodEnd;
                   result.reconciled += 1;
                 }
               }

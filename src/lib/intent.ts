@@ -1,12 +1,18 @@
-/** Where a user belongs right after signing in, based on the offer they came from. */
-export function getIntent(): "redpill" | null {
+/**
+ * Red Pill registrations are closed, so there is no longer an offer-specific
+ * post-auth destination. Any legacy "bp_intent" value left in a returning
+ * visitor's browser is cleared so it can't hijack the Blue Pill flow.
+ */
+export function getIntent(): null {
   try {
-    return localStorage.getItem("bp_intent") === "redpill" ? "redpill" : null;
+    localStorage.removeItem("bp_intent");
   } catch {
-    return null;
+    /* ignore */
   }
+  return null;
 }
 
-export function postAuthTarget(): "/enroll" | "/app" {
-  return getIntent() === "redpill" ? "/enroll" : "/app";
+export function postAuthTarget(): "/app" {
+  getIntent();
+  return "/app";
 }

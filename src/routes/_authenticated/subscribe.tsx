@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, LogOut, Tag, X as XIcon, Loader2 } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { supabase } from "@/integrations/supabase/client";
+import { getIntent } from "@/lib/intent";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
@@ -84,20 +85,11 @@ function Subscribe() {
     if (data?.isSubscribed) navigate({ to: "/app" });
   }, [data?.isSubscribed, navigate]);
 
-  // Someone who came from the Red Pill page belongs on the one-time checkout.
+  // Red Pill registrations are closed — clear any legacy intent so it can't
+  // bounce a Blue Pill subscriber to the closed enrollment page.
   useEffect(() => {
-    if (data && !data.isSubscribed) {
-      let intent: string | null = null;
-      try {
-        intent = localStorage.getItem("bp_intent");
-      } catch {
-        /* ignore */
-      }
-      if (intent === "redpill" || data.subscription?.pill === "red") {
-        navigate({ to: "/enroll", replace: true });
-      }
-    }
-  }, [data, navigate]);
+    getIntent();
+  }, []);
 
   // On mount, if there's a pending subscription row, sync with Razorpay in
   // case a previous checkout succeeded but never wrote back locally.

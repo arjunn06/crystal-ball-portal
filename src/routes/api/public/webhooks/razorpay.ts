@@ -205,16 +205,19 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
             throw new Error("Active subscription has no paid-through date; retrying reconciliation.");
           }
 
-          const patch: {
+          let patch: {
             status?: string;
             current_period_end?: string;
             cancelled_at?: string;
-          } = activating
-            ? {
-                status: "active",
-                current_period_end: resolvedPeriodEnd,
-              }
-            : { status: "cancelled", cancelled_at: new Date().toISOString() };
+          };
+          if (activating) {
+            if (!resolvedPeriodEnd) {
+              throw new Error("Active subscription has no paid-through date; retrying reconciliation.");
+            }
+            patch = { status: "active", current_period_end: resolvedPeriodEnd };
+          } else {
+            patch = { status: "cancelled", cancelled_at: new Date().toISOString() };
+          }
 
           const { data: updated, error: updErr } = await supabaseAdmin
             .from("subscriptions")

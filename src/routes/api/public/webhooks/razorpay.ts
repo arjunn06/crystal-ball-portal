@@ -178,6 +178,33 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
         }
 
         try {
+          let activatingPeriodEnd = s?.current_end ?? s?.charge_at;
+          if (activating && !activatingPeriodEnd) {
+            const keyId = process.env['RAZORPAY_KEY_ID'];
+            const keySecret = process.env['RAZORPAY_KEY_SECRET'];
+            if (keyId && keySecret) {
+              const auth = "Basic " + Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+              const remoteRes = await fetch(
+                `https://api.razorpay.com/v1/subscriptions/${subscriptionId}`,
+                { headers: { Authorization: auth } },
+              );
+              if (remoteRes.ok) {
+                const remote = (await remoteRes.json()) as {
+                  current_end?: number;
+                  charge_at?: number;
+                };
+                activatingPeriodEnd = remote.current_end ?? remote.charge_at;
+              }
+            }
+          }
+
+          const resolvedPeriodEnd = activatingPeriodEnd
+            ? new Date(activatingPeriodEnd * 1000).toISOString()
+            : existingRow?.current_period_end;
+          if (activating && !resolvedPeriodEnd) {
+            throw new Error("Active subscription has no paid-through date; retrying reconciliation.");
+          }
+
           const patch: {
             status?: string;
             current_period_end?: string;
@@ -185,11 +212,7 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           } = activating
             ? {
                 status: "active",
-                ...(s?.current_end
-                  ? { current_period_end: new Date(s.current_end * 1000).toISOString() }
-                  : s?.charge_at
-                    ? { current_period_end: new Date(s.charge_at * 1000).toISOString() }
-                    : {}),
+                current_period_end: resolvedPeriodEnd,
               }
             : { status: "cancelled", cancelled_at: new Date().toISOString() };
 

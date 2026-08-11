@@ -89,10 +89,11 @@ export const Route = createFileRoute("/api/public/discord/user-callback")({
         // 3. verify active subscription (defensive)
         const { data: sub } = await supabaseAdmin
           .from("subscriptions")
-          .select("status, pill")
+          .select("status, pill, current_period_end")
           .eq("user_id", userId)
           .maybeSingle();
-        if (sub?.status !== "active") {
+        const { isEntitled } = await import("@/lib/membership.server");
+        if (!isEntitled(sub)) {
           return done({ discord: "error", reason: "Active membership required" });
         }
 

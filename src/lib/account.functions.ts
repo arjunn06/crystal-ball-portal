@@ -19,11 +19,12 @@ export const getAccountOverview = createServerFn({ method: "GET" })
         .maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
+    const { isEntitled } = await import("@/lib/membership.server");
     return {
       profile,
       subscription,
       isAdmin: (roles ?? []).some((r) => r.role === "admin"),
-      isSubscribed: subscription?.status === "active",
+      isSubscribed: isEntitled(subscription),
       pill: (subscription?.pill ?? "blue") as "red" | "blue",
     };
   });

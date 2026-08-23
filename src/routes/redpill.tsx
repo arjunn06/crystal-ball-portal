@@ -110,7 +110,7 @@ function RedPill() {
             style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
           >
             <span className="size-1.5 rounded-full bg-white animate-pulse" />
-            THE RED PILL · SLOTS FULL
+            THE RED PILL · WAITLIST OPEN
           </span>
           <h1
             style={{ ...clash, letterSpacing: "-0.01em" }}

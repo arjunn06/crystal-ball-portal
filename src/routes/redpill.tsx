@@ -1,7 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Video, CalendarDays, LineChart } from "lucide-react";
+import { Video, CalendarDays, LineChart, Check, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { LogoIcon } from "@/components/logo-icon";
 import { DiscordIcon } from "@/components/discord-icon";
+import { joinRedPillWaitlist } from "@/lib/waitlist.functions";
+import { waitlistSchema } from "@/lib/waitlist.schema";
 
 export const Route = createFileRoute("/redpill")({
   head: () => ({

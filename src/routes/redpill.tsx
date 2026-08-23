@@ -10,26 +10,26 @@ import { waitlistSchema } from "@/lib/waitlist.schema";
 export const Route = createFileRoute("/redpill")({
   head: () => ({
     meta: [
-      { title: "The Red Pill — 1 Month Live IFVG Mentorship at ₹2999" },
+      { title: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         name: "description",
         content:
-          "An intense one-month live Zoom program covering basics to advanced IFVG trading. Course finishes in a week, then we trade together live. ₹2999 with premium Discord access.",
+          "This cohort is full. Join the Red Pill waitlist with your email and phone number to get a priority slot for the next one, free.",
       },
-      { property: "og:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { property: "og:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         property: "og:description",
         content:
-          "Live Zoom classes, course done in one week, then live trading together for the rest of the month. ₹2999.",
+          "Slots are full. Join the waitlist to get a free priority slot for the next live cohort.",
       },
       { property: "og:type", content: "product" },
       { property: "og:url", content: "https://blueprint.ifvg.in/redpill" },
       { property: "og:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { name: "twitter:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         name: "twitter:description",
-        content: "Live Zoom mentorship, basics to advanced IFVG. ₹2999.",
+        content: "Join the Red Pill waitlist for a free priority slot in the next cohort.",
       },
       { name: "twitter:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
     ],

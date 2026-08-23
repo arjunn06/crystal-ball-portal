@@ -1,31 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Video, CalendarDays, LineChart } from "lucide-react";
+import { Video, CalendarDays, LineChart, Check, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { LogoIcon } from "@/components/logo-icon";
 import { DiscordIcon } from "@/components/discord-icon";
+import { joinRedPillWaitlist } from "@/lib/waitlist.functions";
+import { waitlistSchema } from "@/lib/waitlist.schema";
 
 export const Route = createFileRoute("/redpill")({
   head: () => ({
     meta: [
-      { title: "The Red Pill — 1 Month Live IFVG Mentorship at ₹2999" },
+      { title: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         name: "description",
         content:
-          "An intense one-month live Zoom program covering basics to advanced IFVG trading. Course finishes in a week, then we trade together live. ₹2999 with premium Discord access.",
+          "This cohort is full. Join the Red Pill waitlist with your email and phone number to get a priority slot for the next one, free.",
       },
-      { property: "og:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { property: "og:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         property: "og:description",
         content:
-          "Live Zoom classes, course done in one week, then live trading together for the rest of the month. ₹2999.",
+          "Slots are full. Join the waitlist to get a free priority slot for the next live cohort.",
       },
       { property: "og:type", content: "product" },
       { property: "og:url", content: "https://blueprint.ifvg.in/redpill" },
       { property: "og:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { name: "twitter:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         name: "twitter:description",
-        content: "Live Zoom mentorship, basics to advanced IFVG. ₹2999.",
+        content: "Join the Red Pill waitlist for a free priority slot in the next cohort.",
       },
       { name: "twitter:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
     ],
@@ -106,7 +110,7 @@ function RedPill() {
             style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
           >
             <span className="size-1.5 rounded-full bg-white animate-pulse" />
-            THE RED PILL · SLOTS FULL
+            THE RED PILL · WAITLIST OPEN
           </span>
           <h1
             style={{ ...clash, letterSpacing: "-0.01em" }}
@@ -123,9 +127,13 @@ function RedPill() {
             live, with premium Discord access included.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <span className="inline-flex items-center gap-2 h-14 px-7 rounded-full bg-[#0B0B10] text-white text-[15px] font-semibold">
-              Slots full · Registrations closed
-            </span>
+            <a
+              href="#waitlist"
+              className="inline-flex items-center gap-2 h-14 px-8 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition"
+              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+            >
+              Join the waitlist
+            </a>
             <a
               href="#curriculum"
               className="inline-flex items-center h-14 px-7 rounded-full bg-white text-[15px] font-semibold border border-black/5 hover:bg-[#FAFAFA] transition-colors shadow-sm"
@@ -135,7 +143,7 @@ function RedPill() {
           </div>
           <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-[#6B6B72]">
             <span className="size-1.5 rounded-full bg-[#E53935]" />
-            This cohort is fully booked — registrations for the next one open soon
+            This cohort is full — join the waitlist to get a priority slot for free
           </div>
         </div>
 
@@ -238,15 +246,18 @@ function RedPill() {
                 Trade Alerts, session links and community access for the full program.
               </p>
             </div>
-            <span className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 text-white/80 text-[14px] font-semibold border border-white/10">
-              Slots full
-            </span>
+            <a
+              href="#waitlist"
+              className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 text-white text-[14px] font-semibold border border-white/10 hover:bg-white/15 transition-colors"
+            >
+              Join the waitlist
+            </a>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 py-24">
+      {/* WAITLIST */}
+      <section id="waitlist" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
         <div className="relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-10 md:p-14 text-center shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]">
           <div
             aria-hidden
@@ -254,16 +265,18 @@ function RedPill() {
             style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
           />
           <h2 style={clash} className="relative text-[34px] md:text-[46px] font-bold leading-[1.08]">
-            Slots are full.
+            Join the waitlist.
           </h2>
           <p className="relative mx-auto mt-4 max-w-lg text-[16px] text-[#5A5A62]">
-            This Red Pill cohort is fully booked and registrations are now closed.
+            This cohort is full. Leave your email and phone number to lock a{" "}
+            <strong>priority slot for the next one — free</strong>. We&apos;ll reach out before
+            registrations open publicly.
           </p>
-          <span className="relative mt-8 inline-flex items-center gap-2 h-14 px-8 rounded-full bg-[#0B0B10] text-white text-[15px] font-semibold">
-            Registrations closed
-          </span>
+
+          <WaitlistForm />
+
           <div className="relative mt-6 text-[13px] text-[#6B6B72]">
-            Prefer to start small?{" "}
+            Prefer to start now?{" "}
             <Link to="/bluepill" className="font-semibold underline">
               Try the Blue Pill at ₹499/mo
             </Link>
@@ -310,5 +323,128 @@ function Phase({
       </h3>
       <p className="mt-3 text-[14px] leading-[1.55] text-[#5A5A62]">{body}</p>
     </div>
+  );
+}
+
+function WaitlistForm() {
+  const join = useServerFn(joinRedPillWaitlist);
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const parsed = waitlistSchema.safeParse({ email, phone, name: name || undefined });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Please check your details");
+      return;
+    }
+    setStatus("loading");
+    try {
+      await join({ data: parsed.data });
+      setStatus("done");
+    } catch (err: any) {
+      setStatus("idle");
+      setError(err?.message ?? "Something went wrong. Please try again.");
+    }
+  }
+
+  if (status === "done") {
+    return (
+      <div className="relative mx-auto mt-9 max-w-md rounded-2xl border border-[#E53935]/20 bg-[#FFF4F2] p-7">
+        <span className="mx-auto mb-3 grid size-11 place-items-center rounded-full bg-[#E53935] text-white">
+          <Check className="size-5" strokeWidth={3} />
+        </span>
+        <div style={clash} className="text-[20px] font-bold">
+          You&apos;re on the list.
+        </div>
+        <p className="mt-2 text-[14px] text-[#5A5A62]">
+          Your priority slot is reserved. We&apos;ll contact you on the email and number you gave
+          before the next cohort opens.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="relative mx-auto mt-9 max-w-md text-left">
+      <div className="grid gap-3">
+        <Field
+          label="Name (optional)"
+          value={name}
+          onChange={setName}
+          type="text"
+          placeholder="Your name"
+          autoComplete="name"
+        />
+        <Field
+          label="Email"
+          value={email}
+          onChange={setEmail}
+          type="email"
+          placeholder="you@email.com"
+          autoComplete="email"
+        />
+        <Field
+          label="Phone number"
+          value={phone}
+          onChange={setPhone}
+          type="tel"
+          placeholder="+91 90000 00000"
+          autoComplete="tel"
+        />
+      </div>
+
+      {error && <p className="mt-3 text-[13px] font-medium text-[#E53935]">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 h-14 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition disabled:opacity-70"
+        style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+      >
+        {status === "loading" && <Loader2 className="size-4 animate-spin" />}
+        {status === "loading" ? "Joining…" : "Join waitlist · Free priority slot"}
+      </button>
+      <p className="mt-3 text-center text-[11.5px] text-[#6B6B72]">
+        No payment now. We only use your details to contact you about the next cohort.
+      </p>
+    </form>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  type,
+  placeholder,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type: string;
+  placeholder: string;
+  autoComplete: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-[11px] font-bold tracking-[0.14em] uppercase text-[#6B6B72]">
+        {label}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        maxLength={255}
+        className="mt-1.5 w-full h-13 py-3.5 px-5 rounded-2xl bg-[#F7F1E8] border border-black/5 text-[15px] text-[#0B0B10] placeholder:text-[#9A9AA2] outline-none focus:border-[#E53935]/50 focus:bg-white transition-colors"
+      />
+    </label>
   );
 }

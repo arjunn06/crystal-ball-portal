@@ -325,3 +325,126 @@ function Phase({
     </div>
   );
 }
+
+function WaitlistForm() {
+  const join = useServerFn(joinRedPillWaitlist);
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    const parsed = waitlistSchema.safeParse({ email, phone, name: name || undefined });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Please check your details");
+      return;
+    }
+    setStatus("loading");
+    try {
+      await join({ data: parsed.data });
+      setStatus("done");
+    } catch (err: any) {
+      setStatus("idle");
+      setError(err?.message ?? "Something went wrong. Please try again.");
+    }
+  }
+
+  if (status === "done") {
+    return (
+      <div className="relative mx-auto mt-9 max-w-md rounded-2xl border border-[#E53935]/20 bg-[#FFF4F2] p-7">
+        <span className="mx-auto mb-3 grid size-11 place-items-center rounded-full bg-[#E53935] text-white">
+          <Check className="size-5" strokeWidth={3} />
+        </span>
+        <div style={clash} className="text-[20px] font-bold">
+          You&apos;re on the list.
+        </div>
+        <p className="mt-2 text-[14px] text-[#5A5A62]">
+          Your priority slot is reserved. We&apos;ll contact you on the email and number you gave
+          before the next cohort opens.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="relative mx-auto mt-9 max-w-md text-left">
+      <div className="grid gap-3">
+        <Field
+          label="Name (optional)"
+          value={name}
+          onChange={setName}
+          type="text"
+          placeholder="Your name"
+          autoComplete="name"
+        />
+        <Field
+          label="Email"
+          value={email}
+          onChange={setEmail}
+          type="email"
+          placeholder="you@email.com"
+          autoComplete="email"
+        />
+        <Field
+          label="Phone number"
+          value={phone}
+          onChange={setPhone}
+          type="tel"
+          placeholder="+91 90000 00000"
+          autoComplete="tel"
+        />
+      </div>
+
+      {error && <p className="mt-3 text-[13px] font-medium text-[#E53935]">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={status === "loading"}
+        className="mt-5 inline-flex w-full items-center justify-center gap-2 h-14 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition disabled:opacity-70"
+        style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+      >
+        {status === "loading" && <Loader2 className="size-4 animate-spin" />}
+        {status === "loading" ? "Joining…" : "Join waitlist · Free priority slot"}
+      </button>
+      <p className="mt-3 text-center text-[11.5px] text-[#6B6B72]">
+        No payment now. We only use your details to contact you about the next cohort.
+      </p>
+    </form>
+  );
+}
+
+function Field({
+  label,
+  value,
+  onChange,
+  type,
+  placeholder,
+  autoComplete,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  type: string;
+  placeholder: string;
+  autoComplete: string;
+}) {
+  return (
+    <label className="block">
+      <span className="text-[11px] font-bold tracking-[0.14em] uppercase text-[#6B6B72]">
+        {label}
+      </span>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        autoComplete={autoComplete}
+        maxLength={255}
+        className="mt-1.5 w-full h-13 py-3.5 px-5 rounded-2xl bg-[#F7F1E8] border border-black/5 text-[15px] text-[#0B0B10] placeholder:text-[#9A9AA2] outline-none focus:border-[#E53935]/50 focus:bg-white transition-colors"
+      />
+    </label>
+  );
+}

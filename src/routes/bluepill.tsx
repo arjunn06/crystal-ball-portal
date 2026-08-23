@@ -23,7 +23,7 @@ export const Route = createFileRoute("/bluepill")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://blueprint.ifvg.in/bluepill" },
-      { property: "og:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
+      { property: "og:image", content: "https://blueprint.ifvg.in/og-bluepill.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "The Blue Pill — ₹499/mo IFVG Community | Blueprint" },
       {
@@ -31,7 +31,7 @@ export const Route = createFileRoute("/bluepill")({
         content:
           "₹499/month. Every recorded session, live NY calls, and the members-only Discord.",
       },
-      { name: "twitter:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
+      { name: "twitter:image", content: "https://blueprint.ifvg.in/og-bluepill.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://blueprint.ifvg.in/bluepill" }],
   }),

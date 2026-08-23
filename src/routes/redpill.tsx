@@ -24,14 +24,14 @@ export const Route = createFileRoute("/redpill")({
       },
       { property: "og:type", content: "product" },
       { property: "og:url", content: "https://blueprint.ifvg.in/redpill" },
-      { property: "og:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
+      { property: "og:image", content: "https://blueprint.ifvg.in/og-redpill.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
       {
         name: "twitter:description",
         content: "Join the Red Pill waitlist for a free priority slot in the next cohort.",
       },
-      { name: "twitter:image", content: "https://blueprint.ifvg.in/og-blueprint.jpg" },
+      { name: "twitter:image", content: "https://blueprint.ifvg.in/og-redpill.jpg" },
     ],
     links: [{ rel: "canonical", href: "https://blueprint.ifvg.in/redpill" }],
     scripts: [

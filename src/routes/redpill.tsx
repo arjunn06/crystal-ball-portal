@@ -256,8 +256,8 @@ function RedPill() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 py-24">
+      {/* WAITLIST */}
+      <section id="waitlist" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
         <div className="relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-10 md:p-14 text-center shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]">
           <div
             aria-hidden
@@ -265,16 +265,18 @@ function RedPill() {
             style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
           />
           <h2 style={clash} className="relative text-[34px] md:text-[46px] font-bold leading-[1.08]">
-            Slots are full.
+            Join the waitlist.
           </h2>
           <p className="relative mx-auto mt-4 max-w-lg text-[16px] text-[#5A5A62]">
-            This Red Pill cohort is fully booked and registrations are now closed.
+            This cohort is full. Leave your email and phone number to lock a{" "}
+            <strong>priority slot for the next one — free</strong>. We&apos;ll reach out before
+            registrations open publicly.
           </p>
-          <span className="relative mt-8 inline-flex items-center gap-2 h-14 px-8 rounded-full bg-[#0B0B10] text-white text-[15px] font-semibold">
-            Registrations closed
-          </span>
+
+          <WaitlistForm />
+
           <div className="relative mt-6 text-[13px] text-[#6B6B72]">
-            Prefer to start small?{" "}
+            Prefer to start now?{" "}
             <Link to="/bluepill" className="font-semibold underline">
               Try the Blue Pill at ₹499/mo
             </Link>

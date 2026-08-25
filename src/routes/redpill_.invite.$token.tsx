@@ -26,7 +26,7 @@ export const Route = createFileRoute("/redpill_/invite/$token")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: InvitePage;
+  component: InvitePage,
 });
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };

@@ -9,30 +9,9 @@ export async function assertAdminUser(ctx: { supabase: any; userId: string }) {
   if (!data) throw new Error("Forbidden");
 }
 
-export function newInviteToken() {
-  return `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "").slice(0, 40);
-}
-
-/** Does this email hold an unused, unexpired invite? */
-export async function findValidInvite(token: string, email: string | null) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: inv } = await supabaseAdmin
-    .from("redpill_invites")
-    .select("id, email, expires_at, used_at")
-    .eq("token", token)
-    .maybeSingle();
-  if (!inv) return null;
-  if (inv.used_at) return null;
-  if (new Date(inv.expires_at).getTime() < Date.now()) return null;
-  if (email && inv.email.toLowerCase() !== email.toLowerCase()) return null;
-  return inv;
-}
-
-export async function markInviteUsed(inviteId: string, userId: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  await supabaseAdmin
-    .from("redpill_invites")
-    .update({ used_at: new Date().toISOString(), used_by: userId })
-    .eq("id", inviteId)
-    .is("used_at", null);
+/** One shared invite link unlocks checkout for every waitlist member. */
+export async function findValidInvite(token: string, _email: string | null) {
+  const { SHARED_INVITE_TOKEN } = await import("./redpill-invite.shared");
+  if (token !== SHARED_INVITE_TOKEN) return null;
+  return { id: SHARED_INVITE_TOKEN };
 }

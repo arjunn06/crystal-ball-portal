@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { findValidInvite, markInviteUsed } from "./redpill-invite.server";
+import { findValidInvite } from "./redpill-invite.server";
 
 /** The Red Pill is a one-time ₹2,999 enrolment (one month, live). */
 export const RED_PILL_AMOUNT_PAISE = 299900;
@@ -120,11 +120,6 @@ export const verifyRedPillPayment = createServerFn({ method: "POST" })
         },
         { onConflict: "user_id" },
       );
-    }
-    if (data.inviteToken) {
-      const email = ((context.claims as any)?.email as string | undefined) ?? null;
-      const invite = await findValidInvite(data.inviteToken, email);
-      if (invite) await markInviteUsed(invite.id, context.userId);
     }
     return { ok: true, currentPeriodEnd: endsAt };
   });

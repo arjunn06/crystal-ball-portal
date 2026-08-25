@@ -36,15 +36,3 @@ export async function markInviteUsed(inviteId: string, userId: string) {
     .eq("id", inviteId)
     .is("used_at", null);
 }
-
-export async function markInviteUsedByOrder(orderId: string, userId: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: inv } = await supabaseAdmin
-    .from("redpill_invites")
-    .select("id")
-    .eq("used_by", userId)
-    .is("used_at", null)
-    .maybeSingle();
-  if (inv) await markInviteUsed(inv.id, userId);
-  void orderId;
-}

@@ -1,31 +1,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdminUser, newInviteToken } from "./redpill-invite.server";
 
 /**
  * Red Pill registrations are closed to the public, but waitlist members get a
  * single-use "magic link" from the admin panel that unlocks checkout for them.
  */
 
-async function assertAdmin(ctx: { supabase: any; userId: string }) {
-  const { data, error } = await ctx.supabase.rpc("has_role", {
-    _user_id: ctx.userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden");
-}
-
-function newToken() {
-  const raw = `${crypto.randomUUID()}${crypto.randomUUID()}`.replace(/-/g, "");
-  return raw.slice(0, 40);
-}
-
 /** Waitlist entries + whether an invite has been issued / used. */
 export const adminListWaitlist = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context);
+    await assertAdminUser(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const [{ data: entries }, { data: invites }] = await Promise.all([
       supabaseAdmin
@@ -75,9 +62,9 @@ export const adminCreateRedPillInvite = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ context, data }) => {
-    await assertAdmin(context);
+    await assertAdminUser(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const token = newToken();
+    const token = newInviteToken();
     const expires = new Date(Date.now() + data.expires_in_days * 86_400_000).toISOString();
     const { error } = await supabaseAdmin.from("redpill_invites").insert({
       token,

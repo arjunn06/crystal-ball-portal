@@ -22,6 +22,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated/subscribe'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as RedpillPriorityAccessRouteImport } from './routes/redpill_.priority-access'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin/audit'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
@@ -35,7 +36,6 @@ import { Route as AuthenticatedAppCoursesRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAppDiscordRouteImport } from './routes/_authenticated/app/discord'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
-import { Route as RedpillInviteTokenRouteImport } from './routes/redpill_.invite.$token'
 import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin/courses.index'
 import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
 import { Route as AuthenticatedAppCoursesIndexRouteImport } from './routes/_authenticated/app/courses.index'
@@ -114,6 +114,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   path: '/email/unsubscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RedpillPriorityAccessRoute = RedpillPriorityAccessRouteImport.update({
+  id: '/redpill_/priority-access',
+  path: '/redpill/priority-access',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -183,11 +188,6 @@ const AuthenticatedAppSettingsRoute =
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RedpillInviteTokenRoute = RedpillInviteTokenRouteImport.update({
-  id: '/redpill_/invite/$token',
-  path: '/redpill/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminCoursesIndexRoute =
@@ -280,6 +280,7 @@ export interface FileRoutesByFullPath {
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/redpill/priority-access': typeof RedpillPriorityAccessRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
@@ -291,7 +292,6 @@ export interface FileRoutesByFullPath {
   '/app/discord': typeof AuthenticatedAppDiscordRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/redpill/invite/$token': typeof RedpillInviteTokenRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
@@ -319,6 +319,7 @@ export interface FileRoutesByTo {
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/redpill/priority-access': typeof RedpillPriorityAccessRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/promos': typeof AuthenticatedAdminPromosRoute
@@ -328,7 +329,6 @@ export interface FileRoutesByTo {
   '/app/discord': typeof AuthenticatedAppDiscordRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/redpill/invite/$token': typeof RedpillInviteTokenRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
@@ -360,6 +360,7 @@ export interface FileRoutesById {
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/redpill_/priority-access': typeof RedpillPriorityAccessRoute
   '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/discord': typeof AuthenticatedAdminDiscordRoute
@@ -371,7 +372,6 @@ export interface FileRoutesById {
   '/_authenticated/app/discord': typeof AuthenticatedAppDiscordRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
-  '/redpill_/invite/$token': typeof RedpillInviteTokenRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/admin/courses/$id': typeof AuthenticatedAdminCoursesIdRoute
@@ -403,6 +403,7 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/auth/callback'
     | '/email/unsubscribe'
+    | '/redpill/priority-access'
     | '/admin/audit'
     | '/admin/courses'
     | '/admin/discord'
@@ -414,7 +415,6 @@ export interface FileRouteTypes {
     | '/app/discord'
     | '/app/settings'
     | '/lovable/email/suppression'
-    | '/redpill/invite/$token'
     | '/admin/'
     | '/app/'
     | '/admin/courses/$id'
@@ -442,6 +442,7 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/auth/callback'
     | '/email/unsubscribe'
+    | '/redpill/priority-access'
     | '/admin/audit'
     | '/admin/discord'
     | '/admin/promos'
@@ -451,7 +452,6 @@ export interface FileRouteTypes {
     | '/app/discord'
     | '/app/settings'
     | '/lovable/email/suppression'
-    | '/redpill/invite/$token'
     | '/admin'
     | '/app'
     | '/admin/courses/$id'
@@ -482,6 +482,7 @@ export interface FileRouteTypes {
     | '/_authenticated/subscribe'
     | '/auth/callback'
     | '/email/unsubscribe'
+    | '/redpill_/priority-access'
     | '/_authenticated/admin/audit'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/discord'
@@ -493,7 +494,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/discord'
     | '/_authenticated/app/settings'
     | '/lovable/email/suppression'
-    | '/redpill_/invite/$token'
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
     | '/_authenticated/admin/courses/$id'
@@ -519,8 +519,8 @@ export interface RootRouteChildren {
   RedpillRoute: typeof RedpillRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  RedpillPriorityAccessRoute: typeof RedpillPriorityAccessRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
-  RedpillInviteTokenRoute: typeof RedpillInviteTokenRoute
   ApiPublicCronSubscriptionSweepRoute: typeof ApiPublicCronSubscriptionSweepRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
   ApiPublicDiscordUserCallbackRoute: typeof ApiPublicDiscordUserCallbackRoute
@@ -625,6 +625,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/redpill_/priority-access': {
+      id: '/redpill_/priority-access'
+      path: '/redpill/priority-access'
+      fullPath: '/redpill/priority-access'
+      preLoaderRoute: typeof RedpillPriorityAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/'
@@ -714,13 +721,6 @@ declare module '@tanstack/react-router' {
       path: '/lovable/email/suppression'
       fullPath: '/lovable/email/suppression'
       preLoaderRoute: typeof LovableEmailSuppressionRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/redpill_/invite/$token': {
-      id: '/redpill_/invite/$token'
-      path: '/redpill/invite/$token'
-      fullPath: '/redpill/invite/$token'
-      preLoaderRoute: typeof RedpillInviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/courses/': {
@@ -933,8 +933,8 @@ const rootRouteChildren: RootRouteChildren = {
   RedpillRoute: RedpillRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  RedpillPriorityAccessRoute: RedpillPriorityAccessRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
-  RedpillInviteTokenRoute: RedpillInviteTokenRoute,
   ApiPublicCronSubscriptionSweepRoute: ApiPublicCronSubscriptionSweepRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,
   ApiPublicDiscordUserCallbackRoute: ApiPublicDiscordUserCallbackRoute,

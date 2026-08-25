@@ -1,31 +1,29 @@
 /**
- * Red Pill registrations are closed to the public. Waitlist members get a
- * shared priority-access password; once it is accepted we stash a flag in
- * localStorage so it survives the passwordless sign-in round trip and unlocks
- * checkout afterwards.
+ * Red Pill registrations are closed to the public. Waitlist members receive a
+ * single-use invite link; the token is stashed in localStorage so it survives
+ * the passwordless sign-in round trip and unlocks checkout afterwards.
  */
-const CODE_KEY = "bp_redpill_code";
+const INVITE_KEY = "bp_redpill_invite";
 
-export function setRedPillCode(code: string) {
+export function setRedPillInvite(token: string) {
   try {
-    localStorage.setItem(CODE_KEY, code);
+    localStorage.setItem(INVITE_KEY, token);
   } catch {
     /* ignore */
   }
 }
 
-export function getRedPillCode(): string | null {
+export function getRedPillInviteToken(): string | null {
   try {
-    return localStorage.getItem(CODE_KEY);
+    return localStorage.getItem(INVITE_KEY);
   } catch {
     return null;
   }
 }
 
-export function clearRedPillCode() {
+export function clearRedPillInvite() {
   try {
-    localStorage.removeItem(CODE_KEY);
-    localStorage.removeItem("bp_redpill_invite");
+    localStorage.removeItem(INVITE_KEY);
   } catch {
     /* ignore */
   }
@@ -42,5 +40,5 @@ export function getIntent(): null {
 
 export function postAuthTarget(): "/app" | "/enroll" {
   getIntent();
-  return getRedPillCode() ? "/enroll" : "/app";
+  return getRedPillInviteToken() ? "/enroll" : "/app";
 }

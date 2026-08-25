@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { findValidInvite, markInviteUsed } from "./redpill-invite.server";
 
 /** The Red Pill is a one-time ₹2,999 enrolment (one month, live). */
 export const RED_PILL_AMOUNT_PAISE = 299900;
@@ -14,12 +15,12 @@ const REGISTRATIONS_OPEN = false;
  */
 export const createRedPillOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ accessCode: z.string().trim().max(64).optional() }).parse(d ?? {}))
+  .inputValidator((d) => z.object({ inviteToken: z.string().trim().max(64).optional() }).parse(d ?? {}))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { redPillCodeMatches } = await import("./redpill-access.server");
-    const hasCode = data.accessCode ? redPillCodeMatches(data.accessCode) : false;
-    if (!REGISTRATIONS_OPEN && !hasCode) {
+    const email = ((context.claims as any)?.email as string | undefined) ?? null;
+    const invite = data.inviteToken ? await findValidInvite(data.inviteToken, email) : null;
+    if (!REGISTRATIONS_OPEN && !invite) {
       throw new Error("Slots are full — Red Pill registrations are closed.");
     }
     const keyId = process.env['RAZORPAY_KEY_ID'];
@@ -85,7 +86,7 @@ export const verifyRedPillPayment = createServerFn({ method: "POST" })
         razorpay_payment_id: z.string(),
         razorpay_order_id: z.string(),
         razorpay_signature: z.string(),
-        accessCode: z.string().trim().max(64).optional(),
+        inviteToken: z.string().trim().max(64).optional(),
       })
       .parse(d),
   )
@@ -119,6 +120,11 @@ export const verifyRedPillPayment = createServerFn({ method: "POST" })
         },
         { onConflict: "user_id" },
       );
+    }
+    if (data.inviteToken) {
+      const email = ((context.claims as any)?.email as string | undefined) ?? null;
+      const invite = await findValidInvite(data.inviteToken, email);
+      if (invite) await markInviteUsed(invite.id, context.userId);
     }
     return { ok: true, currentPeriodEnd: endsAt };
   });

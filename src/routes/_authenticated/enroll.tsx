@@ -57,7 +57,11 @@ function Enroll() {
   const verify = useServerFn(verifyRedPillPayment);
   const reconcile = useServerFn(reconcileRedPillOrder);
 
-  const inviteToken = typeof window === "undefined" ? null : getRedPillInviteToken();
+  const [inviteToken, setInviteToken] = useState<string | null>(null);
+  useEffect(() => {
+    setInviteToken(getRedPillInviteToken());
+  }, []);
+
 
   const { data, refetch } = useQuery({
     queryKey: ["account", "overview"],

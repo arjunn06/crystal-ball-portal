@@ -287,19 +287,37 @@ function Enroll() {
                 ))}
               </ul>
 
-              <Button
-                disabled
-                className="mt-7 w-full h-13 py-4 rounded-full bg-[#0B0B10]/10 text-[#0B0B10] text-[15px] font-semibold border-0 disabled:opacity-100"
-              >
-                Slots full · Registrations closed
-              </Button>
+              {inviteToken ? (
+                <>
+                  <Button
+                    onClick={() => mut.mutate()}
+                    disabled={mut.isPending}
+                    style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+                    className="mt-7 w-full h-14 rounded-full text-white text-[15px] font-semibold border-0 shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105"
+                  >
+                    {mut.isPending ? "Opening checkout…" : "Complete payment · ₹2,999"}
+                  </Button>
+                  <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
+                    Priority slot from the waitlist · secure payment via Razorpay
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Button
+                    disabled
+                    className="mt-7 w-full h-13 py-4 rounded-full bg-[#0B0B10]/10 text-[#0B0B10] text-[15px] font-semibold border-0 disabled:opacity-100"
+                  >
+                    Slots full · Registrations closed
+                  </Button>
 
-              <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
-                This cohort is fully booked.{" "}
-                <Link to="/subscribe" className="underline">
-                  Start with the Blue Pill at ₹499/mo
-                </Link>
-              </p>
+                  <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
+                    This cohort is fully booked.{" "}
+                    <Link to="/subscribe" className="underline">
+                      Start with the Blue Pill at ₹499/mo
+                    </Link>
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>

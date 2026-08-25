@@ -1,8 +1,34 @@
 /**
- * Red Pill registrations are closed, so there is no longer an offer-specific
- * post-auth destination. Any legacy "bp_intent" value left in a returning
- * visitor's browser is cleared so it can't hijack the Blue Pill flow.
+ * Red Pill registrations are closed to the public. Waitlist members receive a
+ * single-use invite link; the token is stashed in localStorage so it survives
+ * the passwordless sign-in round trip and unlocks checkout afterwards.
  */
+const INVITE_KEY = "bp_redpill_invite";
+
+export function setRedPillInvite(token: string) {
+  try {
+    localStorage.setItem(INVITE_KEY, token);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function getRedPillInviteToken(): string | null {
+  try {
+    return localStorage.getItem(INVITE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function clearRedPillInvite() {
+  try {
+    localStorage.removeItem(INVITE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function getIntent(): null {
   try {
     localStorage.removeItem("bp_intent");
@@ -12,7 +38,7 @@ export function getIntent(): null {
   return null;
 }
 
-export function postAuthTarget(): "/app" {
+export function postAuthTarget(): "/app" | "/enroll" {
   getIntent();
-  return "/app";
+  return getRedPillInviteToken() ? "/enroll" : "/app";
 }

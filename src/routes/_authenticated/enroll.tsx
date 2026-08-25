@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Check, LogOut } from "lucide-react";
 import { LogoIcon } from "@/components/logo-icon";
 import { supabase } from "@/integrations/supabase/client";
-import { getRedPillInviteToken, clearRedPillInvite } from "@/lib/intent";
+import { getRedPillCode, clearRedPillCode } from "@/lib/intent";
 
 const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
 const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
@@ -57,7 +57,7 @@ function Enroll() {
   const verify = useServerFn(verifyRedPillPayment);
   const reconcile = useServerFn(reconcileRedPillOrder);
 
-  const inviteToken = typeof window === "undefined" ? null : getRedPillInviteToken();
+  const accessCode = typeof window === "undefined" ? null : getRedPillCode();
 
   const { data, refetch } = useQuery({
     queryKey: ["account", "overview"],
@@ -67,7 +67,7 @@ function Enroll() {
   useEffect(() => {
     // Blue Pill members may still enroll — only bounce out once Red Pill is active.
     if (data?.isSubscribed && data.pill === "red") {
-      clearRedPillInvite();
+      clearRedPillCode();
       navigate({ to: "/app/discord" });
     }
   }, [data?.isSubscribed, data?.pill, navigate]);
@@ -123,7 +123,7 @@ function Enroll() {
   }
 
   const mut = useMutation({
-    mutationFn: () => create({ data: { inviteToken: inviteToken ?? undefined } }),
+    mutationFn: () => create({ data: { accessCode: accessCode ?? undefined } }),
     onError: (e: any) => toast.error(e.message ?? "Could not start checkout"),
     onSuccess: async ({ orderId, keyId, amount }) => {
       try {
@@ -146,12 +146,12 @@ function Enroll() {
                   razorpay_payment_id: resp.razorpay_payment_id,
                   razorpay_order_id: resp.razorpay_order_id!,
                   razorpay_signature: resp.razorpay_signature,
-                  inviteToken: inviteToken ?? undefined,
+                  accessCode: accessCode ?? undefined,
                 },
               });
               toast.success("You're in. Welcome to The Red Pill.");
               await sendWelcomeEmail(resp.razorpay_order_id!);
-              clearRedPillInvite();
+              clearRedPillCode();
               await qc.invalidateQueries({ queryKey: ["account", "overview"] });
               navigate({ to: "/app/discord" });
             } catch (e: any) {

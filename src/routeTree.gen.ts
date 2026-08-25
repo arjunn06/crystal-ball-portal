@@ -22,6 +22,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedSubscribeRouteImport } from './routes/_authenticated/subscribe'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
+import { Route as RedpillPriorityAccessRouteImport } from './routes/redpill_.priority-access'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin/audit'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
@@ -112,6 +113,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
 const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
   id: '/email/unsubscribe',
   path: '/email/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RedpillPriorityAccessRoute = RedpillPriorityAccessRouteImport.update({
+  id: '/redpill_/priority-access',
+  path: '/redpill/priority-access',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
@@ -280,6 +286,7 @@ export interface FileRoutesByFullPath {
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/redpill/priority-access': typeof RedpillPriorityAccessRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
@@ -319,6 +326,7 @@ export interface FileRoutesByTo {
   '/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/redpill/priority-access': typeof RedpillPriorityAccessRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/promos': typeof AuthenticatedAdminPromosRoute
@@ -360,6 +368,7 @@ export interface FileRoutesById {
   '/_authenticated/subscribe': typeof AuthenticatedSubscribeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
+  '/redpill_/priority-access': typeof RedpillPriorityAccessRoute
   '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/discord': typeof AuthenticatedAdminDiscordRoute
@@ -403,6 +412,7 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/auth/callback'
     | '/email/unsubscribe'
+    | '/redpill/priority-access'
     | '/admin/audit'
     | '/admin/courses'
     | '/admin/discord'
@@ -442,6 +452,7 @@ export interface FileRouteTypes {
     | '/subscribe'
     | '/auth/callback'
     | '/email/unsubscribe'
+    | '/redpill/priority-access'
     | '/admin/audit'
     | '/admin/discord'
     | '/admin/promos'
@@ -482,6 +493,7 @@ export interface FileRouteTypes {
     | '/_authenticated/subscribe'
     | '/auth/callback'
     | '/email/unsubscribe'
+    | '/redpill_/priority-access'
     | '/_authenticated/admin/audit'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/discord'
@@ -519,6 +531,7 @@ export interface RootRouteChildren {
   RedpillRoute: typeof RedpillRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
+  RedpillPriorityAccessRoute: typeof RedpillPriorityAccessRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   RedpillInviteTokenRoute: typeof RedpillInviteTokenRoute
   ApiPublicCronSubscriptionSweepRoute: typeof ApiPublicCronSubscriptionSweepRoute
@@ -623,6 +636,13 @@ declare module '@tanstack/react-router' {
       path: '/email/unsubscribe'
       fullPath: '/email/unsubscribe'
       preLoaderRoute: typeof EmailUnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/redpill_/priority-access': {
+      id: '/redpill_/priority-access'
+      path: '/redpill/priority-access'
+      fullPath: '/redpill/priority-access'
+      preLoaderRoute: typeof RedpillPriorityAccessRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
@@ -933,6 +953,7 @@ const rootRouteChildren: RootRouteChildren = {
   RedpillRoute: RedpillRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
+  RedpillPriorityAccessRoute: RedpillPriorityAccessRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   RedpillInviteTokenRoute: RedpillInviteTokenRoute,
   ApiPublicCronSubscriptionSweepRoute: ApiPublicCronSubscriptionSweepRoute,

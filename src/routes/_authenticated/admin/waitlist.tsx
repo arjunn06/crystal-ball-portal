@@ -1,11 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
 import { toast } from "sonner";
-import { adminListWaitlist, adminCreateRedPillInvite } from "@/lib/redpill-invite.functions";
+import { adminListWaitlist } from "@/lib/waitlist-admin.functions";
 import { Button } from "@/components/ui/button";
-import { Copy, Link2, Loader2, Check } from "lucide-react";
+import { Copy, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/waitlist")({
   head: () => ({ meta: [{ title: "Red Pill waitlist — Admin" }] }),
@@ -18,54 +17,44 @@ type Entry = {
   phone: string;
   name: string | null;
   created_at: string;
-  invite: { token: string; expires_at: string; used_at: string | null } | null;
 };
 
-function inviteUrl(token: string) {
-  const origin = typeof window === "undefined" ? "https://blueprint.ifvg.in" : window.location.origin;
-  return `${origin}/redpill/invite/${token}`;
-}
+const ACCESS_URL = "https://blueprint.ifvg.in/redpill/priority-access";
 
 function WaitlistPage() {
-  const qc = useQueryClient();
   const list = useServerFn(adminListWaitlist);
-  const createInvite = useServerFn(adminCreateRedPillInvite);
-  const [busy, setBusy] = useState<string | null>(null);
-
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "waitlist"],
     queryFn: () => list(),
   });
 
-  const mut = useMutation({
-    mutationFn: (e: Entry) =>
-      createInvite({
-        data: { email: e.email, waitlist_id: e.id, name: e.name ?? undefined, expires_in_days: 14 },
-      }),
-    onSuccess: async ({ token }) => {
-      await navigator.clipboard.writeText(inviteUrl(token)).catch(() => {});
-      toast.success("Payment link created and copied");
-      qc.invalidateQueries({ queryKey: ["admin", "waitlist"] });
-    },
-    onError: (e: any) => toast.error(e?.message ?? "Could not create the link"),
-    onSettled: () => setBusy(null),
-  });
-
-  async function copy(token: string) {
-    await navigator.clipboard.writeText(inviteUrl(token));
-    toast.success("Link copied");
-  }
-
   const entries = (data?.entries ?? []) as Entry[];
+
+  async function copy(text: string, label: string) {
+    await navigator.clipboard.writeText(text);
+    toast.success(`${label} copied`);
+  }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Red Pill waitlist</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Issue a single-use payment link. The member signs in with their email, pays ₹2,999 and
-          then claims their Discord role.
+          Send waitlist members the priority-access page plus the shared password. They sign in with
+          their email, pay ₹2,999 and then claim their Discord role.
         </p>
+      </div>
+
+      <div className="rounded-xl border bg-card p-5 flex flex-wrap items-center gap-3">
+        <div className="flex-1 min-w-[240px]">
+          <div className="text-xs uppercase tracking-wider text-muted-foreground">
+            Priority access page
+          </div>
+          <div className="font-medium">{ACCESS_URL}</div>
+        </div>
+        <Button variant="outline" size="sm" onClick={() => copy(ACCESS_URL, "Link")}>
+          <Copy className="size-3.5" /> Copy link
+        </Button>
       </div>
 
       <div className="rounded-xl border bg-card overflow-hidden">
@@ -82,7 +71,6 @@ function WaitlistPage() {
                 <th className="text-left font-medium px-4 py-3">Member</th>
                 <th className="text-left font-medium px-4 py-3">Phone</th>
                 <th className="text-left font-medium px-4 py-3">Joined</th>
-                <th className="text-left font-medium px-4 py-3">Invite</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -98,39 +86,12 @@ function WaitlistPage() {
                     {new Date(e.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
-                    {!e.invite ? (
-                      <span className="text-muted-foreground">Not sent</span>
-                    ) : e.invite.used_at ? (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-600">
-                        <Check className="size-3.5" /> Paid / used
-                      </span>
-                    ) : (
-                      <span className="text-muted-foreground">
-                        Active · expires {new Date(e.invite.expires_at).toLocaleDateString()}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
                     <div className="flex justify-end gap-2">
-                      {e.invite && !e.invite.used_at && (
-                        <Button variant="outline" size="sm" onClick={() => copy(e.invite!.token)}>
-                          <Copy className="size-3.5" /> Copy link
-                        </Button>
-                      )}
-                      <Button
-                        size="sm"
-                        disabled={busy === e.id}
-                        onClick={() => {
-                          setBusy(e.id);
-                          mut.mutate(e);
-                        }}
-                      >
-                        {busy === e.id ? (
-                          <Loader2 className="size-3.5 animate-spin" />
-                        ) : (
-                          <Link2 className="size-3.5" />
-                        )}
-                        {e.invite ? "New link" : "Create link"}
+                      <Button variant="outline" size="sm" onClick={() => copy(e.email, "Email")}>
+                        <Copy className="size-3.5" /> Email
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => copy(e.phone, "Phone")}>
+                        <Copy className="size-3.5" /> Phone
                       </Button>
                     </div>
                   </td>

@@ -481,6 +481,53 @@ export type Database = {
           },
         ]
       }
+      redpill_invites: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          expires_at: string
+          id: string
+          name: string | null
+          token: string
+          used_at: string | null
+          used_by: string | null
+          waitlist_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          expires_at?: string
+          id?: string
+          name?: string | null
+          token: string
+          used_at?: string | null
+          used_by?: string | null
+          waitlist_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          expires_at?: string
+          id?: string
+          name?: string | null
+          token?: string
+          used_at?: string | null
+          used_by?: string | null
+          waitlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "redpill_invites_waitlist_id_fkey"
+            columns: ["waitlist_id"]
+            isOneToOne: false
+            referencedRelation: "redpill_waitlist"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       redpill_waitlist: {
         Row: {
           created_at: string

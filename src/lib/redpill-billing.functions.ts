@@ -6,8 +6,8 @@ import { findValidInvite } from "./redpill-invite.server";
 /** The Red Pill is a one-time ₹2,999 enrolment (one month, live). */
 export const RED_PILL_AMOUNT_PAISE = 299900;
 const ACCESS_DAYS = 31;
-/** Registrations are closed for the current cohort (slots full). */
-const REGISTRATIONS_OPEN = false;
+/** Registrations are open to everyone. */
+const REGISTRATIONS_OPEN = true;
 
 /**
  * Create a Razorpay *order* (one-time payment, not a subscription) for the

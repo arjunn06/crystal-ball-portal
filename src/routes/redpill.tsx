@@ -10,17 +10,17 @@ import { waitlistSchema } from "@/lib/waitlist.schema";
 export const Route = createFileRoute("/redpill")({
   head: () => ({
     meta: [
-      { title: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
+      { title: "The Red Pill — 1 Month Live IFVG Mentorship" },
       {
         name: "description",
         content:
-          "This cohort is full. Join the Red Pill waitlist with your email and phone number to get a priority slot for the next one, free.",
+          "Enroll in the Red Pill: an intense one-month live Zoom trading program with premium Discord access. ₹2,999 one-time.",
       },
-      { property: "og:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
+      { property: "og:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
       {
         property: "og:description",
         content:
-          "Slots are full. Join the waitlist to get a free priority slot for the next live cohort.",
+          "Registrations are open. One month of live IFVG training on Zoom with premium Discord access.",
       },
       { property: "og:type", content: "product" },
       { property: "og:url", content: "https://blueprint.ifvg.in/redpill" },

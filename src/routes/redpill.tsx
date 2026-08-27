@@ -256,8 +256,8 @@ function RedPill() {
         </div>
       </section>
 
-      {/* WAITLIST */}
-      <section id="waitlist" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
+      {/* ENROLL CTA */}
+      <section id="enroll" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
         <div className="relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-10 md:p-14 text-center shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]">
           <div
             aria-hidden
@@ -265,18 +265,23 @@ function RedPill() {
             style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
           />
           <h2 style={clash} className="relative text-[34px] md:text-[46px] font-bold leading-[1.08]">
-            Join the waitlist.
+            Take the Red Pill.
           </h2>
           <p className="relative mx-auto mt-4 max-w-lg text-[16px] text-[#5A5A62]">
-            This cohort is full. Leave your email and phone number to lock a{" "}
-            <strong>priority slot for the next one — free</strong>. We&apos;ll reach out before
-            registrations open publicly.
+            Registrations are <strong>open to everyone</strong>. One month, live on Zoom — course in
+            week one, then we trade together for the rest of the month.
           </p>
 
-          <WaitlistForm />
+          <Link
+            to="/enroll"
+            className="relative mt-9 inline-flex items-center gap-2 h-14 px-10 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition"
+            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+          >
+            Enroll now · ₹2,999 one-time
+          </Link>
 
           <div className="relative mt-6 text-[13px] text-[#6B6B72]">
-            Prefer to start now?{" "}
+            Prefer to start smaller?{" "}
             <Link to="/bluepill" className="font-semibold underline">
               Try the Blue Pill at ₹499/mo
             </Link>

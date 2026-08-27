@@ -246,12 +246,12 @@ function RedPill() {
                 Trade Alerts, session links and community access for the full program.
               </p>
             </div>
-            <a
-              href="#waitlist"
+            <Link
+              to="/enroll"
               className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 text-white text-[14px] font-semibold border border-white/10 hover:bg-white/15 transition-colors"
             >
-              Join the waitlist
-            </a>
+              Enroll now
+            </Link>
           </div>
         </div>
       </section>

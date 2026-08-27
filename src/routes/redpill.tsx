@@ -26,10 +26,10 @@ export const Route = createFileRoute("/redpill")({
       { property: "og:url", content: "https://blueprint.ifvg.in/redpill" },
       { property: "og:image", content: "https://blueprint.ifvg.in/og-redpill.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Red Pill Waitlist — 1 Month Live IFVG Mentorship" },
+      { name: "twitter:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
       {
         name: "twitter:description",
-        content: "Join the Red Pill waitlist for a free priority slot in the next cohort.",
+        content: "Enroll now: one month of live IFVG training on Zoom, ₹2,999 one-time.",
       },
       { name: "twitter:image", content: "https://blueprint.ifvg.in/og-redpill.jpg" },
     ],
@@ -127,13 +127,13 @@ function RedPill() {
             live, with premium Discord access included.
           </p>
           <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="#waitlist"
+            <Link
+              to="/enroll"
               className="inline-flex items-center gap-2 h-14 px-8 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition"
               style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
             >
-              Join the waitlist
-            </a>
+              Enroll now · ₹2,999
+            </Link>
             <a
               href="#curriculum"
               className="inline-flex items-center h-14 px-7 rounded-full bg-white text-[15px] font-semibold border border-black/5 hover:bg-[#FAFAFA] transition-colors shadow-sm"
@@ -143,7 +143,7 @@ function RedPill() {
           </div>
           <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-[#6B6B72]">
             <span className="size-1.5 rounded-full bg-[#E53935]" />
-            This cohort is full — join the waitlist to get a priority slot for free
+            Registrations are open — limited seats per cohort
           </div>
         </div>
 

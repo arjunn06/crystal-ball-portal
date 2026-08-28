@@ -40,11 +40,14 @@ export const Route = createFileRoute("/api/public/cron/subscription-sweep")({
             let status: string = sub.status;
             let periodEnd: string | null = sub.current_period_end;
 
+            const { paidThroughFromRemote, latestPeriodEnd } = await import(
+              "@/lib/razorpay.server"
+            );
+
             // 1. Reconcile recurring (Blue Pill) subscriptions with Razorpay.
             if (
               rzpAuth &&
               sub.razorpay_subscription_id?.startsWith("sub_") &&
-              status !== "cancelled" &&
               status !== "expired"
             ) {
               const res = await fetch(
@@ -56,6 +59,7 @@ export const Route = createFileRoute("/api/public/cron/subscription-sweep")({
                   status?: string;
                   current_end?: number;
                   charge_at?: number;
+                  end_at?: number;
                 };
                 const remoteStatus = remote.status ?? "";
                 const active = ["active", "authenticated", "charged", "resumed"].includes(
@@ -64,8 +68,9 @@ export const Route = createFileRoute("/api/public/cron/subscription-sweep")({
                 const dead = ["cancelled", "completed", "halted", "paused", "expired"].includes(
                   remoteStatus,
                 );
-                const end = remote.current_end ?? remote.charge_at;
-                const newEnd = end ? new Date(end * 1000).toISOString() : periodEnd;
+                // Never shorten a paid-through date — cancelling autopay keeps
+                // access until the end of the period already paid for.
+                const newEnd = latestPeriodEnd(periodEnd, paidThroughFromRemote(remote));
                 const patch: {
                   status?: string;
                   cancelled_at?: string;
@@ -102,6 +107,7 @@ export const Route = createFileRoute("/api/public/cron/subscription-sweep")({
               status = "expired";
               result.expired += 1;
             }
+
 
             // 3. Strip Discord roles when access is gone.
             if (!isEntitled({ status, current_period_end: periodEnd })) {

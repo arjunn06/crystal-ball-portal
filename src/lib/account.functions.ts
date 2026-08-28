@@ -57,9 +57,8 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .maybeSingle();
     if (!sub) throw new Error("No active subscription.");
-    if (sub.cancelled_at ?? sub.status === "cancelled") {
-      if (sub.status === "cancelled") throw new Error("Already cancelled.");
-    }
+    if (sub.status === "cancelled") throw new Error("Already cancelled.");
+
 
     // Manual / invited trials have no Razorpay subscription — just mark them
     // cancelled locally; access continues until current_period_end.

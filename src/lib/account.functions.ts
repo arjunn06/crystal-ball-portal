@@ -53,11 +53,12 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { data: sub } = await supabase
       .from("subscriptions")
-      .select("razorpay_subscription_id, status")
+      .select("razorpay_subscription_id, status, current_period_end")
       .eq("user_id", userId)
       .maybeSingle();
     if (!sub) throw new Error("No active subscription.");
     if (sub.status === "cancelled") throw new Error("Already cancelled.");
+
 
     // Manual / invited trials have no Razorpay subscription — just mark them
     // cancelled locally; access continues until current_period_end.
@@ -88,10 +89,24 @@ export const cancelMySubscription = createServerFn({ method: "POST" })
       throw new Error("Failed to cancel with payment provider.");
     }
 
+    // Cancelling autopay stops renewal only. Make sure the stored paid-through
+    // date reflects the period the member already paid for so access lasts.
+    const { fetchRemoteSubscription, paidThroughFromRemote, latestPeriodEnd } = await import(
+      "@/lib/razorpay.server"
+    );
+    const remoteEnd = paidThroughFromRemote(
+      await fetchRemoteSubscription(sub.razorpay_subscription_id),
+    );
+    const keepEnd = latestPeriodEnd(sub.current_period_end, remoteEnd);
+
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
       .from("subscriptions")
-      .update({ cancelled_at: new Date().toISOString() })
+      .update({
+        cancelled_at: new Date().toISOString(),
+        ...(keepEnd ? { current_period_end: keepEnd } : {}),
+      })
       .eq("user_id", userId);
     return { ok: true };
+
   });

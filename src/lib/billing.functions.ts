@@ -166,6 +166,7 @@ export const reconcileSubscription = createServerFn({ method: "POST" })
       status?: string;
       current_end?: number;
       charge_at?: number;
+      end_at?: number;
       ended_at?: number;
     };
 
@@ -175,13 +176,15 @@ export const reconcileSubscription = createServerFn({ method: "POST" })
       remote.status ?? "",
     );
     const newStatus = active ? "active" : cancelled ? "cancelled" : sub.status;
-    const end = remote.current_end ?? remote.charge_at;
-    const newEnd = end ? new Date(end * 1000).toISOString() : sub.current_period_end;
+    const { paidThroughFromRemote, latestPeriodEnd } = await import("@/lib/razorpay.server");
+    // Never shorten access already paid for (e.g. autopay cancelled mid-cycle).
+    const newEnd = latestPeriodEnd(sub.current_period_end, paidThroughFromRemote(remote));
 
     const patch: { status?: string; current_period_end?: string; cancelled_at?: string } = {};
     if (newStatus !== sub.status) patch.status = newStatus ?? undefined;
     if (newEnd && newEnd !== sub.current_period_end) patch.current_period_end = newEnd;
     if (cancelled && sub.status !== "cancelled") patch.cancelled_at = new Date().toISOString();
+
 
     let changed = false;
     if (Object.keys(patch).length > 0) {

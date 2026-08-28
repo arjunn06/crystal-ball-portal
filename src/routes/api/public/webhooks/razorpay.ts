@@ -216,8 +216,18 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
             }
             patch = { status: "active", current_period_end: resolvedPeriodEnd };
           } else {
+            // Cancelling autopay must not shorten access: keep (or extend to)
+            // the furthest paid-through date Razorpay knows about.
+            const { fetchRemoteSubscription, paidThroughFromRemote, latestPeriodEnd } =
+              await import("@/lib/razorpay.server");
+            const remoteEnd =
+              paidThroughFromRemote({ current_end: s?.current_end, charge_at: s?.charge_at }) ??
+              paidThroughFromRemote(await fetchRemoteSubscription(subscriptionId));
+            const keepEnd = latestPeriodEnd(existingRow?.current_period_end, remoteEnd);
             patch = { status: "cancelled", cancelled_at: new Date().toISOString() };
+            if (keepEnd) patch.current_period_end = keepEnd;
           }
+
 
           const { data: updated, error: updErr } = await supabaseAdmin
             .from("subscriptions")
@@ -242,9 +252,9 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           // Cancellation stops renewal, but the member keeps access through
           // the period they already paid for. Revoke immediately only when no
           // future paid-through date exists; the sweep handles expiry later.
-          const accessEndsAt = existingRow?.current_period_end
-            ? new Date(existingRow.current_period_end).getTime()
-            : 0;
+          const effectiveEnd = patch.current_period_end ?? existingRow?.current_period_end;
+          const accessEndsAt = effectiveEnd ? new Date(effectiveEnd).getTime() : 0;
+
           if (cancelling && accessEndsAt <= Date.now()) {
             const uid = existingRow?.user_id ?? userIdFromNotes;
             if (uid) {
@@ -282,8 +292,8 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           } else if (cancelling && existingRow?.status === "active") {
             await notify("bluepill-cancelled", {
               accessUntil:
-                fmtDate(existingRow?.current_period_end) ??
-                "The end of your current billing period",
+                fmtDate(effectiveEnd) ?? "The end of your current billing period",
+
               resubscribeUrl: "https://blueprint.ifvg.in/bluepill",
             });
           }

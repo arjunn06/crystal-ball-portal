@@ -252,9 +252,9 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           // Cancellation stops renewal, but the member keeps access through
           // the period they already paid for. Revoke immediately only when no
           // future paid-through date exists; the sweep handles expiry later.
-          const accessEndsAt = existingRow?.current_period_end
-            ? new Date(existingRow.current_period_end).getTime()
-            : 0;
+          const effectiveEnd = patch.current_period_end ?? existingRow?.current_period_end;
+          const accessEndsAt = effectiveEnd ? new Date(effectiveEnd).getTime() : 0;
+
           if (cancelling && accessEndsAt <= Date.now()) {
             const uid = existingRow?.user_id ?? userIdFromNotes;
             if (uid) {

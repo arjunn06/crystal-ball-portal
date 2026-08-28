@@ -292,8 +292,8 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           } else if (cancelling && existingRow?.status === "active") {
             await notify("bluepill-cancelled", {
               accessUntil:
-                fmtDate(existingRow?.current_period_end) ??
-                "The end of your current billing period",
+                fmtDate(effectiveEnd) ?? "The end of your current billing period",
+
               resubscribeUrl: "https://blueprint.ifvg.in/bluepill",
             });
           }

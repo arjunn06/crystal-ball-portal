@@ -33,7 +33,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 const SITE_NAME = "Blueprint"
 const FROM_NAME = "Arjun IFVG - Login"
 const FROM_LOCAL = "auth"
-const SENDER_DOMAIN = "notify.blueprint.ifvg.in"
+const SENDER_DOMAIN = "blueprint.ifvg.in"
 const ROOT_DOMAIN = "blueprint.ifvg.in"
 const FROM_DOMAIN = "blueprint.ifvg.in"
 

@@ -22,9 +22,15 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
+DECLARE
+  base_url text;
 BEGIN
+  SELECT decrypted_secret INTO base_url FROM vault.decrypted_secrets WHERE name = 'app_base_url';
+  IF base_url IS NULL THEN
+    RETURN;
+  END IF;
   PERFORM net.http_post(
-    url := 'https://project--35d9d475-f50f-4401-8711-f4dc6d659d17.lovable.app/api/public/cron/subscription-sweep',
+    url := base_url || '/api/public/cron/subscription-sweep',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
       'Authorization', 'Bearer ' || (

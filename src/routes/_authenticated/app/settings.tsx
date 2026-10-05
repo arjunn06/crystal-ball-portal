@@ -1,3 +1,4 @@
+import { BLUE_PILL_TOTAL_PAISE } from "@/lib/pricing";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -207,7 +208,7 @@ function SettingsPage() {
             />
           </div>
           <div className="mt-4 text-xs text-muted-foreground">
-            {formatINR(499 * 100)} / month · billed via Razorpay
+            {formatINR(BLUE_PILL_TOTAL_PAISE)} / month incl. 18% GST · billed via Razorpay
           </div>
           {sub?.status === "active" && !willCancel && (
             <div className="mt-5 pt-4 border-t border-border/70 flex items-center justify-between">

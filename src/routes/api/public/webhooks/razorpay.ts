@@ -1,3 +1,4 @@
+import { BLUE_PILL_TOTAL_PAISE, formatRupees } from "@/lib/pricing";
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 
@@ -170,7 +171,7 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
 
         if (paymentDue) {
           await notify("bluepill-payment-due", {
-            amount: p?.amount ? `₹${(p.amount / 100).toLocaleString("en-IN")}` : "₹499",
+            amount: p?.amount ? `₹${(p.amount / 100).toLocaleString("en-IN")}` : formatRupees(BLUE_PILL_TOTAL_PAISE),
             dueDate: fmtDate(existingRow?.current_period_end) ?? "As soon as possible",
             billingUrl: "https://blueprint.ifvg.in/app/settings",
           });
@@ -285,7 +286,7 @@ export const Route = createFileRoute("/api/public/webhooks/razorpay")({
           // Lifecycle emails — only on a real state transition.
           if (activating && existingRow?.status !== "active") {
             await notify("bluepill-subscription-started", {
-              amount: "₹499/month",
+              amount: `${formatRupees(BLUE_PILL_TOTAL_PAISE)}/month`,
               nextChargeDate: fmtDate(patch.current_period_end) ?? "One month from today",
               appUrl: "https://blueprint.ifvg.in/app",
             });

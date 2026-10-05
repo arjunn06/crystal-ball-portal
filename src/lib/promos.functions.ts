@@ -1,3 +1,4 @@
+import { BLUE_PILL_TOTAL_PAISE } from "@/lib/pricing";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -87,7 +88,7 @@ async function tryCreateRazorpayOffer(input: {
     };
     if (input.discount_type === "percent_off_first") {
       body.percent_rate = input.discount_value;
-      body.max_cashback = Math.round(499 * 100 * (input.discount_value / 100));
+      body.max_cashback = Math.round(BLUE_PILL_TOTAL_PAISE * (input.discount_value / 100));
     } else {
       body.discount_amount = Math.round(input.discount_value * 100);
     }

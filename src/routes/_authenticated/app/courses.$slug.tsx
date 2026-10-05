@@ -5,6 +5,7 @@ import { getCourse, getLessonVideoUrl, setLessonComplete } from "@/lib/courses.f
 import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, ChevronLeft, Play } from "lucide-react";
 import { Card, formatDuration } from "@/components/app/sidebar";
+import { ProgressBar } from "@/components/app/ui-kit";
 
 export const Route = createFileRoute("/_authenticated/app/courses/$slug")({
   component: CoursePlayer,
@@ -44,9 +45,9 @@ function CoursePlayer() {
     <>
       <Link
         to="/app/courses"
-        className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-6"
+        className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ChevronLeft className="size-3.5" /> Courses
+        <ChevronLeft className="size-4" /> All courses
       </Link>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -68,7 +69,9 @@ function CoursePlayer() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-xs text-muted-foreground">Now playing</p>
-                  <h1 className="mt-1 text-xl font-semibold tracking-tight">{active.title}</h1>
+                  <h1 className="mt-2 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em]">
+                    {active.title}
+                  </h1>
                   {active.duration_seconds && (
                     <p className="text-xs text-muted-foreground mt-1">
                       {formatDuration(active.duration_seconds)}
@@ -84,8 +87,8 @@ function CoursePlayer() {
                   }
                   className={
                     completed.has(active.id)
-                      ? "inline-flex items-center gap-1.5 rounded-lg border border-primary/40 bg-primary/10 text-primary px-3 h-9 text-xs font-medium shrink-0"
-                      : "inline-flex items-center gap-1.5 rounded-lg border border-border bg-surface hover:bg-hover px-3 h-9 text-xs font-medium shrink-0"
+                      ? "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-success/40 bg-success/10 px-4 text-sm font-medium text-success"
+                      : "inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground transition hover:opacity-90 active:scale-[0.98]"
                   }
                 >
                   {completed.has(active.id) ? (
@@ -112,18 +115,18 @@ function CoursePlayer() {
         <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:flex lg:flex-col">
           <Card className="p-5">
             <p className="text-xs text-muted-foreground">Course</p>
-            <h2 className="mt-1 font-semibold tracking-tight">{course.title}</h2>
+            <h2 className="mt-1.5 font-display text-lg font-bold leading-snug tracking-tight">
+              {course.title}
+            </h2>
             <p className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
               <span>
                 {modules.length} modules · {lessons.length} lessons
               </span>
               <span>{formatDuration(totalDuration)}</span>
             </p>
-            <div className="mt-2 flex items-center gap-2">
-              <div className="h-1 flex-1 rounded-full bg-surface-2 overflow-hidden">
-                <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
-              </div>
-              <span className="text-[11px] text-muted-foreground tabular-nums">{pct}%</span>
+            <div className="mt-3 flex items-center gap-3">
+              <ProgressBar value={pct} className="flex-1" />
+              <span className="text-xs text-muted-foreground tabular-nums">{pct}%</span>
             </div>
           </Card>
 
@@ -167,15 +170,17 @@ function CoursePlayer() {
                                 onClick={() => setActiveId(l.id)}
                                 className={
                                   isActive
-                                    ? "w-full grid grid-cols-[auto_1fr_auto] items-center gap-3 pl-10 pr-4 py-2 text-sm bg-primary/10 text-foreground"
-                                    : "w-full grid grid-cols-[auto_1fr_auto] items-center gap-3 pl-10 pr-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-hover/60 transition-colors"
+                                    ? "w-full grid grid-cols-[auto_1fr_auto] items-center gap-3 pl-10 pr-4 py-2.5 text-sm bg-surface-2 text-foreground font-medium"
+                                    : "w-full grid grid-cols-[auto_1fr_auto] items-center gap-3 pl-10 pr-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-hover/50 transition-colors"
                                 }
                               >
                                 <span className="flex size-5 items-center justify-center shrink-0">
                                   {isDone ? (
-                                    <Check className="size-3.5 text-primary" />
+                                    <Check className="size-3.5 text-success" />
                                   ) : (
-                                    <Play className={`size-3 ${isActive ? "text-primary fill-primary" : "opacity-60"}`} />
+                                    <Play
+                                      className={`size-3 ${isActive ? "text-foreground fill-foreground" : "opacity-60"}`}
+                                    />
                                   )}
                                 </span>
                                 <span className="truncate text-left">{l.title}</span>
@@ -216,12 +221,17 @@ function VideoEmbed({ url, lessonId }: { url: string; lessonId: string }) {
     let cancelled = false;
     const load = () =>
       getSigned({ data: { lesson_id: lessonId } })
-        .then((r: any) => { if (!cancelled) setSigned(r.url); })
+        .then((r: any) => {
+          if (!cancelled) setSigned(r.url);
+        })
         .catch(() => {});
     load();
     // Refresh the signed URL well before it expires (25 min).
     const t = setInterval(load, 25 * 60 * 1000);
-    return () => { cancelled = true; clearInterval(t); };
+    return () => {
+      cancelled = true;
+      clearInterval(t);
+    };
   }, [isHosted, lessonId, getSigned]);
 
   if (isHosted) {

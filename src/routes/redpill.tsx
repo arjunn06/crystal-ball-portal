@@ -1,18 +1,25 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Video, CalendarDays, LineChart } from "lucide-react";
-import { LogoIcon } from "@/components/logo-icon";
-import { DiscordIcon } from "@/components/discord-icon";
+import { useRef } from "react";
+import { ArrowRight, DiscordLogo, Sun } from "@phosphor-icons/react";
+import { SiteShell, SiteNav, SiteFooter } from "@/components/site/shell";
+import { Reveal, Rise } from "@/components/site/reveal";
+import { PillCapsule } from "@/components/site/pill-capsule";
+import { Testimonials } from "@/components/site/testimonials";
+import { MobileCtaBar } from "@/components/site/mobile-cta";
+import { btnLink, btnPrimary, container } from "@/components/site/ui";
+
+const TITLE = "The Red Pill | 1 Month Live IFVG Mentorship";
 
 export const Route = createFileRoute("/redpill")({
   head: () => ({
     meta: [
-      { title: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { title: TITLE },
       {
         name: "description",
         content:
           "Enroll in the Red Pill: an intense one-month live Zoom trading program with premium Discord access. ₹2,999 one-time.",
       },
-      { property: "og:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { property: "og:title", content: TITLE },
       {
         property: "og:description",
         content:
@@ -22,7 +29,7 @@ export const Route = createFileRoute("/redpill")({
       { property: "og:url", content: "https://blueprint.ifvg.in/redpill" },
       { property: "og:image", content: "https://blueprint.ifvg.in/og-redpill.jpg" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "The Red Pill — 1 Month Live IFVG Mentorship" },
+      { name: "twitter:title", content: TITLE },
       {
         name: "twitter:description",
         content: "Enroll now: one month of live IFVG training on Zoom, ₹2,999 one-time.",
@@ -36,7 +43,7 @@ export const Route = createFileRoute("/redpill")({
         children: JSON.stringify({
           "@context": "https://schema.org",
           "@type": "Course",
-          name: "The Red Pill — 1 Month Live IFVG Mentorship",
+          name: TITLE,
           description:
             "Intense one-month live Zoom trading program covering basics to advanced IFVG trading, with premium Discord access.",
           provider: { "@type": "Organization", name: "Blueprint by Arjun IFVG" },
@@ -48,281 +55,270 @@ export const Route = createFileRoute("/redpill")({
   component: RedPill,
 });
 
-const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
-const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
-
-const WEEK1 = [
-  "Introduction to Trading - Candlestick anatomy and basics",
-  "What is Price Action and How does the markets move?",
-  "What are ICT Concepts & How to apply them",
-  "What is Liquidity",
-  "Liquidity Sweeps & Reading Price",
-  "Importance of Time & Price",
-  "The IFVG Model explained with examples",
-  "How to apply SMT Divergences",
-  "Futures & Forex prop firm rules and guide",
+const CLUSTERS = [
+  {
+    name: "The foundation",
+    items: [
+      "Introduction to Trading: candlestick anatomy and basics",
+      "What is price action and how do markets move?",
+      "What are ICT concepts and how to apply them",
+    ],
+  },
+  {
+    name: "Reading liquidity and time",
+    items: [
+      "What is liquidity",
+      "Liquidity sweeps and reading price",
+      "The importance of time and price",
+    ],
+  },
+  {
+    name: "Executing the model",
+    items: [
+      "The IFVG model explained with examples",
+      "How to apply SMT divergences",
+      "Futures and forex prop firm rules and guide",
+    ],
+  },
 ];
 
 function RedPill() {
+  const heroEnd = useRef<HTMLDivElement>(null);
+
   return (
-    <div
-      style={{ ...archivo, backgroundColor: "#F5EEE3", color: "#0B0B10" }}
-      className="min-h-screen relative overflow-hidden"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
-        style={{
-          background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFC6BC 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
-        }}
+    <SiteShell>
+      <SiteNav
+        cta={
+          <Link to="/enroll" className={`${btnPrimary} !h-10 !px-4 !text-sm`}>
+            Enroll<span className="hidden sm:inline">&nbsp;for ₹2,999</span>
+          </Link>
+        }
       />
-
-      <header className="relative z-50 mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <LogoIcon className="text-black size-10" />
-        </Link>
-        <div className="flex items-center gap-3">
-          <Link
-            to="/bluepill"
-            className="hidden md:inline-flex items-center h-11 px-5 rounded-full border border-black/10 bg-white text-[13.5px] font-semibold hover:bg-[#FAFAFA] transition-colors"
-          >
-            Blue Pill · ₹499/mo
-          </Link>
-          <Link
-            to="/auth"
-            className="inline-flex items-center h-11 px-5 rounded-full bg-[#0B0B10] text-white text-[13.5px] font-semibold hover:bg-black transition-colors"
-          >
-            Sign in
-          </Link>
-        </div>
-      </header>
-
-      {/* HERO */}
-      <section className="relative z-10 mx-auto max-w-4xl px-6 pt-8 pb-20 flex flex-col items-center text-center">
-        <div className="flex flex-col items-center">
-          <span
-            className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full text-white text-[11px] font-bold tracking-[0.16em] uppercase"
-            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-          >
-            <span className="size-1.5 rounded-full bg-white animate-pulse" />
-            THE RED PILL · WAITLIST OPEN
-          </span>
-          <h1
-            style={{ ...clash, letterSpacing: "-0.01em" }}
-            className="mt-6 text-[46px] md:text-[68px] font-bold leading-[0.98]"
-          >
-            Steal my 5 figure printing
-            <br />
-            trading strategy!
-          </h1>
-          <p className="mt-7 max-w-xl text-[17px] leading-[1.55] text-[#4A4A52]">
-            An intense one-month training program conducted entirely live on
-            Zoom. The full course is completed in the <strong>first week</strong> —
-            for the rest of the days we trade together and analyse my executions
-            live, with premium Discord access included.
-          </p>
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              to="/enroll"
-              className="inline-flex items-center gap-2 h-14 px-8 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition"
-              style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-            >
-              Enroll now · ₹2,999
-            </Link>
-            <a
-              href="#curriculum"
-              className="inline-flex items-center h-14 px-7 rounded-full bg-white text-[15px] font-semibold border border-black/5 hover:bg-[#FAFAFA] transition-colors shadow-sm"
-            >
-              See what's covered
-            </a>
-          </div>
-          <div className="mt-8 flex items-center justify-center gap-2 text-[12px] text-[#6B6B72]">
-            <span className="size-1.5 rounded-full bg-[#E53935]" />
-            Registrations are open — limited seats per cohort
-          </div>
-        </div>
-
-        <div className="mt-14 w-full">
-          <div className="text-[11px] font-bold tracking-[0.16em] uppercase text-[#6B6B72]">
-            Learn more about the program
-          </div>
-          <div className="mt-5 relative overflow-hidden rounded-[28px] border border-black/5 bg-black shadow-[0_40px_90px_-40px_rgba(0,0,0,0.45)]">
-            <div className="aspect-video">
-              <iframe
-                src="https://www.youtube.com/embed/2fxjbw5fdsk"
-                title="The Red Pill — program walkthrough"
-                loading="lazy"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="h-full w-full border-0"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW THE MONTH RUNS */}
-      <section className="relative z-10 mx-auto max-w-7xl px-6 py-20">
-        <div className="flex flex-col items-center text-center">
-          <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
-            HOW THE MONTH RUNS
-            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
-          </div>
-          <h2
-            style={{ ...clash, letterSpacing: "-0.005em" }}
-            className="mt-6 max-w-2xl text-[38px] md:text-[52px] font-bold leading-[1.05]"
-          >
-            Learn in a week. Trade for a month.
-          </h2>
-        </div>
-        <div className="mt-14 grid md:grid-cols-3 gap-5">
-          <Phase
-            tag="WEEK 1"
-            title="The full course, live"
-            body="Every module from basics to advanced IFVG, delivered live on Zoom with live Q&A anytime in between the session."
-            icon={<Video className="size-4" />}
-          />
-          <Phase
-            tag="WEEKS 2–4"
-            title="We trade together"
-            body="Daily live sessions where we take the market together — setups, entries and risk management in real time."
-            icon={<LineChart className="size-4" />}
-          />
-          <Phase
-            tag="EVERY DAY"
-            title="Execution reviews"
-            body="I break down my own live executions so you see exactly why each trade was taken — and what was skipped."
-            icon={<CalendarDays className="size-4" />}
-          />
-        </div>
-      </section>
-
-      {/* CURRICULUM */}
-      <section id="curriculum" className="relative z-10 bg-[#0A0A0F] py-24 md:py-28">
-        <div className="mx-auto max-w-7xl px-6">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-white/5 text-white/70 text-[11px] font-semibold tracking-[0.16em] uppercase">
-              WEEK 1 CURRICULUM
-            </div>
-            <h2
-              style={{ ...clash, letterSpacing: "-0.005em" }}
-              className="mt-6 text-[36px] md:text-[50px] font-bold leading-[1.05] text-[#FAFAFA]"
-            >
-              Everything covered, live.
-            </h2>
-            <p className="mt-4 text-[16px] text-[#8B8B96]">
-              Nine modules taught end to end in the first week of the program.
-            </p>
-          </div>
-          <div className="mt-12 grid md:grid-cols-2 gap-3">
-            {WEEK1.map((t, i) => (
-              <div
-                key={t}
-                className="flex items-center gap-4 rounded-2xl bg-[#101014] border border-white/5 px-5 py-4 hover:border-[#E53935]/40 transition-colors"
-              >
-                <span
-                  style={clash}
-                  className="text-[13px] font-bold text-[#E53935] w-7 shrink-0"
-                >
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="text-[15px] text-[#FAFAFA] font-medium">{t}</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-12 flex flex-wrap items-center gap-4 rounded-2xl bg-[#101014] border border-white/5 p-6">
-            <DiscordIcon className="size-6 text-[#5865F2]" />
-            <div className="flex-1 min-w-[240px]">
-              <div style={clash} className="text-[18px] font-bold text-[#FAFAFA]">
-                Premium Discord access included
-              </div>
-              <p className="text-[14px] text-[#8B8B96]">
-                Trade Alerts, session links and community access for the full program.
-              </p>
-            </div>
-            <Link
-              to="/enroll"
-              className="inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white/10 text-white text-[14px] font-semibold border border-white/10 hover:bg-white/15 transition-colors"
-            >
-              Enroll now
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ENROLL CTA */}
-      <section id="enroll" className="relative z-10 mx-auto max-w-7xl px-6 py-24">
-        <div className="relative overflow-hidden rounded-[28px] border border-black/5 bg-white p-10 md:p-14 text-center shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]">
+      <main id="main">
+        {/* HERO */}
+        <section className="relative">
           <div
             aria-hidden
-            className="absolute -top-24 -right-24 size-80 rounded-full opacity-40"
-            style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
+            className="pointer-events-none absolute inset-x-0 top-0 h-[620px] bg-[radial-gradient(900px_420px_at_85%_-10%,hsl(4_70%_45%/0.22),transparent_70%)]"
           />
-          <h2 style={clash} className="relative text-[34px] md:text-[46px] font-bold leading-[1.08]">
-            Take the Red Pill.
-          </h2>
-          <p className="relative mx-auto mt-4 max-w-lg text-[16px] text-[#5A5A62]">
-            Registrations are <strong>open to everyone</strong>. One month, live on Zoom — course in
-            week one, then we trade together for the rest of the month.
-          </p>
-
-          <Link
-            to="/enroll"
-            className="relative mt-9 inline-flex items-center gap-2 h-14 px-10 rounded-full text-white text-[15px] font-semibold shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105 transition"
-            style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
+          <div
+            className={`${container} relative grid items-center gap-12 py-14 lg:min-h-[calc(100dvh-4rem)] lg:grid-cols-[1fr_1.12fr] lg:gap-14 lg:py-16`}
           >
-            Enroll now · ₹2,999 one-time
-          </Link>
-
-          <div className="relative mt-6 text-[13px] text-[#6B6B72]">
-            Prefer to start smaller?{" "}
-            <Link to="/bluepill" className="font-semibold underline">
-              Try the Blue Pill at ₹499/mo
-            </Link>
+            <div>
+              <Rise i={0}>
+                <h1 className="font-display text-[clamp(2.4rem,5vw,3.9rem)] font-extrabold leading-[1.04] tracking-[-0.04em]">
+                  Steal my 5&nbsp;figure printing trading strategy.
+                </h1>
+              </Rise>
+              <Rise i={1}>
+                <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted-foreground">
+                  One month live on Zoom. The full course in week one, then we trade together.
+                </p>
+              </Rise>
+              <Rise i={2} className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
+                <Link to="/enroll" className={btnPrimary}>
+                  Enroll now for ₹2,999
+                  <ArrowRight className="size-4" weight="bold" />
+                </Link>
+                <a href="#curriculum" className={btnLink}>
+                  See what is covered
+                </a>
+              </Rise>
+            </div>
+            <Rise i={2}>
+              <div className="overflow-hidden rounded-2xl border border-border bg-black shadow-[0_50px_120px_-40px_hsl(4_70%_40%/0.45),0_30px_60px_-30px_hsl(220_30%_2%/0.9)]">
+                <div className="aspect-video">
+                  <iframe
+                    src="https://www.youtube.com/embed/2fxjbw5fdsk"
+                    title="The Red Pill program walkthrough"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    className="h-full w-full border-0"
+                  />
+                </div>
+              </div>
+            </Rise>
           </div>
-        </div>
-      </section>
+          <div ref={heroEnd} aria-hidden className="h-px" />
+        </section>
 
-      <footer className="relative z-10 border-t border-black/5">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between text-[12px] text-[#6B6B72]">
-          <span>© Blueprint · by Arjun IFVG</span>
-          <span>All rights reserved</span>
-        </div>
-      </footer>
-    </div>
-  );
-}
+        <Testimonials />
 
-function Phase({
-  tag,
-  title,
-  body,
-  icon,
-}: {
-  tag: string;
-  title: string;
-  body: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="relative rounded-3xl bg-white border border-black/5 p-7 shadow-[0_20px_50px_-30px_rgba(0,0,0,0.25)] hover:-translate-y-1 transition-transform">
-      <div className="flex items-center justify-between mb-6">
-        <span
-          className="inline-flex items-center h-11 px-4 rounded-full text-white text-[12px] font-bold tracking-wider"
-          style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-        >
-          {tag}
-        </span>
-        <span className="size-10 rounded-full bg-[#F5EEE3] grid place-items-center text-[#E53935]">
-          {icon}
-        </span>
-      </div>
-      <h3 style={clash} className="text-[23px] font-bold leading-tight">
-        {title}
-      </h3>
-      <p className="mt-3 text-[14px] leading-[1.55] text-[#5A5A62]">{body}</p>
-    </div>
+        {/* THE MONTH */}
+        <section className="border-t border-border py-24 md:py-32">
+          <div className={container}>
+            <Reveal>
+              <h2 className="max-w-3xl font-display text-[clamp(2rem,4.5vw,3.4rem)] font-extrabold leading-[1.1] tracking-[-0.035em]">
+                Learn in a week. Trade for a month.
+              </h2>
+            </Reveal>
+
+            <div className="mt-14 grid gap-4 md:grid-cols-4">
+              <Reveal className="md:col-span-1">
+                <div className="flex h-full flex-col justify-between rounded-2xl bg-primary p-7 text-primary-foreground md:min-h-[300px]">
+                  <p className="font-display text-4xl font-extrabold leading-none whitespace-nowrap lg:text-5xl tracking-[-0.04em]">
+                    Week 1
+                  </p>
+                  <div className="mt-10">
+                    <h3 className="font-display text-xl font-bold leading-tight">
+                      The full course, live
+                    </h3>
+                    <p className="mt-2 text-[15px] leading-snug opacity-80">
+                      Every module from basics to advanced IFVG, with live Q&A in between sessions.
+                    </p>
+                  </div>
+                </div>
+              </Reveal>
+              <Reveal delay={0.08} className="md:col-span-3">
+                <div className="flex h-full flex-col justify-between rounded-2xl border border-border bg-surface p-7 md:min-h-[300px]">
+                  <p className="font-display text-4xl font-extrabold leading-none whitespace-nowrap lg:text-5xl tracking-[-0.04em] text-muted-foreground">
+                    Weeks 2 to 4
+                  </p>
+                  <div className="mt-10">
+                    <h3 className="font-display text-xl font-bold leading-tight">
+                      We trade together
+                    </h3>
+                    <p className="mt-2 max-w-[52ch] text-[15px] leading-snug text-muted-foreground">
+                      Live sessions where we take the market together: setups, entries and risk
+                      management in real time.
+                    </p>
+                  </div>
+                </div>
+              </Reveal>
+            </div>
+            <Reveal delay={0.12}>
+              <div className="mt-4 flex items-start gap-4 rounded-2xl border border-border p-6 md:items-center">
+                <Sun className="mt-0.5 size-6 shrink-0 text-primary md:mt-0" weight="regular" />
+                <p className="text-[15px] leading-snug">
+                  <span className="font-semibold">Every day, execution reviews.</span>{" "}
+                  <span className="text-muted-foreground">
+                    Arjun breaks down his own live trades so you see why each was taken and what was
+                    skipped.
+                  </span>
+                </p>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* CURRICULUM */}
+        <section id="curriculum" className="scroll-mt-16 border-t border-border py-24 md:py-32">
+          <div className={container}>
+            <Reveal>
+              <h2 className="max-w-3xl font-display text-[clamp(2rem,4.5vw,3.4rem)] font-extrabold leading-[1.1] tracking-[-0.035em]">
+                Everything covered in week one.
+              </h2>
+              <p className="mt-5 max-w-[52ch] text-lg leading-relaxed text-muted-foreground">
+                Nine modules, taught end to end and live. They build from your first candle to prop
+                firm rules.
+              </p>
+            </Reveal>
+
+            <div className="mt-14 divide-y divide-border border-y border-border">
+              {CLUSTERS.map((c, ci) => (
+                <Reveal key={c.name} y={16}>
+                  <div className="grid gap-8 py-10 md:py-12 lg:grid-cols-[minmax(0,320px)_1fr] lg:gap-16">
+                    <div>
+                      <div className="flex gap-1.5" aria-hidden>
+                        {CLUSTERS.map((_, i) => (
+                          <span
+                            key={i}
+                            className={`h-1 w-10 rounded-full ${i <= ci ? "bg-pill-red" : "bg-border"}`}
+                          />
+                        ))}
+                      </div>
+                      <h3 className="mt-5 font-display text-2xl font-bold tracking-tight md:text-3xl">
+                        {c.name}
+                      </h3>
+                      <p className="mt-2 font-mono text-sm text-muted-foreground tabular">
+                        {String(ci * 3 + 1).padStart(2, "0")} to{" "}
+                        {String(ci * 3 + 3).padStart(2, "0")}
+                      </p>
+                    </div>
+                    <ol className="-mx-4 md:-mx-5">
+                      {c.items.map((t, i) => (
+                        <li
+                          key={t}
+                          className="group flex items-baseline gap-5 rounded-xl px-4 py-4 transition-colors duration-200 hover:bg-surface md:gap-7 md:px-5 md:py-5"
+                        >
+                          <span className="w-8 shrink-0 font-mono text-sm tabular text-pill-red">
+                            {String(ci * 3 + i + 1).padStart(2, "0")}
+                          </span>
+                          <span className="text-xl font-semibold leading-snug tracking-tight text-foreground/80 transition duration-200 group-hover:translate-x-1 group-hover:text-foreground md:text-2xl">
+                            {t}
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+
+            <Reveal>
+              <div className="mt-20 flex flex-wrap items-center gap-5 rounded-2xl border border-border bg-surface p-6 md:p-7">
+                <DiscordLogo className="size-8 shrink-0 text-[#8e99ff]" weight="fill" />
+                <div className="min-w-[240px] flex-1">
+                  <p className="font-display text-xl font-bold">Premium Discord is included</p>
+                  <p className="mt-1 text-[15px] text-muted-foreground">
+                    Trade alerts, session links and the community for the full program.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+
+        {/* ENROLL */}
+        <section id="enroll" className="scroll-mt-16 border-t border-border py-24 md:py-32">
+          <div className={container}>
+            <Reveal>
+              <div
+                className="relative overflow-hidden rounded-3xl border border-pill-red/25 p-8 md:p-14"
+                style={{
+                  background:
+                    "radial-gradient(800px 420px at 100% 0%, hsl(4 70% 40% / 0.3), transparent 65%), linear-gradient(180deg, hsl(4 22% 10%), var(--surface))",
+                }}
+              >
+                <PillCapsule
+                  tone="red"
+                  className="absolute right-8 top-10 hidden w-40 rotate-[-22deg] md:block"
+                />
+                <div className="relative max-w-2xl">
+                  <h2 className="font-display text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-[1.04] tracking-[-0.04em]">
+                    Take the Red Pill.
+                  </h2>
+                  <p className="mt-5 max-w-[48ch] text-lg leading-relaxed text-muted-foreground">
+                    Registrations are open to everyone. Seats are limited per cohort.
+                  </p>
+                  <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-5">
+                    <Link to="/enroll" className={btnPrimary}>
+                      Enroll now for ₹2,999
+                      <ArrowRight className="size-4" weight="bold" />
+                    </Link>
+                    <p className="text-sm text-muted-foreground">
+                      One payment, no recurring charge.
+                    </p>
+                  </div>
+                  <p className="mt-10 text-[15px] text-muted-foreground">
+                    Prefer to start smaller?{" "}
+                    <Link to="/bluepill" className={btnLink}>
+                      Try the Blue Pill at ₹499/month
+                    </Link>
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      </main>
+      <SiteFooter />
+
+      <MobileCtaBar sentinel={heroEnd}>
+        <Link to="/enroll" className={`${btnPrimary} w-full`}>
+          Enroll now for ₹2,999
+        </Link>
+      </MobileCtaBar>
+    </SiteShell>
   );
 }

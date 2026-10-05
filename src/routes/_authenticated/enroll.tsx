@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
@@ -11,25 +11,21 @@ import { getAccountOverview } from "@/lib/account.functions";
 import { openRazorpay } from "@/lib/razorpay-checkout";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Check, LogOut } from "lucide-react";
-import { LogoIcon } from "@/components/logo-icon";
-import { supabase } from "@/integrations/supabase/client";
+import { Check } from "@phosphor-icons/react";
+import { CheckoutShell } from "@/components/site/checkout-shell";
+import { btnPrimary } from "@/components/site/ui";
 import { getRedPillInviteToken, clearRedPillInvite } from "@/lib/intent";
-
-const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
-const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
 
 export const Route = createFileRoute("/_authenticated/enroll")({
   head: () => ({
     meta: [
-      { title: "Enroll · The Red Pill — Blueprint" },
+      { title: "Enroll in The Red Pill | Blueprint" },
       {
         name: "description",
         content:
           "Enroll in The Red Pill: one month of live IFVG training on Zoom for ₹2,999, premium Discord included.",
       },
-      { property: "og:title", content: "Enroll · The Red Pill — Blueprint" },
+      { property: "og:title", content: "Enroll in The Red Pill | Blueprint" },
       {
         property: "og:description",
         content: "One month, live on Zoom. ₹2,999 one-time with premium Discord access.",
@@ -61,7 +57,6 @@ function Enroll() {
   useEffect(() => {
     setInviteToken(getRedPillInviteToken());
   }, []);
-
 
   const { data, refetch } = useQuery({
     queryKey: ["account", "overview"],
@@ -138,7 +133,7 @@ function Enroll() {
           currency: "INR",
           name: "Blueprint · Red Pill",
           description: "One month live mentorship",
-          theme: { color: "#E53935" },
+          theme: { color: "#D9423C" },
           prefill: {
             email: data?.profile?.email ?? undefined,
             name: data?.profile?.full_name ?? undefined,
@@ -188,127 +183,49 @@ function Enroll() {
   });
 
   return (
-    <div
-      style={{ ...archivo, backgroundColor: "#F5EEE3", color: "#0B0B10" }}
-      className="min-h-screen relative overflow-hidden flex flex-col"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[720px]"
-        style={{
-          background:
-            "radial-gradient(1200px 500px at 50% -100px, #FFCCC4 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
-        }}
-      />
-
-      <header className="relative z-10 mx-auto w-full max-w-7xl px-6 h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2.5">
-          <LogoIcon className="text-black size-10" />
-        </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-[12px] text-[#6B6B72] truncate max-w-[180px] hidden sm:inline">
-            {data?.profile?.email}
-          </span>
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = "/";
-            }}
-            className="inline-flex items-center gap-1.5 text-[12px] text-[#6B6B72] hover:text-[#0B0B10] transition-colors"
-          >
-            <LogOut className="size-3.5" />
-            Sign out
-          </button>
-        </div>
-      </header>
-
-      <div className="relative z-10 flex-1 grid place-items-center px-6 pt-4 pb-20">
-        <div className="w-full max-w-xl">
-          <div className="inline-flex items-center gap-2 h-8 px-3.5 rounded-full bg-[#0B0B10] text-white/90 text-[11px] font-semibold tracking-[0.16em] uppercase">
-            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
-            ONE STEP TO GO
-            <span className="size-1.5 rounded-full bg-[#FF2A1F]" />
-          </div>
-          <h1
-            style={{ ...clash, letterSpacing: "-0.005em" }}
-            className="mt-5 text-[40px] md:text-[52px] font-bold leading-[1.05] text-[#0B0B10]"
-          >
-            Confirm your seat in
-            <br />
-            <span className="inline-flex items-center gap-3 flex-wrap">
-              the
-              <span
-                className="inline-flex items-center h-11 md:h-12 px-4 rounded-full text-white text-[15px] md:text-[17px] font-semibold shadow-[0_10px_30px_-10px_rgba(229,57,53,0.7)]"
-                style={{
-                  background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)",
-                  ...clash,
-                }}
-              >
-                Red Pill
-              </span>
-            </span>
+    <CheckoutShell
+      tone="red"
+      email={data?.profile?.email ?? ""}
+      intro={
+        <>
+          <h1 className="font-display text-[clamp(2.4rem,5vw,3.8rem)] font-extrabold leading-[1.04] tracking-[-0.04em]">
+            Confirm your seat in the Red Pill.
           </h1>
-          <p className="mt-5 text-[16px] leading-[1.55] text-[#4A4A52] max-w-md">
-            One month, live on Zoom with me. Course finished in week one, then we
-            trade the market together for the rest of the month.
+          <p className="mt-6 max-w-[44ch] text-lg leading-relaxed text-muted-foreground">
+            One month, live on Zoom with Arjun. The course is finished in week one, then we trade
+            the market together for the rest of the month.
           </p>
+        </>
+      }
+    >
+      <h2 className="text-sm font-medium text-muted-foreground">The Red Pill, one-time payment</h2>
+      <p className="mt-2 font-display tabular text-6xl font-extrabold leading-none tracking-[-0.04em]">
+        ₹2,999
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Single payment through Razorpay. No recurring charge.
+      </p>
 
-          <div className="relative mt-10 overflow-hidden rounded-[24px] border border-black/5 bg-white p-7 md:p-9 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)]">
-            <div
-              aria-hidden
-              className="absolute -top-20 -right-20 size-72 rounded-full opacity-40"
-              style={{ background: "radial-gradient(closest-side,#FFCCC4,transparent)" }}
-            />
-            <div className="relative">
-              <div className="inline-flex items-center gap-2 h-7 px-3 rounded-full bg-[#0B0B10]/5 text-[#0B0B10] text-[11px] font-semibold tracking-[0.16em] uppercase">
-                RED PILL · ONE-TIME
-              </div>
-              <div className="mt-5 flex items-baseline gap-1.5">
-                <span style={clash} className="text-[52px] font-bold leading-none">
-                  ₹2,999
-                </span>
-                <span className="text-[15px] text-[#6B6B72]">one-time</span>
-              </div>
-              <p className="mt-1.5 text-[12.5px] text-[#6B6B72]">
-                Single payment, securely via Razorpay · no recurring charge
-              </p>
+      <ul className="mt-7 space-y-3">
+        {PERKS.map((f) => (
+          <li key={f} className="flex items-start gap-3 text-[15px] leading-snug">
+            <Check className="mt-0.5 size-4 shrink-0 text-primary" weight="bold" />
+            {f}
+          </li>
+        ))}
+      </ul>
 
-              <ul className="mt-6 grid grid-cols-1 gap-2.5">
-                {PERKS.map((f) => (
-                  <li
-                    key={f}
-                    className="flex items-start gap-3 rounded-2xl bg-[#F7F1E8] border border-black/5 px-4 py-3"
-                  >
-                    <span className="mt-0.5 size-5 rounded-full bg-white border border-black/5 grid place-items-center shrink-0">
-                      <Check className="size-3 text-[#E53935]" strokeWidth={3} />
-                    </span>
-                    <span className="text-[14px] text-[#1A1A1F] font-medium">{f}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                onClick={() => mut.mutate()}
-                disabled={mut.isPending}
-                style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-                className="mt-7 w-full h-14 rounded-full text-white text-[15px] font-semibold border-0 shadow-[0_16px_40px_-14px_rgba(229,57,53,0.8)] hover:brightness-105"
-              >
-                {mut.isPending ? "Opening checkout…" : "Complete payment · ₹2,999"}
-              </Button>
-              <p className="mt-3 text-[11px] text-center text-[#6B6B72]">
-                {inviteToken ? "Priority slot from the waitlist · " : ""}secure payment via Razorpay
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <footer className="relative z-10 border-t border-black/5">
-        <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between text-[12px] text-[#6B6B72]">
-          <span>© Blueprint · by Arjun IFVG</span>
-          <span>All rights reserved</span>
-        </div>
-      </footer>
-    </div>
+      <button
+        type="button"
+        onClick={() => mut.mutate()}
+        disabled={mut.isPending}
+        className={`${btnPrimary} mt-8 w-full`}
+      >
+        {mut.isPending ? "Opening checkout" : "Complete payment for ₹2,999"}
+      </button>
+      <p className="mt-3 text-center text-xs text-muted-foreground">
+        {inviteToken ? "Priority slot from the waitlist. " : ""}Secure payment through Razorpay.
+      </p>
+    </CheckoutShell>
   );
 }

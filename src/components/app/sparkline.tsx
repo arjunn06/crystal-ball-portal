@@ -2,7 +2,7 @@ export function Sparkline({
   data,
   width = 260,
   height = 60,
-  stroke = "hsl(var(--primary))",
+  stroke = "var(--foreground)",
   fill = "none",
   className,
   showAxis = false,
@@ -25,7 +25,9 @@ export function Sparkline({
     const y = height - ((v - min) / range) * (height - 4) - 2;
     return [x, y] as const;
   });
-  const path = pts.map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+  const path = pts
+    .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`)
+    .join(" ");
   const areaPath = `${path} L${width},${height} L0,${height} Z`;
   const last = pts[pts.length - 1];
   return (

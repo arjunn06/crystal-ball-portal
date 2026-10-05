@@ -17,7 +17,7 @@ export const Route = createFileRoute("/redpill")({
       {
         name: "description",
         content:
-          "Enroll in the Red Pill: an intense one-month live Zoom trading program with premium Discord access. ₹2,999 one-time.",
+          "Enroll in the Red Pill: an intense one-month live Zoom trading program with premium Discord access. ₹2,999 + taxes, one-time.",
       },
       { property: "og:title", content: TITLE },
       {
@@ -32,7 +32,7 @@ export const Route = createFileRoute("/redpill")({
       { name: "twitter:title", content: TITLE },
       {
         name: "twitter:description",
-        content: "Enroll now: one month of live IFVG training on Zoom, ₹2,999 one-time.",
+        content: "Enroll now: one month of live IFVG training on Zoom, ₹2,999 + taxes, one-time.",
       },
       { name: "twitter:image", content: "https://blueprint.ifvg.in/og-redpill.jpg" },
     ],
@@ -90,7 +90,7 @@ function RedPill() {
       <SiteNav
         cta={
           <Link to="/enroll" className={`${btnPrimary} !h-10 !px-4 !text-sm`}>
-            Enroll<span className="hidden sm:inline">&nbsp;for ₹2,999</span>
+            Enroll<span className="hidden sm:inline">&nbsp;for ₹2,999 + taxes</span>
           </Link>
         }
       />
@@ -117,7 +117,7 @@ function RedPill() {
               </Rise>
               <Rise i={2} className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
                 <Link to="/enroll" className={btnPrimary}>
-                  Enroll now for ₹2,999
+                  Enroll now for ₹2,999 + taxes
                   <ArrowRight className="size-4" weight="bold" />
                 </Link>
                 <a href="#curriculum" className={btnLink}>
@@ -293,7 +293,7 @@ function RedPill() {
                   </p>
                   <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-5">
                     <Link to="/enroll" className={btnPrimary}>
-                      Enroll now for ₹2,999
+                      Enroll now for ₹2,999 + taxes
                       <ArrowRight className="size-4" weight="bold" />
                     </Link>
                     <p className="text-sm text-muted-foreground">
@@ -303,7 +303,7 @@ function RedPill() {
                   <p className="mt-10 text-[15px] text-muted-foreground">
                     Prefer to start smaller?{" "}
                     <Link to="/bluepill" className={btnLink}>
-                      Try the Blue Pill at ₹499/month
+                      Try the Blue Pill at ₹499/month + taxes
                     </Link>
                   </p>
                 </div>
@@ -316,7 +316,7 @@ function RedPill() {
 
       <MobileCtaBar sentinel={heroEnd}>
         <Link to="/enroll" className={`${btnPrimary} w-full`}>
-          Enroll now for ₹2,999
+          Enroll now for ₹2,999 + taxes
         </Link>
       </MobileCtaBar>
     </SiteShell>

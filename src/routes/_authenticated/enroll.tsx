@@ -24,12 +24,12 @@ export const Route = createFileRoute("/_authenticated/enroll")({
       {
         name: "description",
         content:
-          "Enroll in The Red Pill: one month of live IFVG training on Zoom for ₹2,999, premium Discord included.",
+          "Enroll in The Red Pill: one month of live IFVG training on Zoom for ₹2,999 + taxes, premium Discord included.",
       },
       { property: "og:title", content: "Enroll in The Red Pill | Blueprint" },
       {
         property: "og:description",
-        content: "One month, live on Zoom. ₹2,999 one-time with premium Discord access.",
+        content: "One month, live on Zoom. ₹2,999 + taxes, one-time with premium Discord access.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

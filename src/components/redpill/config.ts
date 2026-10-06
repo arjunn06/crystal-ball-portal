@@ -169,7 +169,7 @@ export function buildFaq(c: RpConfig): FaqEntry[] {
     {
       id: "need",
       q: "What do I need to join?",
-      a: "Zoom, a Discord account, and a Google account or an email address to sign in.",
+      a: "Zoom, a Discord account, and an email address to sign in.",
     },
     {
       id: "recurring",
@@ -179,7 +179,7 @@ export function buildFaq(c: RpConfig): FaqEntry[] {
     {
       id: "join",
       q: "How do I join?",
-      a: `Sign in with Google or an email code, pay ${PRICE_TAXES} on Razorpay, then get your Red Pill role in the Discord. Session links are shared there.`,
+      a: `Sign in with an email code, pay ${PRICE_TAXES} on Razorpay, then get your Red Pill role in the Discord. Session links are shared there.`,
     },
     {
       id: "advice",

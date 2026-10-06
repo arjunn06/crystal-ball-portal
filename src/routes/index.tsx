@@ -298,7 +298,7 @@ const STEPS = [
   {
     icon: UserCircle,
     title: "Create your account",
-    body: "Sign in with Google or an email code. No password to remember.",
+    body: "Sign in with a one-time code sent to your email. No password to remember.",
   },
   {
     icon: CreditCard,

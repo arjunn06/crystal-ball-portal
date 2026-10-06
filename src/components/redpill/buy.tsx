@@ -8,7 +8,7 @@ import { Fn, Rv } from "./shared";
 /* Join: three steps and the price card                               */
 /* ---------------------------------------------------------------- */
 const STEPS = [
-  { n: "01", t: "Sign in.", b: "Continue with Google, or get a code by email." },
+  { n: "01", t: "Sign in.", b: "Get a one-time code by email. No password." },
   { n: "02", t: "Pay once.", b: `${PRICE_TAXES} on Razorpay. One payment, no recurring charge.` },
   {
     n: "03",

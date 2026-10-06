@@ -35,6 +35,7 @@ import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppCoursesRouteImport } from './routes/_authenticated/app/courses'
 import { Route as AuthenticatedAppDiscordRouteImport } from './routes/_authenticated/app/discord'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app/settings'
+import { Route as ApiPublicEnvCheckRouteImport } from './routes/api/public/env-check'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AuthenticatedAdminCoursesIndexRouteImport } from './routes/_authenticated/admin/courses.index'
 import { Route as AuthenticatedAdminCoursesIdRouteImport } from './routes/_authenticated/admin/courses.$id'
@@ -185,6 +186,11 @@ const AuthenticatedAppSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedAppRouteRoute,
   } as any)
+const ApiPublicEnvCheckRoute = ApiPublicEnvCheckRouteImport.update({
+  id: '/api/public/env-check',
+  path: '/api/public/env-check',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
   id: '/lovable/email/suppression',
   path: '/lovable/email/suppression',
@@ -291,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/app/courses': typeof AuthenticatedAppCoursesRouteWithChildren
   '/app/discord': typeof AuthenticatedAppDiscordRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/app/': typeof AuthenticatedAppIndexRoute
@@ -328,6 +335,7 @@ export interface FileRoutesByTo {
   '/admin/waitlist': typeof AuthenticatedAdminWaitlistRoute
   '/app/discord': typeof AuthenticatedAppDiscordRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/app': typeof AuthenticatedAppIndexRoute
@@ -371,6 +379,7 @@ export interface FileRoutesById {
   '/_authenticated/app/courses': typeof AuthenticatedAppCoursesRouteWithChildren
   '/_authenticated/app/discord': typeof AuthenticatedAppDiscordRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/api/public/env-check': typeof ApiPublicEnvCheckRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
@@ -414,6 +423,7 @@ export interface FileRouteTypes {
     | '/app/courses'
     | '/app/discord'
     | '/app/settings'
+    | '/api/public/env-check'
     | '/lovable/email/suppression'
     | '/admin/'
     | '/app/'
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/admin/waitlist'
     | '/app/discord'
     | '/app/settings'
+    | '/api/public/env-check'
     | '/lovable/email/suppression'
     | '/admin'
     | '/app'
@@ -493,6 +504,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/courses'
     | '/_authenticated/app/discord'
     | '/_authenticated/app/settings'
+    | '/api/public/env-check'
     | '/lovable/email/suppression'
     | '/_authenticated/admin/'
     | '/_authenticated/app/'
@@ -520,6 +532,7 @@ export interface RootRouteChildren {
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   RedpillInviteRoute: typeof RedpillInviteRoute
+  ApiPublicEnvCheckRoute: typeof ApiPublicEnvCheckRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
   ApiPublicCronSubscriptionSweepRoute: typeof ApiPublicCronSubscriptionSweepRoute
   ApiPublicDiscordCallbackRoute: typeof ApiPublicDiscordCallbackRoute
@@ -715,6 +728,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/settings'
       preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
       parentRoute: typeof AuthenticatedAppRouteRoute
+    }
+    '/api/public/env-check': {
+      id: '/api/public/env-check'
+      path: '/api/public/env-check'
+      fullPath: '/api/public/env-check'
+      preLoaderRoute: typeof ApiPublicEnvCheckRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/lovable/email/suppression': {
       id: '/lovable/email/suppression'
@@ -934,6 +954,7 @@ const rootRouteChildren: RootRouteChildren = {
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   RedpillInviteRoute: RedpillInviteRoute,
+  ApiPublicEnvCheckRoute: ApiPublicEnvCheckRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
   ApiPublicCronSubscriptionSweepRoute: ApiPublicCronSubscriptionSweepRoute,
   ApiPublicDiscordCallbackRoute: ApiPublicDiscordCallbackRoute,

@@ -133,7 +133,7 @@ function Enroll() {
           amount,
           currency: "INR",
           name: "Blueprint · Red Pill",
-          description: "One month live mentorship",
+          description: `One month live mentorship: ${formatRupees(RED_PILL_BASE_PAISE)} + ${formatRupees(gstOn(RED_PILL_BASE_PAISE))} GST (18%)`,
           theme: { color: "#D9423C" },
           prefill: {
             email: data?.profile?.email ?? undefined,

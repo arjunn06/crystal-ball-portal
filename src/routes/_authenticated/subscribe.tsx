@@ -117,7 +117,7 @@ function Subscribe() {
           key: keyId,
           subscription_id: subscriptionId,
           name: "Blueprint · Blue Pill",
-          description: "Monthly membership",
+          description: `Monthly membership: ${formatRupees(BLUE_PILL_BASE_PAISE)} + ${formatRupees(gstOn(BLUE_PILL_BASE_PAISE))} GST (18%)`,
           theme: { color: "#3F7BEA" },
           prefill: {
             email: data?.profile?.email ?? undefined,

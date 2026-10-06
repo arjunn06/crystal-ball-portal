@@ -1,3 +1,4 @@
+import { RED_PILL_BASE_PAISE, RED_PILL_TOTAL_PAISE, gstOn, formatRupees } from "@/lib/pricing";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Check } from "@phosphor-icons/react";
 import { CheckoutShell } from "@/components/site/checkout-shell";
@@ -60,7 +61,12 @@ function InvitePage() {
     >
       <h2 className="text-sm font-medium text-muted-foreground">Waitlist priority slot</h2>
       <p className="mt-2 font-display tabular text-6xl font-extrabold leading-none tracking-[-0.04em]">
-        ₹2,999
+        {formatRupees(RED_PILL_BASE_PAISE)}
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        + {formatRupees(gstOn(RED_PILL_BASE_PAISE))} GST (18%) ={" "}
+        <span className="font-semibold text-foreground">{formatRupees(RED_PILL_TOTAL_PAISE)}</span>{" "}
+        total
       </p>
       <p className="mt-2 text-sm text-muted-foreground">One month, live. One-time payment.</p>
       <ul className="mt-7 space-y-3">
@@ -72,7 +78,7 @@ function InvitePage() {
         ))}
       </ul>
       <button type="button" onClick={continueToPayment} className={`${btnPrimary} mt-8 w-full`}>
-        Complete payment for ₹2,999
+        Complete payment for {formatRupees(RED_PILL_TOTAL_PAISE)}
       </button>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         Limited seats. Closes once slots are filled.

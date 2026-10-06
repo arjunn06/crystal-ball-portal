@@ -10,6 +10,7 @@ import { validatePromoCode } from "@/lib/promos.functions";
 import { getAccountOverview } from "@/lib/account.functions";
 import { useEffect, useState } from "react";
 import { openRazorpay } from "@/lib/razorpay-checkout";
+import { BLUE_PILL_BASE_PAISE, BLUE_PILL_TOTAL_PAISE, gstOn, formatRupees } from "@/lib/pricing";
 import { toast } from "sonner";
 import { Check, ArrowRight, Tag, X as XIcon, CircleNotch } from "@phosphor-icons/react";
 import { CheckoutShell } from "@/components/site/checkout-shell";
@@ -180,12 +181,16 @@ function Subscribe() {
     >
       <h2 className="text-sm font-medium text-muted-foreground">The Blue Pill, monthly</h2>
       <p className="mt-2 font-display tabular text-6xl font-extrabold leading-none tracking-[-0.04em]">
-        ₹499
+        {formatRupees(BLUE_PILL_BASE_PAISE)}
         <span className="ml-2 font-sans text-base font-normal tracking-normal text-muted-foreground">
           /month
         </span>
       </p>
-      <p className="mt-2 text-sm text-muted-foreground">Billed monthly through Razorpay.</p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        + {formatRupees(gstOn(BLUE_PILL_BASE_PAISE))} GST (18%) ={" "}
+        <span className="font-semibold text-foreground">{formatRupees(BLUE_PILL_TOTAL_PAISE)}</span>{" "}
+        per month. Billed monthly through Razorpay.
+      </p>
 
       <ul className="mt-7 space-y-3">
         {[
@@ -217,7 +222,7 @@ function Subscribe() {
                 ? `Subscribe, ${applied.discount_value}% off first month`
                 : applied?.discount_type === "amount_off_first"
                   ? `Subscribe, ₹${applied.discount_value} off first month`
-                  : "Subscribe for ₹499/month"}
+                  : `Subscribe for ${formatRupees(BLUE_PILL_TOTAL_PAISE)}/month`}
             <ArrowRight className="size-4" weight="bold" />
           </>
         )}

@@ -24,12 +24,13 @@ export const Route = createFileRoute("/bluepill")({
       {
         name: "description",
         content:
-          "The private community for IFVG traders. ₹499/month for every recorded session, live NY calls, and the members-only Discord.",
+          "The private community for IFVG traders. ₹499/month + taxes for every recorded session, live NY calls, and the members-only Discord.",
       },
       { property: "og:title", content: TITLE },
       {
         property: "og:description",
-        content: "₹499/month. Every recorded session, live NY calls, and the members-only Discord.",
+        content:
+          "₹499/month + taxes. Every recorded session, live NY calls, and the members-only Discord.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://blueprint.ifvg.in/bluepill" },
@@ -38,7 +39,8 @@ export const Route = createFileRoute("/bluepill")({
       { name: "twitter:title", content: TITLE },
       {
         name: "twitter:description",
-        content: "₹499/month. Every recorded session, live NY calls, and the members-only Discord.",
+        content:
+          "₹499/month + taxes. Every recorded session, live NY calls, and the members-only Discord.",
       },
       { name: "twitter:image", content: "https://blueprint.ifvg.in/og-bluepill.jpg" },
     ],
@@ -79,7 +81,7 @@ function BluePill() {
       <SiteNav
         cta={
           <Link to="/auth" className={`${btnPrimary} !h-10 !px-4 !text-sm`}>
-            Join<span className="hidden sm:inline">&nbsp;for ₹499/month</span>
+            Join<span className="hidden sm:inline">&nbsp;for ₹499/month + taxes</span>
           </Link>
         }
       />
@@ -92,7 +94,7 @@ function BluePill() {
       <SiteFooter />
       <MobileCtaBar sentinel={heroEnd}>
         <Link to="/auth" className={`${btnPrimary} w-full`}>
-          Join for ₹499/month
+          Join for ₹499/month + taxes
         </Link>
       </MobileCtaBar>
     </SiteShell>
@@ -121,12 +123,12 @@ function Hero({ endRef }: { endRef: React.RefObject<HTMLDivElement | null> }) {
           <Rise i={1}>
             <p className="mt-6 max-w-[46ch] text-lg leading-relaxed text-muted-foreground">
               Every Red Pill class recording, uncut, plus live NY streams and trade alerts. ₹499 a
-              month.
+              month + taxes.
             </p>
           </Rise>
           <Rise i={2} className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-4">
             <Link to="/auth" className={btnPrimary}>
-              Get access for ₹499/month
+              Get access for ₹499/month + taxes
               <ArrowRight className="size-4" weight="bold" />
             </Link>
             <a href="#inside" className={btnLink}>
@@ -341,7 +343,7 @@ function Pricing() {
               <p className="mt-8 font-display tabular text-6xl font-extrabold leading-none tracking-[-0.04em]">
                 ₹499
                 <span className="ml-2 font-sans text-base font-normal tracking-normal text-muted-foreground">
-                  /month
+                  /month + taxes
                 </span>
               </p>
               <p className="mt-3 text-sm text-muted-foreground">

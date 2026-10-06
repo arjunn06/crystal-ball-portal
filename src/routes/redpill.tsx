@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PRICE } from "@/components/redpill/config";
+import { PRICE_TAXES } from "@/components/redpill/config";
 import { RpNav } from "@/components/redpill/nav";
 import { RpMobileBar } from "@/components/redpill/mobile-bar";
 import { Hero, Walkthrough } from "@/components/redpill/hero";
@@ -8,7 +8,7 @@ import { Faq, Final, Join, Notes } from "@/components/redpill/buy";
 import { RP_HEAD_SCRIPT, useRpPage } from "@/components/redpill/use-rp-page";
 
 const TITLE = "The Red Pill: a live IFVG mentorship on Zoom | Blueprint by Arjun IFVG";
-const DESC = `A one-month live IFVG mentorship on Zoom. Full course in week 1, then we trade the market together. ${PRICE}, one time.`;
+const DESC = `A one-month live IFVG mentorship on Zoom. Full course in week 1, then we trade the market together. ${PRICE_TAXES}, one time.`;
 
 export const Route = createFileRoute("/redpill")({
   head: () => ({

@@ -4,8 +4,8 @@ import { supabaseAdmin } from '@/integrations/supabase/client.server'
 import { TEMPLATES } from '@/lib/email-templates/registry'
 
 const SITE_NAME = 'Arjun IFVG'
-const SENDER_DOMAIN = 'notify.blueprint.ifvg.in'
-const FROM_DOMAIN = 'notify.blueprint.ifvg.in'
+const SENDER_DOMAIN = 'blueprint.ifvg.in'
+const FROM_DOMAIN = 'blueprint.ifvg.in'
 
 function generateToken(): string {
   const bytes = new Uint8Array(32)

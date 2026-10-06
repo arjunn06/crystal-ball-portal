@@ -6,7 +6,12 @@
  * Nothing on the page may be invented: no seat counts, dates, guarantees or student numbers.
  */
 
-export const PRICE = "₹2,999";
+import { RED_PILL_BASE_PAISE, RED_PILL_TOTAL_PAISE, formatRupees, gstOn } from "@/lib/pricing";
+
+export const PRICE = formatRupees(RED_PILL_BASE_PAISE);
+/** Every price on the page carries "+ taxes": checkout adds 18% GST on top of the list price. */
+export const PRICE_TAXES = `${PRICE} + taxes`;
+export const TAX_LINE = `+ ${formatRupees(gstOn(RED_PILL_BASE_PAISE))} GST (18%) = ${formatRupees(RED_PILL_TOTAL_PAISE)} total at checkout.`;
 export const VIDEO_ID = "2fxjbw5fdsk";
 export const ENROLL_PATH = "/enroll" as const;
 
@@ -28,7 +33,7 @@ export type RpConfig = {
   scheduleLine?: string; // e.g. "Classes run Mon to Fri at 8 PM IST."
   firstSession?: string; // e.g. "Mon 2 Nov, 8:00 PM IST"
 
-  /** Exactly one of: "Inclusive of all taxes." | "No extra charges at checkout." | "Plus applicable taxes." */
+  /** Shown under the price. Built from src/lib/pricing.ts so it always matches checkout. */
   taxLine?: string;
   /** One plain sentence. Must match the Cancellation and Refund page. */
   refundLine?: string;
@@ -62,6 +67,7 @@ export const RP: RpConfig = {
   heroVariant: "default",
   weeksVariant: "default",
   noteVoice: "third",
+  taxLine: TAX_LINE,
   bluePillLink: false,
 };
 
@@ -168,12 +174,12 @@ export function buildFaq(c: RpConfig): FaqEntry[] {
     {
       id: "recurring",
       q: "Is there a recurring charge?",
-      a: `No. It is one payment of ${PRICE} on Razorpay. Nothing renews.`,
+      a: `No. It is one payment of ${PRICE_TAXES} on Razorpay. Nothing renews.`,
     },
     {
       id: "join",
       q: "How do I join?",
-      a: `Sign in with Google or an email code, pay ${PRICE} on Razorpay, then get your Red Pill role in the Discord. Session links are shared there.`,
+      a: `Sign in with Google or an email code, pay ${PRICE_TAXES} on Razorpay, then get your Red Pill role in the Discord. Session links are shared there.`,
     },
     {
       id: "advice",

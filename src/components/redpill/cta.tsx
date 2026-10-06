@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { CaretRight } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
-import { ENROLL_PATH, PRICE } from "./config";
+import { ENROLL_PATH, PRICE_TAXES } from "./config";
 
 /** The single filled button on the page. One verb, one destination. */
 export function EnrollButton({
@@ -22,7 +22,7 @@ export function EnrollButton({
       data-cta={placement}
       className={`rp-btn ${full ? "w-full max-w-[360px] m:w-auto m:min-w-[220px]" : ""} ${className}`}
     >
-      Enroll for {PRICE}
+      Enroll for {PRICE_TAXES}
     </Link>
   );
 }
@@ -44,7 +44,11 @@ export function TextLink({ href, children }: { href: string; children: ReactNode
   );
 }
 
-export function EnrollTextLink({ children = `Enroll for ${PRICE}` }: { children?: ReactNode }) {
+export function EnrollTextLink({
+  children = `Enroll for ${PRICE_TAXES}`,
+}: {
+  children?: ReactNode;
+}) {
   return (
     <Link to={ENROLL_PATH} className="rp-link">
       {children}

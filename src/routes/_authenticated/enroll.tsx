@@ -1,3 +1,4 @@
+import { RED_PILL_BASE_PAISE, RED_PILL_TOTAL_PAISE, gstOn, formatRupees } from "@/lib/pricing";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -23,12 +24,12 @@ export const Route = createFileRoute("/_authenticated/enroll")({
       {
         name: "description",
         content:
-          "Enroll in The Red Pill: one month of live IFVG training on Zoom for ₹2,999, premium Discord included.",
+          "Enroll in The Red Pill: one month of live IFVG training on Zoom for ₹2,999 + taxes, premium Discord included.",
       },
       { property: "og:title", content: "Enroll in The Red Pill | Blueprint" },
       {
         property: "og:description",
-        content: "One month, live on Zoom. ₹2,999 one-time with premium Discord access.",
+        content: "One month, live on Zoom. ₹2,999 + taxes, one-time with premium Discord access.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -200,7 +201,12 @@ function Enroll() {
     >
       <h2 className="text-sm font-medium text-muted-foreground">The Red Pill, one-time payment</h2>
       <p className="mt-2 font-display tabular text-6xl font-extrabold leading-none tracking-[-0.04em]">
-        ₹2,999
+        {formatRupees(RED_PILL_BASE_PAISE)}
+      </p>
+      <p className="mt-2 text-sm text-muted-foreground">
+        + {formatRupees(gstOn(RED_PILL_BASE_PAISE))} GST (18%) ={" "}
+        <span className="font-semibold text-foreground">{formatRupees(RED_PILL_TOTAL_PAISE)}</span>{" "}
+        total
       </p>
       <p className="mt-2 text-sm text-muted-foreground">
         Single payment through Razorpay. No recurring charge.
@@ -221,7 +227,9 @@ function Enroll() {
         disabled={mut.isPending}
         className={`${btnPrimary} mt-8 w-full`}
       >
-        {mut.isPending ? "Opening checkout" : "Complete payment for ₹2,999"}
+        {mut.isPending
+          ? "Opening checkout"
+          : `Complete payment for ${formatRupees(RED_PILL_TOTAL_PAISE)}`}
       </button>
       <p className="mt-3 text-center text-xs text-muted-foreground">
         {inviteToken ? "Priority slot from the waitlist. " : ""}Secure payment through Razorpay.

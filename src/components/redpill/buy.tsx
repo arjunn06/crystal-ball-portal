@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Check, Lock, Plus } from "@phosphor-icons/react";
 import { EnrollButton, Microline } from "./cta";
-import { PRICE, QUOTES, RP, buildFaq, futureIst } from "./config";
+import { PRICE, PRICE_TAXES, QUOTES, RP, buildFaq, futureIst } from "./config";
 import { Fn, Rv } from "./shared";
 
 /* ---------------------------------------------------------------- */
@@ -9,7 +9,7 @@ import { Fn, Rv } from "./shared";
 /* ---------------------------------------------------------------- */
 const STEPS = [
   { n: "01", t: "Sign in.", b: "Continue with Google, or get a code by email." },
-  { n: "02", t: "Pay once.", b: `${PRICE} on Razorpay. One payment, no recurring charge.` },
+  { n: "02", t: "Pay once.", b: `${PRICE_TAXES} on Razorpay. One payment, no recurring charge.` },
   {
     n: "03",
     t: "Join Discord.",
@@ -81,7 +81,7 @@ export function Join() {
                   <span style={{ fontSize: "0.7em" }}>₹</span>
                   {PRICE.slice(1)}
                 </span>
-                <span className="rp-body rp-ink2 whitespace-nowrap">one time</span>
+                <span className="rp-body rp-ink2 whitespace-nowrap">one time + taxes</span>
               </p>
               {RP.taxLine && <p className="rp-small rp-ink2 mt-2">{RP.taxLine}</p>}
               <dl className="rp-ledger mt-8">
@@ -236,7 +236,9 @@ export function Final() {
         </p>
         <div className="relative mt-8 flex w-full flex-col items-center">
           <EnrollButton placement="final" full className="m:!min-w-[260px]" />
-          <p className="rp-small rp-ink2 mt-3">{PRICE} once. One payment. No recurring charge.</p>
+          <p className="rp-small rp-ink2 mt-3">
+            {PRICE_TAXES}, once. One payment. No recurring charge.
+          </p>
           <a href="#walkthrough" className="rp-link mt-2">
             Watch the walkthrough
           </a>
@@ -282,7 +284,7 @@ export function Notes() {
     "Trade updates in the members Discord are Arjun's own trades, shared for learning. They are not recommendations. The screenshot is a real update shown to explain the format, not a record of results. Individual trades vary and losses happen.",
     "We do not recommend or endorse any broker or prop firm. You are responsible for making sure any market or platform you use is permitted for you under the laws that apply to you.",
     `Messages are excerpts from the members Discord, in the students' own words. Trimmed parts are marked with "...". Experiences are individual and do not predict your results.${hasGloss ? " Translations of Tamil-English messages are labelled." : ""}`,
-    `Payments are processed by Razorpay. The Red Pill is a single one-time charge of ${PRICE} with no subscription.`,
+    `Payments are processed by Razorpay. The Red Pill is a single one-time charge of ${PRICE} plus 18% GST, with no subscription.`,
   ];
   return (
     <footer id="notes" className="rp-band rp-pad-bar pt-16 m:pt-20">

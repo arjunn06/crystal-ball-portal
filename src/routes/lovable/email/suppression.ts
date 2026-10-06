@@ -1,9 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
-import { WebhookError, verifyWebhookRequest } from '@lovable.dev/webhooks-js'
+import { verifyStandardWebhook, WebhookVerificationError } from '@/lib/email/provider.server'
 import { createFileRoute } from '@tanstack/react-router'
 
-// Suppression event payload sent by the Go API when Mailgun reports
-// a bounce, complaint, or unsubscribe.
+// Resend webhook (Svix-signed). Add an endpoint in Resend -> Webhooks for
+// email.bounced and email.complained pointing at /lovable/email/suppression and
+// store its signing secret in RESEND_WEBHOOK_SECRET.
 interface SuppressionPayload {
   email: string
   reason: 'bounce' | 'complaint' | 'unsubscribe'
@@ -13,16 +14,24 @@ interface SuppressionPayload {
   retry_count: number
 }
 
-function parseSuppressionPayload(body: string): SuppressionPayload {
-  const parsed = JSON.parse(body)
-  if (!parsed.data) {
-    throw new Error('Missing data field in payload')
+// Returns null for events we don't act on (delivered, opened, transient bounces...).
+function parseSuppressionPayload(body: string): SuppressionPayload | null {
+  const evt = JSON.parse(body)
+  const reason =
+    evt.type === 'email.bounced' ? 'bounce' : evt.type === 'email.complained' ? 'complaint' : null
+  if (!reason) return null
+  // Only permanent bounces should suppress an address.
+  if (reason === 'bounce' && evt.data?.bounce?.type && evt.data.bounce.type !== 'Permanent') return null
+  const email = Array.isArray(evt.data?.to) ? evt.data.to[0] : null
+  if (!email) throw new Error('Missing recipient')
+  return {
+    email,
+    reason,
+    message_id: evt.data?.email_id,
+    metadata: { provider: 'resend', event: evt.type, bounce: evt.data?.bounce ?? null },
+    is_retry: false,
+    retry_count: 0,
   }
-  const data = parsed.data as SuppressionPayload
-  if (!data.email || !data.reason) {
-    throw new Error('Missing required fields: email, reason')
-  }
-  return data
 }
 
 function mapReasonToStatus(
@@ -55,48 +64,27 @@ export const Route = createFileRoute("/lovable/email/suppression")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apiKey = process.env['LOVABLE_API_KEY']
+        const secret = process.env['RESEND_WEBHOOK_SECRET']
         const supabaseUrl = import.meta.env['VITE_SUPABASE_URL']
         const supabaseServiceKey = process.env['SUPABASE_SERVICE_ROLE_KEY']
 
-        if (!apiKey || !supabaseUrl || !supabaseServiceKey) {
+        if (!secret || !supabaseUrl || !supabaseServiceKey) {
           console.error('Missing required environment variables')
           return Response.json({ error: 'Server configuration error' }, { status: 500 })
         }
 
-        // Verify HMAC signature using the Lovable API Key (same as auth-email-hook)
-        let payload: SuppressionPayload
+        let payload: SuppressionPayload | null
         try {
-          const verified = await verifyWebhookRequest({
-            req: request,
-            secret: apiKey,
-            parser: parseSuppressionPayload,
-          })
-          payload = verified.payload
+          payload = parseSuppressionPayload(await verifyStandardWebhook(request, secret))
         } catch (error) {
-          if (error instanceof WebhookError) {
-            switch (error.code) {
-              case 'invalid_signature':
-                console.error('Invalid webhook signature')
-                return Response.json({ error: 'Invalid signature' }, { status: 401 })
-              case 'stale_timestamp':
-                console.error('Stale webhook timestamp')
-                return Response.json({ error: 'Stale timestamp' }, { status: 401 })
-              case 'invalid_payload':
-              case 'invalid_json':
-                console.error('Invalid payload', { code: error.code })
-                return Response.json({ error: 'Invalid payload' }, { status: 400 })
-              default:
-                console.error('Webhook verification failed', {
-                  code: error.code,
-                  message: error.message,
-                })
-                return Response.json({ error: 'Verification failed' }, { status: 401 })
-            }
+          if (error instanceof WebhookVerificationError) {
+            console.error('Invalid webhook signature', { code: error.message })
+            return Response.json({ error: 'Invalid signature' }, { status: 401 })
           }
-          console.error('Unexpected error during verification', { error })
-          return Response.json({ error: 'Internal error' }, { status: 500 })
+          console.error('Invalid payload', { error })
+          return Response.json({ error: 'Invalid payload' }, { status: 400 })
         }
+        if (!payload) return Response.json({ success: true, ignored: true })
 
         const supabase = createClient(supabaseUrl, supabaseServiceKey)
         const normalizedEmail = payload.email.toLowerCase()

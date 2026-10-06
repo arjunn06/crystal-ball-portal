@@ -1,12 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  cancelMySubscription,
-  getAccountOverview,
-  updateMyProfile,
-} from "@/lib/account.functions";
-import { PageHeader, Card, formatINR } from "@/components/app/sidebar";
+import { cancelMySubscription, getAccountOverview, updateMyProfile } from "@/lib/account.functions";
+import { Card, formatINR } from "@/components/app/sidebar";
+import { MemberHeader } from "@/components/app/ui-kit";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,8 +37,7 @@ function SettingsPage() {
   }, [data?.profile]);
 
   const saveMut = useMutation({
-    mutationFn: (v: { full_name?: string | null; avatar_url?: string | null }) =>
-      save({ data: v }),
+    mutationFn: (v: { full_name?: string | null; avatar_url?: string | null }) => save({ data: v }),
     onSuccess: () => {
       toast.success("Profile updated.");
       qc.invalidateQueries({ queryKey: ["account", "overview"] });
@@ -99,36 +95,35 @@ function SettingsPage() {
   const willCancel = !!sub?.cancelled_at;
 
   return (
-    <>
-      <PageHeader title="Settings" description="Manage your account and subscription." />
+    <div>
+      <MemberHeader title="Settings" description="Manage your account and subscription." />
 
-      <div className="space-y-6 max-w-2xl">
-        <Card className="p-6">
-          <h2 className="font-semibold tracking-tight">Profile</h2>
+      <div className="max-w-2xl space-y-6">
+        <Card className="p-7">
+          <h2 className="font-display text-xl font-bold tracking-tight">Profile</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Displayed across your account.</p>
           <div className="mt-5 space-y-4">
             <div>
-              <Label htmlFor="email" className="text-xs text-muted-foreground">Email</Label>
-              <Input
-                id="email"
-                value={data?.profile?.email ?? ""}
-                disabled
-                className="mt-1.5 bg-surface border-border h-10 rounded-lg"
-              />
+              <Label htmlFor="email" className="text-xs text-muted-foreground">
+                Email
+              </Label>
+              <Input id="email" value={data?.profile?.email ?? ""} disabled className="mt-1.5" />
             </div>
             <div>
-              <Label htmlFor="name" className="text-xs text-muted-foreground">Full name</Label>
+              <Label htmlFor="name" className="text-xs text-muted-foreground">
+                Full name
+              </Label>
               <Input
                 id="name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="mt-1.5 bg-surface border-border h-10 rounded-lg"
+                className="mt-1.5"
               />
             </div>
             <div>
               <Label className="text-xs text-muted-foreground">Avatar</Label>
               <div className="mt-1.5 flex items-center gap-4">
-                <div className="size-16 rounded-full overflow-hidden bg-surface border border-border flex items-center justify-center shrink-0">
+                <div className="size-16 rounded-2xl overflow-hidden bg-surface-2 border border-border flex items-center justify-center shrink-0">
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
@@ -142,7 +137,7 @@ function SettingsPage() {
                     variant="outline"
                     onClick={() => document.getElementById("avatar-file")?.click()}
                     disabled={uploading}
-                    className="rounded-lg h-9 border-border bg-surface hover:bg-hover"
+                    className="h-9"
                   >
                     <Upload className="size-4 mr-2" />
                     {uploading ? "Uploading…" : avatarUrl ? "Change" : "Upload image"}
@@ -180,7 +175,7 @@ function SettingsPage() {
               <Button
                 onClick={() => saveMut.mutate({ full_name: fullName, avatar_url: avatarUrl })}
                 disabled={saveMut.isPending}
-                className="rounded-lg h-10"
+                className="h-10"
               >
                 {saveMut.isPending ? "Saving…" : "Save changes"}
               </Button>
@@ -188,17 +183,27 @@ function SettingsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
-          <h2 className="font-semibold tracking-tight">Subscription</h2>
+        <Card className="p-7">
+          <h2 className="font-display text-xl font-bold tracking-tight">Subscription</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             <Metric label="Plan" value="Blue Pill" />
             <Metric
               label="Status"
-              value={sub?.status === "active" ? (willCancel ? "Cancels soon" : "Active") : (sub?.status ?? "—")}
+              value={
+                sub?.status === "active"
+                  ? willCancel
+                    ? "Cancels soon"
+                    : "Active"
+                  : (sub?.status ?? "—")
+              }
             />
             <Metric
               label={willCancel ? "Ends" : "Renews"}
-              value={sub?.current_period_end ? new Date(sub.current_period_end).toLocaleDateString() : "—"}
+              value={
+                sub?.current_period_end
+                  ? new Date(sub.current_period_end).toLocaleDateString()
+                  : "—"
+              }
             />
           </div>
           <div className="mt-4 text-xs text-muted-foreground">
@@ -214,14 +219,15 @@ function SettingsPage() {
                 onClick={() =>
                   confirm({
                     title: "Cancel membership?",
-                    description: "Your access continues until the end of the current billing period.",
+                    description:
+                      "Your access continues until the end of the current billing period.",
                     confirmLabel: "Cancel membership",
                     cancelLabel: "Keep it",
                     destructive: true,
                   }).then((ok) => ok && cancelMut.mutate())
                 }
                 disabled={cancelMut.isPending}
-                className="rounded-lg h-9 border-border bg-surface hover:bg-hover"
+                className="h-9"
               >
                 Cancel membership
               </Button>
@@ -234,29 +240,25 @@ function SettingsPage() {
           )}
         </Card>
 
-        <Card className="p-6">
-          <h2 className="font-semibold tracking-tight">Session</h2>
+        <Card className="p-7">
+          <h2 className="font-display text-xl font-bold tracking-tight">Session</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Sign out of this browser.</p>
           <div className="mt-4">
-            <Button
-              variant="outline"
-              onClick={signOut}
-              className="rounded-lg h-10 border-border bg-surface hover:bg-hover"
-            >
+            <Button variant="outline" onClick={signOut} className="">
               <LogOut className="size-4 mr-2" /> Sign out
             </Button>
           </div>
         </Card>
       </div>
-    </>
+    </div>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-border/70 bg-surface-2 px-4 py-3">
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      <p className="mt-1 font-semibold text-sm">{value}</p>
+    <div className="rounded-xl bg-surface-2 px-4 py-4">
+      <p className="text-xs text-muted-foreground">{label}</p>
+      <p className="mt-1.5 font-display text-lg font-bold tracking-tight">{value}</p>
     </div>
   );
 }

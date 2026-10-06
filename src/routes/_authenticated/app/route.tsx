@@ -3,9 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect } from "react";
 import { getAccountOverview } from "@/lib/account.functions";
-import { AppShell, AppSidebar, UserAvatar, type NavItem } from "@/components/app/sidebar";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { SignOutButton } from "@/components/app/sign-out-button";
+import { type NavItem } from "@/components/app/sidebar";
+import { MemberShell } from "@/components/app/ui-kit";
 import { LayoutDashboard, BookOpen, Settings, Shield } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 import { getIntent } from "@/lib/intent";
@@ -65,34 +64,8 @@ function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <AppSidebar
-        items={items}
-        brand={{ label: "Blueprint", sub: "Member area" }}
-        user={user}
-        footer={
-          <div className="space-y-2">
-            <div className="flex items-center gap-2.5 px-2 py-1.5">
-              <UserAvatar user={user} size={32} />
-              <div className="min-w-0">
-                <p className="text-xs font-medium truncate">
-                  {data?.profile?.full_name ?? "Member"}
-                </p>
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {data?.profile?.email}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex-1"><SignOutButton /></div>
-              <ThemeToggle />
-            </div>
-          </div>
-        }
-      />
-      <AppShell>
-        <Outlet />
-      </AppShell>
-    </div>
+    <MemberShell items={items} user={user} isAdmin={data?.isAdmin}>
+      <Outlet />
+    </MemberShell>
   );
 }

@@ -3,120 +3,211 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getAccountOverview } from "@/lib/account.functions";
 import { listCourses } from "@/lib/courses.functions";
-import { PageHeader, Card, formatDuration } from "@/components/app/sidebar";
-import { ArrowRight, BookOpen, Play } from "lucide-react";
+import { getMyClaim } from "@/lib/discord.functions";
+import { LogoIcon } from "@/components/logo-icon";
+import { formatDuration } from "@/components/app/sidebar";
+import {
+  EmptyState,
+  ProgressBar,
+  SkeletonBlock,
+  Stat,
+  StatStrip,
+  StatusPill,
+} from "@/components/app/ui-kit";
+import { ArrowRight, BookOpen, Check, Play } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/app/")({
   component: Home,
 });
 
+const dateFmt = new Intl.DateTimeFormat("en-IN", {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+});
+
 function Home() {
   const acct = useServerFn(getAccountOverview);
   const list = useServerFn(listCourses);
+  const claim = useServerFn(getMyClaim);
   const { data: overview } = useQuery({
     queryKey: ["account", "overview"],
     queryFn: () => acct(),
   });
-  const { data: courses } = useQuery({
+  const { data: courses, isLoading: coursesLoading } = useQuery({
     queryKey: ["courses", "list"],
     queryFn: () => list(),
     enabled: overview?.isSubscribed,
   });
+  const { data: discord } = useQuery({ queryKey: ["discord", "claim"], queryFn: () => claim() });
 
   const firstName = overview?.profile?.full_name?.split(" ")[0];
-  const totalDone = (courses ?? []).reduce((s, c) => s + c.completedCount, 0);
-  const totalLessons = (courses ?? []).reduce((s, c) => s + c.lessonCount, 0);
-  const nextCourse = (courses ?? []).find((c) => c.completedCount < c.lessonCount) ?? courses?.[0];
+  const all = courses ?? [];
+  const totalDone = all.reduce((s, c) => s + c.completedCount, 0);
+  const totalLessons = all.reduce((s, c) => s + c.lessonCount, 0);
+  const next = all.find((c) => c.completedCount < c.lessonCount) ?? all[0];
+  const sub = overview?.subscription;
+  const active = sub?.status === "active";
+  const willCancel = !!sub?.cancelled_at;
+  const roleActive = discord?.status === "assigned";
 
   return (
-    <>
-      <PageHeader
-        title={`Welcome${firstName ? `, ${firstName}` : ""}.`}
-        description="Your library and role, all in one place."
-      />
+    <div className="space-y-14">
+      <header>
+        <h1 className="font-display text-4xl font-extrabold leading-[1.05] tracking-[-0.04em] md:text-[3.4rem]">
+          {firstName ? `Welcome back, ${firstName}.` : "Welcome back."}
+        </h1>
+        <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-muted-foreground">
+          Your library, progress and membership in one place.
+        </p>
+      </header>
 
-      <div className="grid gap-4 sm:grid-cols-3 mb-8">
-        <StatCard label="Membership" value={overview?.subscription?.status === "active" ? "Active" : "—"} sub={overview?.subscription?.current_period_end ? `Renews ${new Date(overview.subscription.current_period_end).toLocaleDateString()}` : undefined} />
-        <StatCard label="Courses" value={String(courses?.length ?? 0)} sub={`${courses?.reduce((s, c) => s + c.moduleCount, 0) ?? 0} modules · ${totalLessons} lessons`} />
-        <StatCard label="Progress" value={`${totalDone}/${totalLessons}`} sub="Lessons completed" />
-      </div>
-
-      {nextCourse && (
-        <Card className="mb-8 p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="size-11 rounded-lg bg-primary/15 border border-primary/30 grid place-items-center text-primary shrink-0">
-              <Play className="size-4 fill-current" />
+      {/* Continue learning */}
+      {coursesLoading || !overview ? (
+        <SkeletonBlock className="h-[300px]" />
+      ) : next ? (
+        <Link
+          to="/app/courses/$slug"
+          params={{ slug: next.slug }}
+          className="group grid overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-foreground/25 md:grid-cols-[1.15fr_1fr]"
+        >
+          <div className="relative aspect-video overflow-hidden bg-surface-2 md:aspect-auto md:min-h-[300px]">
+            {next.cover_url ? (
+              <img
+                src={next.cover_url}
+                alt=""
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-[radial-gradient(520px_320px_at_20%_0%,hsl(214_80%_50%/0.32),transparent_70%),linear-gradient(180deg,hsl(214_24%_12%),var(--surface))]">
+                <LogoIcon className="absolute -bottom-6 -right-4 size-40 text-foreground/[0.06]" />
+              </div>
+            )}
+            <span className="absolute inset-0 grid place-items-center">
+              <span className="grid size-16 place-items-center rounded-full bg-background/80 text-foreground backdrop-blur transition-transform duration-300 group-hover:scale-110">
+                <Play className="size-6 translate-x-0.5 fill-current" />
+              </span>
+            </span>
+          </div>
+          <div className="flex flex-col justify-between gap-10 p-7 md:p-9">
+            <div>
+              <p className="text-sm text-muted-foreground">Continue learning</p>
+              <h2 className="mt-3 font-display text-2xl font-extrabold leading-tight tracking-[-0.03em] md:text-[1.9rem]">
+                {next.title}
+              </h2>
+              {next.summary && (
+                <p className="mt-3 line-clamp-2 text-[15px] leading-relaxed text-muted-foreground">
+                  {next.summary}
+                </p>
+              )}
             </div>
-            <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">Continue where you left off</p>
-              <p className="mt-0.5 font-semibold truncate">{nextCourse.title}</p>
-              <p className="text-xs text-muted-foreground">
-                {nextCourse.completedCount}/{nextCourse.lessonCount} lessons · {formatDuration(nextCourse.totalDurationSeconds)}
-              </p>
+            <div>
+              <div className="mb-2.5 flex items-center justify-between text-sm">
+                <span className="text-muted-foreground tabular-nums">
+                  {next.completedCount} of {next.lessonCount} lessons
+                </span>
+                <span className="font-medium tabular-nums">
+                  {next.lessonCount
+                    ? Math.round((next.completedCount / next.lessonCount) * 100)
+                    : 0}
+                  %
+                </span>
+              </div>
+              <ProgressBar
+                value={next.lessonCount ? (next.completedCount / next.lessonCount) * 100 : 0}
+              />
+              <div className="mt-6 flex items-center justify-between gap-4">
+                <span className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 text-sm font-semibold text-primary-foreground">
+                  {next.completedCount > 0 ? "Resume" : "Start"}
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {formatDuration(next.totalDurationSeconds)}
+                </span>
+              </div>
             </div>
           </div>
-          <Link to="/app/courses/$slug" params={{ slug: nextCourse.slug }}>
-            <button className="inline-flex items-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-4 h-10 text-sm font-medium hover:bg-primary/90 transition-colors whitespace-nowrap">
-              Resume <ArrowRight className="size-4" />
-            </button>
-          </Link>
-        </Card>
+        </Link>
+      ) : (
+        <EmptyState
+          icon={<BookOpen className="size-5" />}
+          title="No courses published yet"
+          body="New sessions appear here as soon as they go live."
+        />
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <QuickLink
-          to="/app/courses"
-          icon={<BookOpen className="size-4" />}
-          title="Browse courses"
-          description="All published sessions and modules."
+      {/* Figures */}
+      <StatStrip className="sm:grid-cols-3">
+        <Stat
+          label="Membership"
+          value={
+            overview ? (
+              <span className="inline-flex items-center gap-3">
+                {active ? (willCancel ? "Ending" : "Active") : "Inactive"}
+                {active && !willCancel && <StatusPill tone="blue">Blue Pill</StatusPill>}
+              </span>
+            ) : (
+              "-"
+            )
+          }
+          sub={
+            sub?.current_period_end
+              ? `${willCancel ? "Ends" : "Renews"} ${dateFmt.format(new Date(sub.current_period_end))}`
+              : undefined
+          }
         />
-        <QuickLink
-          to="/app/discord"
-          icon={<DiscordIcon className="size-4" />}
-          title="Claim your Discord role"
-          description="Get the members-only role and access the private server."
+        <Stat
+          label="Lessons completed"
+          value={
+            <>
+              {totalDone}
+              <span className="text-muted-foreground"> / {totalLessons}</span>
+            </>
+          }
+          sub={
+            totalLessons
+              ? `${Math.round((totalDone / totalLessons) * 100)}% of the library`
+              : undefined
+          }
         />
-      </div>
-    </>
-  );
-}
+        <Stat
+          label="Courses"
+          value={all.length}
+          sub={`${all.reduce((s, c) => s + c.moduleCount, 0)} modules`}
+        />
+      </StatStrip>
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <Card className="p-5">
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight">{value}</p>
-      {sub && <p className="mt-1 text-xs text-muted-foreground truncate">{sub}</p>}
-    </Card>
-  );
-}
-
-function QuickLink({
-  to,
-  icon,
-  title,
-  description,
-}: {
-  to: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <Link to={to as any}>
-      <Card className="p-5 card-hover group flex items-start justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="size-9 rounded-lg bg-surface-2 border border-border grid place-items-center text-primary">
-            {icon}
+      {/* Discord */}
+      <section
+        aria-labelledby="discord-heading"
+        className="grid items-center gap-6 rounded-2xl border border-border bg-surface p-7 md:grid-cols-[auto_1fr_auto] md:p-8"
+      >
+        <span className="grid size-14 place-items-center rounded-xl bg-[#5865F2]/15 text-[#8e99ff]">
+          <DiscordIcon className="size-7" />
+        </span>
+        <div>
+          <div className="flex flex-wrap items-center gap-3">
+            <h2 id="discord-heading" className="font-display text-xl font-bold tracking-tight">
+              {roleActive ? "Your Discord role is active" : "Claim your Discord role"}
+            </h2>
+            {roleActive && (
+              <StatusPill tone="success">
+                <Check className="size-3.5" /> Connected
+              </StatusPill>
+            )}
           </div>
-          <div>
-            <p className="font-semibold text-sm">{title}</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
-          </div>
+          <p className="mt-1.5 max-w-xl text-[15px] leading-relaxed text-muted-foreground">
+            {roleActive
+              ? "You can see the members channels, trade alerts and live streams."
+              : "Link your account to unlock the members channels, trade alerts and live streams."}
+          </p>
         </div>
-        <ArrowRight className="size-4 text-muted-foreground group-hover:text-foreground transition-colors mt-1" />
-      </Card>
-    </Link>
+        <Button asChild variant={roleActive ? "outline" : "default"} className="h-11 px-5">
+          <Link to="/app/discord">{roleActive ? "Manage" : "Connect Discord"}</Link>
+        </Button>
+      </section>
+    </div>
   );
 }

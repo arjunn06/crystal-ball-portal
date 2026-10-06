@@ -1,25 +1,32 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { adminMetrics } from "@/lib/admin.functions";
 import { Card, formatINR } from "@/components/app/sidebar";
 import { Sparkline } from "@/components/app/sparkline";
-import { Bell, Wallet, TrendingUp, Users, BookOpen, Repeat, ArrowUpRight } from "lucide-react";
+import { SkeletonBlock, Stat, StatStrip } from "@/components/app/ui-kit";
+import { ArrowRight, ArrowUpRight, BookOpen, ClipboardList, Ticket, Users } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: AdminHome,
 });
+
+const dateFmt = new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" });
 
 function AdminHome() {
   const fn = useServerFn(adminMetrics);
   const { data, isLoading } = useQuery({ queryKey: ["admin", "metrics"], queryFn: () => fn() });
 
   if (isLoading || !data) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>;
+    return (
+      <div className="space-y-6">
+        <SkeletonBlock className="h-12 w-64" />
+        <SkeletonBlock className="h-[340px]" />
+        <SkeletonBlock className="h-32" />
+      </div>
+    );
   }
 
-  const now = new Date();
-  const timeLabel = now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   const todayRev = data.todayRevenuePaise;
   const yesterdayRev = data.yesterdayRevenuePaise;
   const delta =
@@ -28,217 +35,174 @@ function AdminHome() {
         ? 100
         : 0
       : Math.round(((todayRev - yesterdayRev) / yesterdayRev) * 100);
+  const sum = (a: number[]) => a.reduce((s, v) => s + v, 0);
 
   return (
-    <>
-      {/* TODAY */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold tracking-tight">Today</h2>
-        <button className="size-8 grid place-items-center rounded-lg border border-border/70 text-muted-foreground hover:text-foreground">
-          <Bell className="size-4" />
-        </button>
-      </div>
+    <div className="space-y-12">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-3xl font-extrabold tracking-[-0.035em] md:text-[2.4rem] md:leading-[1.05]">
+            Overview
+          </h1>
+          <p className="mt-3 text-[15px] text-muted-foreground">
+            How the community is doing, updated live.
+          </p>
+        </div>
+        <span className="inline-flex h-9 items-center rounded-lg border border-border px-3 text-sm text-muted-foreground">
+          Last 30 days
+        </span>
+      </header>
 
-      <div className="grid gap-4 lg:grid-cols-[1fr_320px] mb-10">
-        <Card className="p-6">
-          <div className="flex items-start gap-10">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-muted-foreground">Gross revenue</p>
-                <DeltaPill value={delta} />
-              </div>
-              <p className="mt-2 text-3xl font-semibold tracking-tight">
+      {/* Revenue */}
+      <Card className="overflow-hidden">
+        <div className="grid gap-8 p-7 md:grid-cols-[1fr_auto] md:p-9">
+          <div>
+            <p className="text-sm text-muted-foreground">Revenue today</p>
+            <div className="mt-3 flex flex-wrap items-center gap-4">
+              <p className="font-display text-5xl font-extrabold tracking-[-0.04em] tabular-nums md:text-6xl">
                 {formatINR(todayRev)}
               </p>
-              <p className="mt-1 text-xs text-muted-foreground">{timeLabel}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Yesterday</p>
-              <p className="mt-2 text-3xl font-semibold tracking-tight">
-                {formatINR(yesterdayRev)}
-              </p>
+              <Delta value={delta} />
             </div>
           </div>
-          <div className="mt-6 h-32">
-            <Sparkline
-              data={data.series.revenue}
-              width={800}
-              height={128}
-              className="w-full h-full"
-              fill="currentColor"
-              showAxis
-            />
+          <div className="md:text-right">
+            <p className="text-sm text-muted-foreground">Yesterday</p>
+            <p className="mt-3 font-display text-3xl font-bold tracking-[-0.03em] tabular-nums text-muted-foreground">
+              {formatINR(yesterdayRev)}
+            </p>
           </div>
-          <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+        </div>
+        <div className="border-t border-border bg-surface-2/40 px-2 pt-6 text-foreground">
+          <Sparkline
+            data={data.series.revenue}
+            width={900}
+            height={150}
+            className="h-36 w-full"
+            fill="currentColor"
+            showAxis
+          />
+          <div className="flex justify-between px-5 pb-4 pt-2 text-xs text-muted-foreground">
             <span>30 days ago</span>
             <span>Today</span>
           </div>
+        </div>
+      </Card>
+
+      {/* Key figures */}
+      <StatStrip className="sm:grid-cols-2 lg:grid-cols-4 lg:divide-y-0 [&>div]:border-border sm:[&>div:nth-child(n+3)]:border-t lg:[&>div:nth-child(n+3)]:border-t-0">
+        <Stat
+          label="Monthly recurring"
+          value={formatINR(data.mrrPaise)}
+          sub={`${formatINR(data.arrPaise)} projected a year`}
+        />
+        <Stat
+          label="Active members"
+          value={data.activeSubs}
+          sub={`${data.totalUsers} total accounts`}
+        />
+        <Stat label="New members" value={sum(data.series.signups)} sub="Past 30 days" />
+        <Stat label="New subscriptions" value={sum(data.series.subs)} sub="Past 30 days" />
+      </StatStrip>
+
+      {/* Trends + people */}
+      <div className="grid gap-5 lg:grid-cols-[1.6fr_1fr]">
+        <Card className="p-7">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-xl font-bold tracking-tight">Recent signups</h2>
+            <Link
+              to="/admin/users"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              All users <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+          <ul className="mt-4 divide-y divide-border">
+            {data.recentSignups.map((u: any) => (
+              <li key={u.id} className="flex items-center justify-between gap-4 py-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-surface-2 text-xs font-semibold">
+                    {(u.full_name ?? u.email ?? "?").slice(0, 2).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium">{u.full_name ?? "Unnamed"}</p>
+                    <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+                  </div>
+                </div>
+                <p className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                  {dateFmt.format(new Date(u.created_at))}
+                </p>
+              </li>
+            ))}
+            {data.recentSignups.length === 0 && (
+              <li className="py-10 text-center text-sm text-muted-foreground">No signups yet.</li>
+            )}
+          </ul>
         </Card>
 
-        <div className="space-y-4">
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Total MRR</p>
-              <Wallet className="size-4 text-muted-foreground" />
-            </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">
-              {formatINR(data.mrrPaise)}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {formatINR(data.arrPaise)} projected ARR
-            </p>
+        <div className="space-y-5">
+          <Card className="p-7">
+            <h2 className="font-display text-xl font-bold tracking-tight">Shortcuts</h2>
+            <ul className="mt-4 space-y-1">
+              <Shortcut
+                to="/admin/users"
+                icon={<Users className="size-4" />}
+                label="Manage users"
+              />
+              <Shortcut
+                to="/admin/courses"
+                icon={<BookOpen className="size-4" />}
+                label={`Courses (${data.publishedCourses} published)`}
+              />
+              <Shortcut
+                to="/admin/promos"
+                icon={<Ticket className="size-4" />}
+                label="Promo codes"
+              />
+              <Shortcut
+                to="/admin/waitlist"
+                icon={<ClipboardList className="size-4" />}
+                label="Red Pill waitlist"
+              />
+            </ul>
           </Card>
-          <Card className="p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">Active members</p>
-              <span className="text-[10px] font-medium bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 rounded-full px-1.5 py-0.5">
-                Live
-              </span>
-            </div>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">{data.activeSubs}</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {data.totalUsers} total accounts
-            </p>
-          </Card>
         </div>
       </div>
-
-      {/* STATS */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-semibold tracking-tight">Stats</h2>
-        <div className="flex gap-1 text-xs">
-          <Chip>Last 30 days</Chip>
-          <Chip>All products</Chip>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 mb-10">
-        <StatCard
-          icon={<TrendingUp className="size-4" />}
-          label="Gross revenue"
-          value={formatINR(data.series.revenue.reduce((s, v) => s + v, 0))}
-          series={data.series.revenue}
-        />
-        <StatCard
-          icon={<Users className="size-4" />}
-          label="New members"
-          value={String(data.series.signups.reduce((s, v) => s + v, 0))}
-          series={data.series.signups}
-        />
-        <StatCard
-          icon={<Repeat className="size-4" />}
-          label="New subscriptions"
-          value={String(data.series.subs.reduce((s, v) => s + v, 0))}
-          series={data.series.subs}
-        />
-        <StatCard
-          icon={<Wallet className="size-4" />}
-          label="MRR"
-          value={formatINR(data.mrrPaise)}
-          series={data.series.subs.map((v) => v * 499_00)}
-        />
-        <StatCard
-          icon={<TrendingUp className="size-4" />}
-          label="ARR"
-          value={formatINR(data.arrPaise)}
-          series={data.series.subs.map((v) => v * 499_00 * 12)}
-        />
-        <StatCard
-          icon={<BookOpen className="size-4" />}
-          label="Published courses"
-          value={String(data.publishedCourses)}
-          series={Array(30).fill(data.publishedCourses)}
-        />
-      </div>
-
-      {/* Recent signups strip */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-semibold tracking-tight">Recent signups</h3>
-            <p className="text-xs text-muted-foreground mt-0.5">Newest members first.</p>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            {data.recentSignups.length} shown
-          </p>
-        </div>
-        <ul className="divide-y divide-border/60">
-          {data.recentSignups.map((u: any) => (
-            <li key={u.id} className="flex items-center justify-between py-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="size-8 rounded-full bg-surface-2 border border-border grid place-items-center text-[11px] font-medium shrink-0">
-                  {(u.full_name ?? u.email ?? "··").slice(0, 2).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm truncate">{u.full_name ?? "Unnamed"}</p>
-                  <p className="text-xs text-muted-foreground truncate">{u.email}</p>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground shrink-0">
-                {new Date(u.created_at).toLocaleDateString()}
-              </p>
-            </li>
-          ))}
-          {data.recentSignups.length === 0 && (
-            <li className="py-8 text-center text-sm text-muted-foreground">No signups yet.</li>
-          )}
-        </ul>
-      </Card>
-    </>
+    </div>
   );
 }
 
-function DeltaPill({ value }: { value: number }) {
+function Shortcut({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
+  return (
+    <li>
+      <Link
+        to={to as any}
+        className="group -mx-3 flex h-11 items-center justify-between rounded-lg px-3 text-sm transition-colors hover:bg-hover/50"
+      >
+        <span className="flex items-center gap-3">
+          <span className="text-muted-foreground">{icon}</span>
+          {label}
+        </span>
+        <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
+      </Link>
+    </li>
+  );
+}
+
+function Delta({ value }: { value: number }) {
   if (value === 0) return null;
   const positive = value > 0;
   return (
     <span
       className={
-        "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[10px] font-medium " +
+        "inline-flex h-7 items-center gap-1 rounded-md border px-2 text-sm font-medium tabular-nums " +
         (positive
-          ? "bg-emerald-500/15 text-emerald-500 border border-emerald-500/30"
-          : "bg-destructive/15 text-destructive border border-destructive/30")
+          ? "border-success/30 bg-success/10 text-success"
+          : "border-destructive/30 bg-destructive/10 text-destructive")
       }
     >
-      <ArrowUpRight className={"size-2.5 " + (positive ? "" : "rotate-90")} />
-      {positive ? "+" : ""}{value}%
+      <ArrowUpRight className={"size-3.5 " + (positive ? "" : "rotate-90")} />
+      {positive ? "+" : ""}
+      {value}%
     </span>
-  );
-}
-
-function Chip({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full border border-border/70 bg-surface px-2.5 py-1 text-muted-foreground">
-      {children}
-    </span>
-  );
-}
-
-function StatCard({
-  icon,
-  label,
-  value,
-  series,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  series: number[];
-}) {
-  return (
-    <Card className="p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <div className="size-6 rounded-md border border-border/70 grid place-items-center text-primary">
-            {icon}
-          </div>
-          <p className="text-sm">{label}</p>
-        </div>
-      </div>
-      <p className="mt-3 text-2xl font-semibold tracking-tight">{value}</p>
-      <div className="mt-3 h-16">
-        <Sparkline data={series} width={280} height={64} className="w-full h-full" />
-      </div>
-    </Card>
   );
 }

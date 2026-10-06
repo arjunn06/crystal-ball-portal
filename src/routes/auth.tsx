@@ -2,19 +2,20 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
+import { SiteShell } from "@/components/site/shell";
 import { LogoIcon } from "@/components/logo-icon";
-import { Button } from "@/components/ui/button";
+import { btnPrimary } from "@/components/site/ui";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { z } from "zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, CircleNotch } from "@phosphor-icons/react";
 import { postAuthTarget } from "@/lib/intent";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Blueprint" },
+      { title: "Sign in | Blueprint" },
       { name: "description", content: "Sign in to your Blueprint membership." },
     ],
   }),
@@ -23,15 +24,8 @@ export const Route = createFileRoute("/auth")({
 
 const emailSchema = z.string().trim().email("Enter a valid email").max(255);
 
-const clash = { fontFamily: "'Clash Display', 'Archivo', ui-sans-serif, system-ui, sans-serif" };
-const archivo = { fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif" };
-
 async function routeAfterLogin(navigate: ReturnType<typeof useNavigate>, userId: string) {
-  const { data } = await supabase
-    .from("profiles")
-    .select("handle")
-    .eq("id", userId)
-    .maybeSingle();
+  const { data } = await supabase.from("profiles").select("handle").eq("id", userId).maybeSingle();
   if (!data?.handle) navigate({ to: "/onboarding", replace: true });
   else navigate({ to: postAuthTarget(), replace: true });
 }
@@ -44,6 +38,7 @@ function AuthPage() {
   const [sending, setSending] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [resending, setResending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -63,9 +58,10 @@ function AuthPage() {
     e.preventDefault();
     const parsed = emailSchema.safeParse(email);
     if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message);
+      setError(parsed.error.errors[0].message);
       return;
     }
+    setError(null);
     setSending(true);
     try {
       await sendCode(parsed.data);
@@ -82,9 +78,10 @@ function AuthPage() {
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
     if (!/^\d{6}$/.test(code)) {
-      toast.error("Enter the 6-digit code");
+      setError("Enter the 6-digit code.");
       return;
     }
+    setError(null);
     setVerifying(true);
     try {
       const { data, error } = await supabase.auth.verifyOtp({
@@ -127,188 +124,231 @@ function AuthPage() {
     if (data.session) await routeAfterLogin(navigate, data.session.user.id);
   }
 
+  const field =
+    "mt-2 h-12 rounded-lg border border-border bg-input text-[15px] text-foreground placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30";
+
   return (
-    <div
-      style={{ ...archivo, backgroundColor: "#F5EEE3", color: "#0B0B10" }}
-      className="min-h-screen relative overflow-hidden flex flex-col"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[560px]"
-        style={{
-          background:
-            "radial-gradient(1000px 420px at 50% -80px, #FFCCC4 0%, #FADEDA 35%, rgba(245,238,227,0) 75%)",
-        }}
-      />
-      <header className="relative z-10">
-        <div className="mx-auto max-w-6xl px-6 h-20 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2.5">
-            <LogoIcon className="size-9 text-[#0B0B10]" />
-          </Link>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-[#4A4A52] hover:text-[#0B0B10] transition-colors"
-          >
-            <ArrowLeft className="size-3.5" />
-            Back to home
-          </Link>
-        </div>
-      </header>
-      <div className="relative z-10 flex-1 flex items-center justify-center px-6 py-10">
-        <div className="w-full max-w-[420px]">
-          <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_30px_80px_-40px_rgba(0,0,0,0.25)] p-8 md:p-10">
-          {step === "email" ? (
-            <>
-              <h1
-                style={{ ...clash, letterSpacing: "-0.01em" }}
-                className="text-[30px] leading-[1.05] font-bold text-[#0B0B10]"
-              >
-                Sign in to Blueprint
-              </h1>
-              <p className="mt-2 text-[14px] leading-[1.55] text-[#5A5A62]">
-                Enter your email — we'll send you a one-time code. No password needed.
-              </p>
-
-              <button
-                onClick={handleGoogle}
-                type="button"
-                className="mt-7 w-full h-12 rounded-full bg-white border border-black/10 hover:bg-[#FAFAFA] transition-colors text-[14px] font-semibold text-[#0B0B10] shadow-sm inline-flex items-center justify-center gap-2.5"
-              >
-                <GoogleGlyph />
-                Continue with Google
-              </button>
-
-              <div className="my-6 flex items-center gap-3 text-[11px] text-[#6B6B72] uppercase tracking-[0.16em] font-semibold">
-                <div className="h-px flex-1 bg-black/10" /> or <div className="h-px flex-1 bg-black/10" />
+    <SiteShell>
+      <main id="main" className="grid min-h-[100dvh] lg:grid-cols-[1.05fr_1fr]">
+        {/* Brand side */}
+        <aside className="relative hidden overflow-hidden border-r border-border lg:block">
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(800px_500px_at_20%_0%,hsl(0_0%_100%/0.036),transparent_65%),radial-gradient(700px_500px_at_100%_100%,hsl(214_80%_55%/0.14),transparent_65%)]"
+          />
+          <div className="relative flex h-full flex-col justify-between p-12 xl:p-16">
+            <Link to="/" className="flex items-center gap-2.5" aria-label="Blueprint home">
+              <LogoIcon className="size-8 text-primary" />
+              <span className="font-display text-[19px] font-extrabold tracking-tight">
+                Blueprint
+              </span>
+            </Link>
+            <div>
+              <h2 className="max-w-[16ch] font-display text-[clamp(2.4rem,4vw,3.6rem)] font-extrabold leading-[1.04] tracking-[-0.04em]">
+                Your seat is one code away.
+              </h2>
+              <div className="mt-10 w-[88%] -rotate-1 overflow-hidden rounded-2xl border border-border shadow-[0_40px_90px_-30px_hsl(220_30%_2%/0.95)]">
+                <img
+                  src="/img/discord-preview.png"
+                  width={935}
+                  height={614}
+                  alt="Premium-alerts channel inside the members-only Discord"
+                  className="block h-auto w-full"
+                />
               </div>
-
-              <form onSubmit={handleEmailSubmit} className="space-y-3">
-                <div>
-                  <Label htmlFor="email" className="text-[12px] font-semibold text-[#4A4A52] tracking-wide uppercase">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    inputMode="email"
-                    required
-                    autoFocus
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    className="mt-2 bg-[#F7F1E8] border border-black/10 h-12 rounded-xl text-[14px] text-[#0B0B10] placeholder:text-[#8B8B92] focus-visible:ring-2 focus-visible:ring-[#E53935]/30 focus-visible:border-[#E53935]/40"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={sending}
-                  className="w-full h-12 rounded-full mt-3 inline-flex items-center justify-center gap-2 text-white text-[14px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform disabled:opacity-70 disabled:hover:translate-y-0"
-                  style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-                >
-                  {sending ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      Sending…
-                    </>
-                  ) : (
-                    "Send code"
-                  )}
-                </button>
-              </form>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => {
-                  setCode("");
-                  setStep("email");
-                }}
-                className="flex items-center gap-1.5 text-[12px] text-[#6B6B72] hover:text-[#0B0B10] transition-colors mb-4"
-              >
-                <ArrowLeft className="size-3.5" />
-                Use a different email
-              </button>
-              <h1
-                style={{ ...clash, letterSpacing: "-0.01em" }}
-                className="text-[30px] leading-[1.05] font-bold text-[#0B0B10]"
-              >
-                Check your email
-              </h1>
-              <p className="mt-2 text-[14px] leading-[1.55] text-[#5A5A62]">
-                We sent a 6-digit code to <span className="text-[#0B0B10] font-semibold">{email}</span>.
-              </p>
-
-              <form onSubmit={handleVerify} className="mt-6 space-y-3">
-                <div>
-                  <Label htmlFor="code" className="text-[12px] font-semibold text-[#4A4A52] tracking-wide uppercase">Verification code</Label>
-                  <Input
-                    id="code"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]{6}"
-                    maxLength={6}
-                    required
-                    autoFocus
-                    autoComplete="one-time-code"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                    placeholder="123456"
-                    className="mt-2 bg-[#F7F1E8] border border-black/10 h-14 rounded-xl text-center text-2xl font-mono tracking-[0.4em] text-[#0B0B10] focus-visible:ring-2 focus-visible:ring-[#E53935]/30 focus-visible:border-[#E53935]/40"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={verifying}
-                  className="w-full h-12 rounded-full mt-3 inline-flex items-center justify-center gap-2 text-white text-[14px] font-semibold shadow-[0_12px_30px_-10px_rgba(229,57,53,0.65)] hover:-translate-y-px transition-transform disabled:opacity-70 disabled:hover:translate-y-0"
-                  style={{ background: "linear-gradient(135deg,#E53935 0%,#FF2A1F 100%)" }}
-                >
-                  {verifying ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" />
-                      Verifying…
-                    </>
-                  ) : (
-                    "Continue"
-                  )}
-                </button>
-              </form>
-
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={resending}
-                className="mt-6 w-full text-center text-[12px] text-[#6B6B72] hover:text-[#0B0B10] transition-colors disabled:opacity-50"
-              >
-                {resending ? "Resending…" : "Didn't get it? Resend code"}
-              </button>
-            </>
-          )}
+            </div>
           </div>
-          <p className="mt-6 text-center text-[12px] text-[#6B6B72]">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-1.5 rounded-full bg-[#E53935] animate-pulse" />
-              Cancel anytime · ₹499/month
-            </span>
-          </p>
-        </div>
-      </div>
-      <footer className="relative z-10 border-t border-black/5">
-        <div className="mx-auto max-w-6xl px-6 h-14 flex items-center justify-between text-[12px] text-[#6B6B72]">
-          <span>© Blueprint · by Arjun IFVG</span>
-          <span>All rights reserved</span>
-        </div>
-      </footer>
-    </div>
+        </aside>
+
+        {/* Form side */}
+        <section className="flex flex-col">
+          <header className="flex h-16 items-center justify-between px-6 sm:px-10">
+            <Link
+              to="/"
+              className="flex items-center gap-2.5 lg:invisible"
+              aria-label="Blueprint home"
+            >
+              <LogoIcon className="size-8 text-primary" />
+              <span className="font-display text-[19px] font-extrabold tracking-tight">
+                Blueprint
+              </span>
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ArrowLeft className="size-4" weight="bold" />
+              Back to home
+            </Link>
+          </header>
+
+          <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
+            <div className="w-full max-w-[400px]">
+              {step === "email" ? (
+                <>
+                  <h1 className="font-display text-[2.2rem] font-extrabold leading-[1.1] tracking-[-0.035em]">
+                    Sign in to Blueprint
+                  </h1>
+                  <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+                    Enter your email and we will send a one-time code. No password needed. New here?
+                    Signing in creates your account.
+                  </p>
+
+                  <button
+                    onClick={handleGoogle}
+                    type="button"
+                    className="mt-8 inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-lg bg-[#f1f3f4] text-[15px] font-semibold text-[#14171c] transition duration-200 hover:bg-white active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                  >
+                    <GoogleGlyph />
+                    Continue with Google
+                  </button>
+
+                  <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+                    <div className="h-px flex-1 bg-border" /> or{" "}
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <form onSubmit={handleEmailSubmit} className="space-y-4" noValidate>
+                    <div>
+                      <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                        Email
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        autoComplete="email"
+                        inputMode="email"
+                        required
+                        autoFocus
+                        value={email}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          if (error) setError(null);
+                        }}
+                        placeholder="you@example.com"
+                        aria-invalid={!!error}
+                        aria-describedby={error ? "auth-error" : undefined}
+                        className={field}
+                      />
+                      {error && (
+                        <p id="auth-error" role="alert" className="mt-2 text-sm text-destructive">
+                          {error}
+                        </p>
+                      )}
+                    </div>
+                    <button type="submit" disabled={sending} className={`${btnPrimary} w-full`}>
+                      {sending ? (
+                        <>
+                          <CircleNotch className="size-4 animate-spin" weight="bold" />
+                          Sending code
+                        </>
+                      ) : (
+                        "Send code"
+                      )}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCode("");
+                      setError(null);
+                      setStep("email");
+                    }}
+                    className="mb-6 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <ArrowLeft className="size-4" weight="bold" />
+                    Use a different email
+                  </button>
+                  <h1 className="font-display text-[2.2rem] font-extrabold leading-[1.1] tracking-[-0.035em]">
+                    Check your email
+                  </h1>
+                  <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+                    We sent a 6-digit code to{" "}
+                    <span className="font-semibold text-foreground">{email}</span>.
+                  </p>
+
+                  <form onSubmit={handleVerify} className="mt-8 space-y-4" noValidate>
+                    <div>
+                      <Label htmlFor="code" className="text-sm font-medium text-foreground">
+                        Verification code
+                      </Label>
+                      <Input
+                        id="code"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]{6}"
+                        maxLength={6}
+                        required
+                        autoFocus
+                        autoComplete="one-time-code"
+                        value={code}
+                        onChange={(e) => {
+                          setCode(e.target.value.replace(/\D/g, "").slice(0, 6));
+                          if (error) setError(null);
+                        }}
+                        placeholder="123456"
+                        aria-invalid={!!error}
+                        aria-describedby={error ? "auth-error" : undefined}
+                        className={`${field} h-14 text-center font-mono text-2xl tracking-[0.4em]`}
+                      />
+                      {error && (
+                        <p id="auth-error" role="alert" className="mt-2 text-sm text-destructive">
+                          {error}
+                        </p>
+                      )}
+                    </div>
+                    <button type="submit" disabled={verifying} className={`${btnPrimary} w-full`}>
+                      {verifying ? (
+                        <>
+                          <CircleNotch className="size-4 animate-spin" weight="bold" />
+                          Verifying
+                        </>
+                      ) : (
+                        "Continue"
+                      )}
+                    </button>
+                  </form>
+
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resending}
+                    className="mt-6 w-full text-center text-sm text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+                  >
+                    {resending ? "Resending" : "Did not get it? Resend code"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
+    </SiteShell>
   );
 }
 
 function GoogleGlyph() {
   return (
     <svg className="size-4" viewBox="0 0 24 24" aria-hidden>
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
-      <path fill="#FBBC05" d="M5.84 14.11a6.6 6.6 0 0 1 0-4.22V7.05H2.18a11 11 0 0 0 0 9.9l3.66-2.84z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.65l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.29 9.14 5.38 12 5.38z"/>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.76h3.56c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.76c-.98.66-2.24 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.11a6.6 6.6 0 0 1 0-4.22V7.05H2.18a11 11 0 0 0 0 9.9l3.66-2.84z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.65l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.05l3.66 2.84C6.71 7.29 9.14 5.38 12 5.38z"
+      />
     </svg>
   );
 }

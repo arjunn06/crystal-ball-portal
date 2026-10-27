@@ -15,6 +15,7 @@ import {
   ScrollText,
   Ticket,
   ClipboardList,
+  Inbox,
 } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 
@@ -51,6 +52,11 @@ function AdminLayout() {
           to: "/admin/waitlist",
           label: "Red Pill waitlist",
           icon: <ClipboardList className="size-4" />,
+        },
+        {
+          to: "/admin/applications",
+          label: "1-1 applications",
+          icon: <Inbox className="size-4" />,
         },
         { to: "/admin/promos", label: "Promo codes", icon: <Ticket className="size-4" /> },
         { to: "/admin/discord", label: "Discord", icon: <DiscordIcon className="size-4" /> },

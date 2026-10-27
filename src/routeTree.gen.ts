@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as ApplyRouteImport } from './routes/apply'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BluepillRouteImport } from './routes/bluepill'
 import { Route as RedpillRouteImport } from './routes/redpill'
@@ -24,6 +25,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as RedpillInviteRouteImport } from './routes/redpill_.invite'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
+import { Route as AuthenticatedAdminApplicationsRouteImport } from './routes/_authenticated/admin/applications'
 import { Route as AuthenticatedAdminAuditRouteImport } from './routes/_authenticated/admin/audit'
 import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
 import { Route as AuthenticatedAdminDiscordRouteImport } from './routes/_authenticated/admin/discord'
@@ -58,6 +60,11 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApplyRoute = ApplyRouteImport.update({
+  id: '/apply',
+  path: '/apply',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -125,6 +132,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRouteRoute,
 } as any)
+const AuthenticatedAdminApplicationsRoute =
+  AuthenticatedAdminApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
 const AuthenticatedAdminAuditRoute = AuthenticatedAdminAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -275,6 +288,7 @@ const LovableEmailTransactionalSendRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/apply': typeof ApplyRoute
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
@@ -287,6 +301,7 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/redpill/invite': typeof RedpillInviteRoute
+  '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
@@ -317,6 +332,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/apply': typeof ApplyRoute
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
@@ -327,6 +343,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/redpill/invite': typeof RedpillInviteRoute
+  '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/admin/discord': typeof AuthenticatedAdminDiscordRoute
   '/admin/promos': typeof AuthenticatedAdminPromosRoute
@@ -357,6 +374,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/apply': typeof ApplyRoute
   '/auth': typeof AuthRouteWithChildren
   '/bluepill': typeof BluepillRoute
   '/redpill': typeof RedpillRoute
@@ -369,6 +387,7 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/redpill_/invite': typeof RedpillInviteRoute
+  '/_authenticated/admin/applications': typeof AuthenticatedAdminApplicationsRoute
   '/_authenticated/admin/audit': typeof AuthenticatedAdminAuditRoute
   '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRouteWithChildren
   '/_authenticated/admin/discord': typeof AuthenticatedAdminDiscordRoute
@@ -401,6 +420,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/apply'
     | '/auth'
     | '/bluepill'
     | '/redpill'
@@ -413,6 +433,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/email/unsubscribe'
     | '/redpill/invite'
+    | '/admin/applications'
     | '/admin/audit'
     | '/admin/courses'
     | '/admin/discord'
@@ -443,6 +464,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/apply'
     | '/auth'
     | '/bluepill'
     | '/redpill'
@@ -453,6 +475,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/email/unsubscribe'
     | '/redpill/invite'
+    | '/admin/applications'
     | '/admin/audit'
     | '/admin/discord'
     | '/admin/promos'
@@ -482,6 +505,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/apply'
     | '/auth'
     | '/bluepill'
     | '/redpill'
@@ -494,6 +518,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/email/unsubscribe'
     | '/redpill_/invite'
+    | '/_authenticated/admin/applications'
     | '/_authenticated/admin/audit'
     | '/_authenticated/admin/courses'
     | '/_authenticated/admin/discord'
@@ -526,6 +551,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  ApplyRoute: typeof ApplyRoute
   AuthRoute: typeof AuthRouteWithChildren
   BluepillRoute: typeof BluepillRoute
   RedpillRoute: typeof RedpillRoute
@@ -559,6 +585,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/apply': {
+      id: '/apply'
+      path: '/apply'
+      fullPath: '/apply'
+      preLoaderRoute: typeof ApplyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -650,6 +683,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/applications': {
+      id: '/_authenticated/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AuthenticatedAdminApplicationsRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/audit': {
@@ -854,6 +894,7 @@ const AuthenticatedAdminCoursesRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteRouteChildren {
+  AuthenticatedAdminApplicationsRoute: typeof AuthenticatedAdminApplicationsRoute
   AuthenticatedAdminAuditRoute: typeof AuthenticatedAdminAuditRoute
   AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRouteWithChildren
   AuthenticatedAdminDiscordRoute: typeof AuthenticatedAdminDiscordRoute
@@ -866,6 +907,7 @@ interface AuthenticatedAdminRouteRouteChildren {
 
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
+    AuthenticatedAdminApplicationsRoute: AuthenticatedAdminApplicationsRoute,
     AuthenticatedAdminAuditRoute: AuthenticatedAdminAuditRoute,
     AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRouteWithChildren,
     AuthenticatedAdminDiscordRoute: AuthenticatedAdminDiscordRoute,
@@ -948,6 +990,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  ApplyRoute: ApplyRoute,
   AuthRoute: AuthRouteWithChildren,
   BluepillRoute: BluepillRoute,
   RedpillRoute: RedpillRoute,

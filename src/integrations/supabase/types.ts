@@ -353,6 +353,78 @@ export type Database = {
           },
         ]
       }
+      one_on_one_applications: {
+        Row: {
+          admin_notes: string | null
+          availability: string
+          created_at: string
+          discord: string | null
+          email: string
+          experience: string
+          goal: string
+          hours_per_week: string
+          id: string
+          ifvg_level: string
+          investment: string
+          location: string
+          markets: string | null
+          name: string
+          phone: string
+          reviewed_at: string | null
+          social: string | null
+          stage: string
+          status: string
+          struggle: string
+          why_you: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          availability: string
+          created_at?: string
+          discord?: string | null
+          email: string
+          experience: string
+          goal: string
+          hours_per_week: string
+          id?: string
+          ifvg_level: string
+          investment: string
+          location: string
+          markets?: string | null
+          name: string
+          phone: string
+          reviewed_at?: string | null
+          social?: string | null
+          stage: string
+          status?: string
+          struggle: string
+          why_you: string
+        }
+        Update: {
+          admin_notes?: string | null
+          availability?: string
+          created_at?: string
+          discord?: string | null
+          email?: string
+          experience?: string
+          goal?: string
+          hours_per_week?: string
+          id?: string
+          ifvg_level?: string
+          investment?: string
+          location?: string
+          markets?: string | null
+          name?: string
+          phone?: string
+          reviewed_at?: string | null
+          social?: string | null
+          stage?: string
+          status?: string
+          struggle?: string
+          why_you?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

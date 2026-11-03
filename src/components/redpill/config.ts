@@ -131,7 +131,7 @@ export const PAYOUT_STORY = {
   facts: [
     { k: "Funded account", v: "Apex 50K" },
     { k: "First payout requested", v: "$500" },
-    { k: "Profits made", v: "around $4,000" },
+    { k: "Profits made", v: "$4,000+" },
   ],
   paragraphs: [
     {

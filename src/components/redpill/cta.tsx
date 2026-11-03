@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { CaretRight } from "@phosphor-icons/react";
 import type { ReactNode } from "react";
-import { ENROLL_PATH, PRICE_TAXES } from "./config";
+import { APPLY_PATH } from "./config";
 
 /** The single filled button on the page. One verb, one destination. */
-export function EnrollButton({
+export function ApplyButton({
   id,
   placement,
   className = "",
@@ -17,18 +17,18 @@ export function EnrollButton({
 }) {
   return (
     <Link
-      to={ENROLL_PATH}
+      to={APPLY_PATH}
       id={id}
       data-cta={placement}
       className={`rp-btn ${full ? "w-full max-w-[360px] m:w-auto m:min-w-[220px]" : ""} ${className}`}
     >
-      Enroll for {PRICE_TAXES}
+      Apply for a call
     </Link>
   );
 }
 
 export function Microline({
-  children = "One payment. No recurring charge.",
+  children = "Limited slots. Arjun picks who gets a call.",
 }: {
   children?: ReactNode;
 }) {
@@ -44,13 +44,9 @@ export function TextLink({ href, children }: { href: string; children: ReactNode
   );
 }
 
-export function EnrollTextLink({
-  children = `Enroll for ${PRICE_TAXES}`,
-}: {
-  children?: ReactNode;
-}) {
+export function ApplyTextLink({ children = "Apply for a call" }: { children?: ReactNode }) {
   return (
-    <Link to={ENROLL_PATH} className="rp-link">
+    <Link to={APPLY_PATH} className="rp-link">
       {children}
       <CaretRight size={14} weight="bold" aria-hidden />
     </Link>

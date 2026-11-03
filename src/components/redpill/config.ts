@@ -13,7 +13,7 @@ export const PRICE = formatRupees(RED_PILL_BASE_PAISE);
 export const PRICE_TAXES = `${PRICE} + taxes`;
 export const TAX_LINE = `+ ${formatRupees(gstOn(RED_PILL_BASE_PAISE))} GST (18%) = ${formatRupees(RED_PILL_TOTAL_PAISE)} total at checkout.`;
 export const VIDEO_ID = "2fxjbw5fdsk";
-export const ENROLL_PATH = "/enroll" as const;
+export const APPLY_PATH = "/apply" as const;
 
 export type RpConfig = {
   /** 'safe' is the lower-risk headline if counsel objects to "Traded live". */
@@ -169,7 +169,7 @@ export function buildFaq(c: RpConfig): FaqEntry[] {
     {
       id: "need",
       q: "What do I need to join?",
-      a: "Zoom, a Discord account, and an email address to sign in.",
+      a: "Zoom, a Discord account, and an email address to apply.",
     },
     {
       id: "recurring",
@@ -179,7 +179,7 @@ export function buildFaq(c: RpConfig): FaqEntry[] {
     {
       id: "join",
       q: "How do I join?",
-      a: `Sign in with an email code, pay ${PRICE_TAXES} on Razorpay, then get your Red Pill role in the Discord. Session links are shared there.`,
+      a: `Apply with a short form. Arjun reviews every application and picks who gets a slot on a call. If you are picked, pay ${PRICE_TAXES} on Razorpay, then get your Red Pill role in the Discord. Session links are shared there.`,
     },
     {
       id: "advice",

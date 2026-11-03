@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Check, Lock, Plus } from "@phosphor-icons/react";
-import { EnrollButton, Microline } from "./cta";
+import { ApplyButton, Microline } from "./cta";
 import { PRICE, PRICE_TAXES, QUOTES, RP, buildFaq, futureIst } from "./config";
 import { Fn, Rv } from "./shared";
 
@@ -8,12 +8,16 @@ import { Fn, Rv } from "./shared";
 /* Join: three steps and the price card                               */
 /* ---------------------------------------------------------------- */
 const STEPS = [
-  { n: "01", t: "Sign in.", b: "Get a one-time code by email. No password." },
-  { n: "02", t: "Pay once.", b: `${PRICE_TAXES} on Razorpay. One payment, no recurring charge.` },
+  { n: "01", t: "Apply.", b: "Fill in a short form to apply for a call with Arjun." },
+  {
+    n: "02",
+    t: "Get picked.",
+    b: "Arjun reviews every application and picks who gets a slot on a call.",
+  },
   {
     n: "03",
-    t: "Join Discord.",
-    b: "Your Red Pill role opens the premium channels, session links and community.",
+    t: "Pay and join Discord.",
+    b: `If you are picked, pay ${PRICE_TAXES} once on Razorpay. Your Red Pill role then opens the premium channels, session links and community.`,
   },
 ];
 
@@ -37,9 +41,9 @@ export function Join() {
     <section id="join" className="rp-section rp-band">
       <div className="rp-wrap">
         <Rv className="text-center">
-          <h2 className="rp-h2">Sign in. Pay once. Join Discord.</h2>
+          <h2 className="rp-h2">Apply. Get picked. Join Discord.</h2>
           <p className="rp-lead rp-ink2 mx-auto mt-4 max-w-[34rem]">
-            Three steps. No password to set up, no subscription.
+            Three steps. Slots are limited and every application is reviewed.
           </p>
         </Rv>
 
@@ -95,13 +99,13 @@ export function Join() {
             </div>
 
             <div className="flex flex-col">
-              <EnrollButton placement="join" full className="!max-w-none !w-full" />
-              <Microline>One payment. No recurring charge. Nothing renews.</Microline>
+              <ApplyButton placement="join" full className="!max-w-none !w-full" />
+              <Microline>Apply first. You only pay if you are picked.</Microline>
 
               <p className="rp-small mt-5">
                 {start
                   ? `${RP.cohortNumber ? `Cohort ${RP.cohortNumber}` : "The next cohort"} starts ${start} IST.${close ? ` Enrolment closes ${close} IST.` : ""}${RP.seatCap ? ` Each cohort is capped at ${RP.seatCap} so live Q&A works.` : ""}`
-                  : "Registrations are open."}
+                  : "Applications are open."}
               </p>
 
               <div className="rp-small rp-ink2 mt-6 space-y-5">
@@ -235,10 +239,8 @@ export function Final() {
           You do not need ten strategies. You need one you can repeat.
         </p>
         <div className="relative mt-8 flex w-full flex-col items-center">
-          <EnrollButton placement="final" full className="m:!min-w-[260px]" />
-          <p className="rp-small rp-ink2 mt-3">
-            {PRICE_TAXES}, once. One payment. No recurring charge.
-          </p>
+          <ApplyButton placement="final" full className="m:!min-w-[260px]" />
+          <p className="rp-small rp-ink2 mt-3">{PRICE_TAXES}, once, only if you are picked.</p>
           <a href="#walkthrough" className="rp-link mt-2">
             Watch the walkthrough
           </a>
@@ -300,7 +302,7 @@ export function Notes() {
 
         <p className="rp-small rp-ink2 mt-10 max-w-[70ch]">
           The only official site is blueprint.ifvg.in. Payments happen only on the Razorpay checkout
-          reached from the enrol page.
+          reached from the payment link on this site.
         </p>
         <p className="rp-small rp-ink2 mt-5 max-w-[70ch]">
           Blueprint by Arjun IFVG provides trading education only. Nothing on this site, in our live

@@ -65,7 +65,7 @@ const FAQ: FaqItem[] = [
   },
   {
     q: "Can I start with the Blue Pill and join the Red Pill later?",
-    a: "Yes. Blue Pill members can still enroll in the Red Pill whenever they are ready.",
+    a: "Yes. Blue Pill members can still apply for the Red Pill whenever they are ready.",
   },
 ];
 

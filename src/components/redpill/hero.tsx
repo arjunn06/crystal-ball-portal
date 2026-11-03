@@ -1,6 +1,6 @@
 import { CaretRight } from "@phosphor-icons/react";
 import { Fragment } from "react";
-import { EnrollButton, Microline } from "./cta";
+import { ApplyButton, Microline } from "./cta";
 import { HERO_FRAGMENTS, RP, futureIst } from "./config";
 import { VideoFacade } from "./video-facade";
 import { Rv } from "./shared";
@@ -52,7 +52,7 @@ export function Hero() {
           className="rp-rise rp-rise-2 mt-7 flex w-full flex-col items-center m:mt-8 m:flex-row m:flex-wrap m:justify-center m:gap-x-6 l:mt-9"
         >
           <div className="order-1 flex w-full justify-center m:w-auto">
-            <EnrollButton placement="hero" full />
+            <ApplyButton placement="hero" full />
           </div>
           <div className="order-2 w-full m:order-3 m:basis-full">
             <Microline />

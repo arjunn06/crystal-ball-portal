@@ -1,12 +1,12 @@
 "use client";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ENROLL_PATH, PRICE_TAXES } from "./config";
+import { APPLY_PATH, PRICE_TAXES } from "./config";
 
 /**
  * Phone-only bottom bar. Shows after the hero button leaves the screen and hides whenever any
  * in-page filled button, the price card, the closing section or the notes are on screen, so two
- * Enroll buttons are never visible together. Mounted on the client only (not in server HTML).
+ * Apply buttons are never visible together. Mounted on the client only (not in server HTML).
  */
 export function RpMobileBar() {
   const [mounted, setMounted] = useState(false);
@@ -63,8 +63,8 @@ export function RpMobileBar() {
         <p className="text-[13px] font-semibold">The Red Pill</p>
         <p className="rp-mono text-[15px] font-semibold">{PRICE_TAXES}</p>
       </div>
-      <Link to={ENROLL_PATH} data-cta="bar" className="rp-btn min-w-[120px] px-5">
-        Enroll
+      <Link to={APPLY_PATH} data-cta="bar" className="rp-btn min-w-[120px] px-5">
+        Apply
       </Link>
     </div>
   );

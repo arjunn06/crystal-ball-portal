@@ -1,7 +1,7 @@
 "use client";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ENROLL_PATH, PRICE_TAXES } from "./config";
+import { APPLY_PATH, PRICE_TAXES } from "./config";
 
 const LINKS = [
   { id: "month", label: "The month" },
@@ -23,7 +23,7 @@ function Wordmark() {
   );
 }
 
-/** Apple-style local nav: wordmark on phones, links + persistent Enroll once the hero CTA has gone. */
+/** Apple-style local nav: wordmark on phones, links + persistent Apply once the hero CTA has gone. */
 export function RpNav() {
   const [stuck, setStuck] = useState(false);
   const [heroCtaGone, setHeroCtaGone] = useState(false);
@@ -81,12 +81,12 @@ export function RpNav() {
         <div className="rp-nav-cta hidden items-center gap-4 m:flex" data-hidden={!heroCtaGone}>
           <span className="rp-mono rp-ink2 hidden text-sm l:inline">{PRICE_TAXES}</span>
           <Link
-            to={ENROLL_PATH}
+            to={APPLY_PATH}
             data-cta="nav"
             className="rp-btn rp-btn-sm"
             tabIndex={heroCtaGone ? 0 : -1}
           >
-            Enroll
+            Apply
           </Link>
         </div>
       </div>

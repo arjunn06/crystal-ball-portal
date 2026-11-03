@@ -7,7 +7,7 @@ import {
   VideoCamera,
   X,
 } from "@phosphor-icons/react";
-import { EnrollButton, EnrollTextLink, Microline, TextLink } from "./cta";
+import { ApplyButton, ApplyTextLink, Microline, TextLink } from "./cta";
 import { QUOTES, RP } from "./config";
 import { Fn, QuoteBody, QuoteCard, Rv } from "./shared";
 
@@ -194,7 +194,7 @@ export function Month() {
 
         <Rv className="mt-14 flex flex-col items-center text-center">
           {RP.scheduleLine && <p className="rp-small rp-ink2 mb-5">{RP.scheduleLine}</p>}
-          <EnrollButton placement="month" full />
+          <ApplyButton placement="month" full />
           <Microline />
           <div className="mt-2">
             <TextLink href="#modules">See the nine modules</TextLink>
@@ -338,7 +338,7 @@ export function Modules() {
         </Rv>
 
         <Rv className="mt-10 text-center">
-          <EnrollTextLink />
+          <ApplyTextLink />
         </Rv>
       </div>
     </section>
@@ -479,7 +479,7 @@ export function Fit() {
             </span>
           </p>
           <div className="mt-6">
-            <EnrollTextLink />
+            <ApplyTextLink />
           </div>
         </Rv>
       </div>

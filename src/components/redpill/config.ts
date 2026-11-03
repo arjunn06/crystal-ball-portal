@@ -125,6 +125,33 @@ export const QUOTES: Record<Quote["id"], Quote> = {
   },
 };
 
+/** A student's own story, wording exactly as he wrote it. "..." marks a visible trim. */
+export const PAYOUT_STORY = {
+  handle: "Singara Velan",
+  facts: [
+    { k: "Funded account", v: "Apex 50K" },
+    { k: "First payout requested", v: "$500" },
+    { k: "Profit still in the account", v: "around $4,000" },
+  ],
+  paragraphs: [
+    {
+      text: "For three full months, I focused only on paper trading. I didn’t rush into buying a funded account. I waited until I developed confidence in my trading.",
+      emphasis: ["I focused only on paper trading."],
+    },
+    {
+      text: "Finally, on October 1st, I purchased my first-ever funded account — Apex 50K. This was a huge milestone in my trading journey.",
+      emphasis: ["Apex 50K"],
+    },
+    {
+      text: "On Friday, October 23rd, I requested my first payout of $500. I still have around $4,000 in profit in my 50K account. This is just the beginning of my journey, and I’m grateful for everything I’ve learned so far.",
+      emphasis: ["first payout of $500", "around $4,000 in profit"],
+    },
+  ],
+  lesson: "When you control your losses, you can take the profits tomorrow.",
+  lessonNote:
+    "This has become my first priority in trading. I focus on protecting my capital, maintaining discipline, being patient, and understanding the logic behind every entry.",
+};
+
 export type FaqEntry = {
   id: string;
   q: string;

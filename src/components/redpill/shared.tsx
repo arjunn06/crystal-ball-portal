@@ -69,6 +69,10 @@ function withEmphasis(text: string, emphasis: string[] = []): ReactNode[] {
   return out;
 }
 
+export function Emphasised({ text, emphasis }: { text: string; emphasis?: string[] }) {
+  return <>{withEmphasis(text, emphasis)}</>;
+}
+
 export function QuoteBody({ q, className = "" }: { q: Quote; className?: string }) {
   return (
     <p lang={q.lang} className={className}>

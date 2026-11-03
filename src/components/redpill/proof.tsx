@@ -8,8 +8,8 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { ApplyButton, ApplyTextLink, Microline, TextLink } from "./cta";
-import { QUOTES, RP } from "./config";
-import { Fn, QuoteBody, QuoteCard, Rv } from "./shared";
+import { PAYOUT_STORY, QUOTES, RP } from "./config";
+import { Emphasised, Fn, QuoteBody, QuoteCard, Rv } from "./shared";
 
 /* ---------------------------------------------------------------- */
 /* Pick one model                                                     */
@@ -90,6 +90,56 @@ export function TobiSection() {
               </li>
             ))}
           </ul>
+        </Rv>
+      </div>
+    </section>
+  );
+}
+
+/* ---------------------------------------------------------------- */
+/* A student's first payout                                           */
+/* ---------------------------------------------------------------- */
+export function PayoutSection() {
+  const s = PAYOUT_STORY;
+  return (
+    <section id="payout" className="scroll-mt-16 pb-[var(--section-y)]">
+      <div className="rp-wrap">
+        <Rv>
+          <h2 className="rp-h2 text-center">A first funded account. A first payout.</h2>
+        </Rv>
+        <Rv i={1} className="rp-tile mx-auto mt-[var(--head-gap)] max-w-[760px] p-6 m:p-10">
+          <dl className="grid divide-y divide-[var(--hair)] m:grid-cols-3 m:divide-x m:divide-y-0">
+            {s.facts.map((f) => (
+              <div key={f.k} className="py-4 m:px-5 m:py-1 m:first:pl-0 m:last:pr-0">
+                <dt className="rp-fine rp-ink2">{f.k}</dt>
+                <dd className="rp-num mt-1 text-[22px] font-semibold tracking-[-0.02em]">{f.v}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="mt-8 space-y-4">
+            {s.paragraphs.map((p) => (
+              <p key={p.text} className="rp-body rp-ink2 text-[18px] leading-[1.45]">
+                <Emphasised text={p.text} emphasis={p.emphasis} />
+              </p>
+            ))}
+          </div>
+
+          <figure className="mt-8 border-l border-[var(--hair)] pl-5">
+            <blockquote>
+              <p className="text-[20px] leading-[1.3] tracking-[-0.01em] m:text-[24px]">
+                “{s.lesson}”
+              </p>
+              <p className="rp-small rp-ink2 mt-3">{s.lessonNote}</p>
+            </blockquote>
+          </figure>
+
+          <p className="mt-8 text-[17px] font-semibold">{s.handle}</p>
+          <p className="rp-small rp-ink2 mt-1">Red Pill student, in his own words.</p>
+          <p className="rp-small rp-ink2 mt-5">
+            Experiences are individual and do not predict your results.
+            <Fn n={4} />
+          </p>
         </Rv>
       </div>
     </section>

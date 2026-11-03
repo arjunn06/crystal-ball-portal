@@ -3,7 +3,15 @@ import { PRICE_TAXES } from "@/components/redpill/config";
 import { RpNav } from "@/components/redpill/nav";
 import { RpMobileBar } from "@/components/redpill/mobile-bar";
 import { Hero, Walkthrough } from "@/components/redpill/hero";
-import { DiscordSection, Fit, Modules, Month, Note, TobiSection } from "@/components/redpill/proof";
+import {
+  DiscordSection,
+  Fit,
+  Modules,
+  Month,
+  Note,
+  PayoutSection,
+  TobiSection,
+} from "@/components/redpill/proof";
 import { Faq, Final, Join, Notes } from "@/components/redpill/buy";
 import { RP_HEAD_SCRIPT, useRpPage } from "@/components/redpill/use-rp-page";
 
@@ -65,6 +73,7 @@ function RedPill() {
         <Walkthrough />
         <Note />
         <TobiSection />
+        <PayoutSection />
         <Month />
         <Modules />
         <DiscordSection />

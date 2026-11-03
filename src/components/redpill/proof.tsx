@@ -135,7 +135,7 @@ export function PayoutSection() {
           </figure>
 
           <p className="mt-8 text-[17px] font-semibold">{s.handle}</p>
-          <p className="rp-small rp-ink2 mt-1">Red Pill student, in his own words.</p>
+          <p className="rp-small rp-ink2 mt-1">Joined the Red Pill in June 2026</p>
           <p className="rp-small rp-ink2 mt-5">
             Experiences are individual and do not predict your results.
             <Fn n={4} />

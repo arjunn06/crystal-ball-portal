@@ -377,6 +377,7 @@ export function Modules() {
             aria-label="Student messages"
             tabIndex={0}
           >
+            <QuoteCard id="d1v4" />
             <QuoteCard id="cython" />
             <QuoteCard id="sanu" />
             <QuoteCard id="veera" />

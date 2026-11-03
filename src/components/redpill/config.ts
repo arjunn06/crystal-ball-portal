@@ -81,7 +81,7 @@ export const HERO_FRAGMENTS: Record<RpConfig["heroVariant"], string[]> = {
 
 /** Student messages, wording exactly as written in the members Discord. "..." marks a visible trim. */
 export type Quote = {
-  id: "tobi" | "cython" | "jeevan" | "sanu" | "veera";
+  id: "tobi" | "cython" | "jeevan" | "sanu" | "veera" | "d1v4";
   handle: string;
   cohort?: string;
   text: string;
@@ -118,6 +118,12 @@ export const QUOTES: Record<Quote["id"], Quote> = {
     handle: "Sanu",
     lang: "ta-Latn",
     text: "Bro honest ah sollanum na enaku vanthu neenga sonna strategy concepts la nallave purinchu intha strategy ku thevaiyaana ellame sollitinga athu mattum illama simple ah puriyuramaari eruchu ...",
+  },
+  d1v4: {
+    id: "d1v4",
+    handle: "d1v4",
+    text: "The way he teaches and clarified my doubts was excellent. That was the first time i came to know about the strategy (IFVG)",
+    emphasis: ["The way he teaches and clarified my doubts was excellent."],
   },
   veera: {
     id: "veera",

@@ -35,9 +35,22 @@ export function Microline({
   return <p className="rp-small rp-ink2 mt-3">{children}</p>;
 }
 
-export function TextLink({ href, children }: { href: string; children: ReactNode }) {
+export function TextLink({
+  href,
+  children,
+  external,
+}: {
+  href: string;
+  children: ReactNode;
+  /** Opens in a new tab, for links that leave the site. */
+  external?: boolean;
+}) {
   return (
-    <a href={href} className="rp-link">
+    <a
+      href={href}
+      className="rp-link"
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
       {children}
       <CaretRight size={14} weight="bold" aria-hidden />
     </a>

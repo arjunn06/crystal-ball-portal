@@ -8,7 +8,7 @@ import {
   X,
 } from "@phosphor-icons/react";
 import { ApplyButton, ApplyTextLink, Microline, TextLink } from "./cta";
-import { PAYOUT_STORY, QUOTES, RP } from "./config";
+import { DISCORD_REVIEWS_URL, PAYOUT_STORY, QUOTES, RP } from "./config";
 import { Emphasised, Fn, QuoteBody, QuoteCard, Rv } from "./shared";
 
 /* ---------------------------------------------------------------- */
@@ -384,6 +384,11 @@ export function Modules() {
           <p className="rp-small rp-ink2 mt-4">
             Experiences are individual and do not predict your results.
             <Fn n={4} />
+          </p>
+          <p className="mt-4">
+            <TextLink href={DISCORD_REVIEWS_URL} external>
+              Read full Student Reviews in discord
+            </TextLink>
           </p>
         </Rv>
 

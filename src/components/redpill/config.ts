@@ -14,6 +14,8 @@ export const PRICE_TAXES = `${PRICE} + taxes`;
 export const TAX_LINE = `+ ${formatRupees(gstOn(RED_PILL_BASE_PAISE))} GST (18%) = ${formatRupees(RED_PILL_TOTAL_PAISE)} total at checkout.`;
 export const VIDEO_ID = "2fxjbw5fdsk";
 export const APPLY_PATH = "/redpill/apply" as const;
+export const DISCORD_REVIEWS_URL =
+  "https://discord.com/channels/1465960044725010628/1550792180975804446";
 
 export type RpConfig = {
   /** 'safe' is the lower-risk headline if counsel objects to "Traded live". */

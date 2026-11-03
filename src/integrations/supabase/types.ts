@@ -547,6 +547,48 @@ export type Database = {
           },
         ];
       };
+      redpill_applications: {
+        Row: {
+          admin_notes: string | null;
+          age: number;
+          created_at: string;
+          email: string;
+          id: string;
+          name: string;
+          phone: string;
+          ready_to_pay: string;
+          reviewed_at: string | null;
+          stage: string;
+          status: string;
+        };
+        Insert: {
+          admin_notes?: string | null;
+          age: number;
+          created_at?: string;
+          email: string;
+          id?: string;
+          name: string;
+          phone: string;
+          ready_to_pay: string;
+          reviewed_at?: string | null;
+          stage: string;
+          status?: string;
+        };
+        Update: {
+          admin_notes?: string | null;
+          age?: number;
+          created_at?: string;
+          email?: string;
+          id?: string;
+          name?: string;
+          phone?: string;
+          ready_to_pay?: string;
+          reviewed_at?: string | null;
+          stage?: string;
+          status?: string;
+        };
+        Relationships: [];
+      };
       redpill_invites: {
         Row: {
           created_at: string;

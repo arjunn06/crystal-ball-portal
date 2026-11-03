@@ -44,7 +44,7 @@ export const STATUS_OPTIONS = [
   { value: "declined", label: "Declined" },
 ] as const;
 
-const values = <T extends readonly { value: string }[]>(options: T) =>
+export const values = <T extends readonly { value: string }[]>(options: T) =>
   options.map((o) => o.value) as [T[number]["value"], ...T[number]["value"][]];
 
 const longAnswer = z

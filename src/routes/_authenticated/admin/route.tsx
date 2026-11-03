@@ -16,6 +16,7 @@ import {
   Ticket,
   ClipboardList,
   Inbox,
+  ClipboardCheck,
 } from "lucide-react";
 import { DiscordIcon } from "@/components/discord-icon";
 
@@ -52,6 +53,11 @@ function AdminLayout() {
           to: "/admin/waitlist",
           label: "Red Pill waitlist",
           icon: <ClipboardList className="size-4" />,
+        },
+        {
+          to: "/admin/redpill-applications",
+          label: "Red Pill applications",
+          icon: <ClipboardCheck className="size-4" />,
         },
         {
           to: "/admin/applications",

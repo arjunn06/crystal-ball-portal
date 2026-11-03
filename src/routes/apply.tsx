@@ -13,8 +13,6 @@ import { submitOneOnOneApplication } from "@/lib/applications.functions";
 import {
   APPLICATIONS_OPEN,
   EXPERIENCE_OPTIONS,
-  HOURS_OPTIONS,
-  IFVG_OPTIONS,
   INVESTMENT_OPTIONS,
   STAGE_OPTIONS,
   applicationSchema,
@@ -48,19 +46,10 @@ type FormState = {
   name: string;
   email: string;
   phone: string;
-  location: string;
-  discord: string;
-  social: string;
   experience: string;
   stage: string;
-  ifvgLevel: string;
-  markets: string;
-  struggle: string;
-  goal: string;
   whyYou: string;
-  hoursPerWeek: string;
   investment: string;
-  availability: string;
   consent: boolean;
   website: string;
 };
@@ -69,19 +58,10 @@ const EMPTY: FormState = {
   name: "",
   email: "",
   phone: "",
-  location: "",
-  discord: "",
-  social: "",
   experience: "",
   stage: "",
-  ifvgLevel: "",
-  markets: "",
-  struggle: "",
-  goal: "",
   whyYou: "",
-  hoursPerWeek: "",
   investment: "",
-  availability: "",
   consent: false,
   website: "",
 };
@@ -94,7 +74,7 @@ const textareaClass =
   "mt-2 block min-h-[132px] w-full resize-y rounded-lg border border-border bg-input px-3 py-3 text-[15px] leading-relaxed text-foreground transition-colors placeholder:text-muted-foreground/70 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30";
 
 const STEPS = [
-  { n: "01", t: "Apply", b: "Takes about five minutes. Be honest, there are no right answers." },
+  { n: "01", t: "Apply", b: "Takes about two minutes. Be honest, there are no right answers." },
   {
     n: "02",
     t: "Arjun reviews",
@@ -241,37 +221,6 @@ function ApplyPage() {
                     />
                   </Field>
                 </div>
-                <Field name="location" label="City and country" error={errors.location}>
-                  <Input
-                    id="location"
-                    autoComplete="address-level2"
-                    value={form.location}
-                    onChange={(e) => set("location", e.target.value)}
-                    className={inputClass}
-                    maxLength={120}
-                    aria-invalid={!!errors.location}
-                  />
-                </Field>
-                <div className="grid gap-6 sm:grid-cols-2">
-                  <Field name="discord" label="Discord" optional error={errors.discord}>
-                    <Input
-                      id="discord"
-                      value={form.discord}
-                      onChange={(e) => set("discord", e.target.value)}
-                      className={inputClass}
-                      maxLength={60}
-                    />
-                  </Field>
-                  <Field name="social" label="Instagram or X" optional error={errors.social}>
-                    <Input
-                      id="social"
-                      value={form.social}
-                      onChange={(e) => set("social", e.target.value)}
-                      className={inputClass}
-                      maxLength={200}
-                    />
-                  </Field>
-                </div>
               </Section>
 
               <Section title="Your trading">
@@ -297,62 +246,8 @@ function ApplyPage() {
                   />
                 </Field>
                 <Field
-                  name="ifvgLevel"
-                  label="How well do you know IFVG?"
-                  error={errors.ifvgLevel}
-                  group
-                >
-                  <ChoiceGroup
-                    name="ifvgLevel"
-                    options={IFVG_OPTIONS}
-                    value={form.ifvgLevel}
-                    onChange={(v) => set("ifvgLevel", v)}
-                  />
-                </Field>
-                <Field name="markets" label="Markets you trade" optional error={errors.markets}>
-                  <Input
-                    id="markets"
-                    placeholder="NQ, ES, Gold, Forex pairs"
-                    value={form.markets}
-                    onChange={(e) => set("markets", e.target.value)}
-                    className={inputClass}
-                    maxLength={200}
-                  />
-                </Field>
-              </Section>
-
-              <Section title="In your words">
-                <Field
-                  name="struggle"
-                  label="What is the biggest thing holding your trading back right now?"
-                  error={errors.struggle}
-                >
-                  <textarea
-                    id="struggle"
-                    value={form.struggle}
-                    onChange={(e) => set("struggle", e.target.value)}
-                    className={textareaClass}
-                    maxLength={1500}
-                    aria-invalid={!!errors.struggle}
-                  />
-                </Field>
-                <Field
-                  name="goal"
-                  label="What do you want your trading to look like in 12 months?"
-                  error={errors.goal}
-                >
-                  <textarea
-                    id="goal"
-                    value={form.goal}
-                    onChange={(e) => set("goal", e.target.value)}
-                    className={textareaClass}
-                    maxLength={1500}
-                    aria-invalid={!!errors.goal}
-                  />
-                </Field>
-                <Field
                   name="whyYou"
-                  label="Why should Arjun pick you for one of these slots?"
+                  label="Tell us where you are in your trading and why you should get a slot"
                   error={errors.whyYou}
                 >
                   <textarea
@@ -362,22 +257,6 @@ function ApplyPage() {
                     className={textareaClass}
                     maxLength={1500}
                     aria-invalid={!!errors.whyYou}
-                  />
-                </Field>
-              </Section>
-
-              <Section title="Fit">
-                <Field
-                  name="hoursPerWeek"
-                  label="How many hours a week can you put into trading and review?"
-                  error={errors.hoursPerWeek}
-                  group
-                >
-                  <ChoiceGroup
-                    name="hoursPerWeek"
-                    options={HOURS_OPTIONS}
-                    value={form.hoursPerWeek}
-                    onChange={(v) => set("hoursPerWeek", v)}
                   />
                 </Field>
                 <Field
@@ -392,21 +271,6 @@ function ApplyPage() {
                     value={form.investment}
                     onChange={(v) => set("investment", v)}
                     single
-                  />
-                </Field>
-                <Field
-                  name="availability"
-                  label="When are you usually free for a call?"
-                  error={errors.availability}
-                >
-                  <Input
-                    id="availability"
-                    placeholder="Weekday evenings, IST"
-                    value={form.availability}
-                    onChange={(e) => set("availability", e.target.value)}
-                    className={inputClass}
-                    maxLength={300}
-                    aria-invalid={!!errors.availability}
                   />
                 </Field>
               </Section>
@@ -496,14 +360,12 @@ function Field({
   name,
   label,
   error,
-  optional,
   group,
   children,
 }: {
   name: string;
   label: string;
   error?: string;
-  optional?: boolean;
   /** Radio groups are labelled by a div, text inputs by a <label for>. */
   group?: boolean;
   children: ReactNode;
@@ -515,7 +377,6 @@ function Field({
       ) : (
         <Label htmlFor={name} className="text-sm font-medium">
           {label}
-          {optional && <span className="ml-1.5 font-normal text-muted-foreground">Optional</span>}
         </Label>
       )}
       {children}

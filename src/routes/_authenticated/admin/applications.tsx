@@ -238,7 +238,8 @@ function ApplicationDetail({ app, onClose }: { app: Application; onClose: () => 
           {app.name} <StatusBadge status={app.status} />
         </DialogTitle>
         <DialogDescription>
-          Applied {new Date(app.created_at).toLocaleString()} · {app.location}
+          Applied {new Date(app.created_at).toLocaleString()}
+          {app.location ? ` · ${app.location}` : ""}
         </DialogDescription>
       </DialogHeader>
 
@@ -276,17 +277,22 @@ function ApplicationDetail({ app, onClose }: { app: Application; onClose: () => 
         <div className="grid gap-5 sm:grid-cols-2">
           <Answer label="Trading for">{labelFor(EXPERIENCE_OPTIONS, app.experience)}</Answer>
           <Answer label="Stage">{labelFor(STAGE_OPTIONS, app.stage)}</Answer>
-          <Answer label="IFVG level">{labelFor(IFVG_OPTIONS, app.ifvg_level)}</Answer>
-          <Answer label="Markets">{app.markets}</Answer>
-          <Answer label="Hours per week">{labelFor(HOURS_OPTIONS, app.hours_per_week)}</Answer>
           <Answer label="Ready to invest">{labelFor(INVESTMENT_OPTIONS, app.investment)}</Answer>
-          <Answer label="Discord">{app.discord}</Answer>
-          <Answer label="Social">{app.social}</Answer>
+          {/* Fields below were dropped from the form; earlier applications may still have them. */}
+          {app.ifvg_level && (
+            <Answer label="IFVG level">{labelFor(IFVG_OPTIONS, app.ifvg_level)}</Answer>
+          )}
+          {app.hours_per_week && (
+            <Answer label="Hours per week">{labelFor(HOURS_OPTIONS, app.hours_per_week)}</Answer>
+          )}
+          {app.markets && <Answer label="Markets">{app.markets}</Answer>}
+          {app.discord && <Answer label="Discord">{app.discord}</Answer>}
+          {app.social && <Answer label="Social">{app.social}</Answer>}
         </div>
-        <Answer label="Availability for a call">{app.availability}</Answer>
-        <Answer label="Biggest thing holding them back">{app.struggle}</Answer>
-        <Answer label="12-month goal">{app.goal}</Answer>
-        <Answer label="Why they should be picked">{app.why_you}</Answer>
+        {app.availability && <Answer label="Availability for a call">{app.availability}</Answer>}
+        {app.struggle && <Answer label="Biggest thing holding them back">{app.struggle}</Answer>}
+        {app.goal && <Answer label="12-month goal">{app.goal}</Answer>}
+        <Answer label="Where they are and why they should be picked">{app.why_you}</Answer>
       </dl>
 
       <div className="space-y-3 border-t border-border pt-5">

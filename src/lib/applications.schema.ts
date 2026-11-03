@@ -47,12 +47,11 @@ export const STATUS_OPTIONS = [
 const values = <T extends readonly { value: string }[]>(options: T) =>
   options.map((o) => o.value) as [T[number]["value"], ...T[number]["value"][]];
 
-const longAnswer = (label: string) =>
-  z
-    .string()
-    .trim()
-    .min(30, { message: `Tell me a little more about ${label} (at least 30 characters)` })
-    .max(1500, { message: "Keep this under 1,500 characters" });
+const longAnswer = z
+  .string()
+  .trim()
+  .min(30, { message: "Tell us a little more (at least 30 characters)" })
+  .max(1500, { message: "Keep this under 1,500 characters" });
 
 export const applicationSchema = z.object({
   name: z.string().trim().min(2, { message: "Enter your full name" }).max(100),
@@ -63,19 +62,10 @@ export const applicationSchema = z.object({
     .min(7, { message: "Enter a valid WhatsApp number" })
     .max(20, { message: "Enter a valid WhatsApp number" })
     .regex(/^[+0-9][0-9\s\-()]*$/, { message: "Enter a valid WhatsApp number" }),
-  location: z.string().trim().min(2, { message: "Enter your city and country" }).max(120),
-  discord: z.string().trim().max(60).optional(),
-  social: z.string().trim().max(200).optional(),
   experience: z.enum(values(EXPERIENCE_OPTIONS), { message: "Choose one" }),
   stage: z.enum(values(STAGE_OPTIONS), { message: "Choose one" }),
-  ifvgLevel: z.enum(values(IFVG_OPTIONS), { message: "Choose one" }),
-  markets: z.string().trim().max(200).optional(),
-  struggle: longAnswer("what you struggle with"),
-  goal: longAnswer("your goal"),
-  whyYou: longAnswer("why you should be picked"),
-  hoursPerWeek: z.enum(values(HOURS_OPTIONS), { message: "Choose one" }),
+  whyYou: longAnswer,
   investment: z.enum(values(INVESTMENT_OPTIONS), { message: "Choose one" }),
-  availability: z.string().trim().min(3, { message: "Tell me when you are usually free" }).max(300),
   consent: z.boolean().refine((v) => v === true, { message: "Please confirm to continue" }),
   /** Honeypot: real people never see this field, bots fill it in. */
   website: z.string().max(200).optional(),

@@ -21,19 +21,10 @@ export const submitOneOnOneApplication = createServerFn({ method: "POST" })
       name: data.name,
       email: data.email.toLowerCase(),
       phone: data.phone,
-      location: data.location,
-      discord: data.discord || null,
-      social: data.social || null,
       experience: data.experience,
       stage: data.stage,
-      ifvg_level: data.ifvgLevel,
-      markets: data.markets || null,
-      struggle: data.struggle,
-      goal: data.goal,
       why_you: data.whyYou,
-      hours_per_week: data.hoursPerWeek,
       investment: data.investment,
-      availability: data.availability,
     });
     if (error?.code === "23505") return { ok: true as const, duplicate: true };
     if (error) throw new Error("Could not submit your application. Please try again.");
